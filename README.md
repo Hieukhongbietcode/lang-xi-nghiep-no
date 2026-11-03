@@ -41,7 +41,7 @@ Chạy trên điện thoại, iPad hay máy tính — **không cần cài đặt
 **Cách 2 — Dùng qua đường link (GitHub Pages):**
 1. Vào **Settings → Pages** của kho mã này.
 2. Ở mục *Build and deployment*, chọn **Source: Deploy from a branch**, **Branch: `main`**, thư mục **`/ (root)`** rồi bấm **Save**.
-3. Sau 1–2 phút, ứng dụng chạy tại `https://<tên-tài-khoản>.github.io/lang-xi-nghiep-no/`.
+3. Sau 1–2 phút, ứng dụng chạy tại `https://hieukhongbietcode.github.io/lang-xi-nghiep-no/`.
 
 > 💡 Trên điện thoại / iPad: mở đường link rồi chọn **Thêm vào Màn hình chính** để dùng như một ứng dụng.
 
