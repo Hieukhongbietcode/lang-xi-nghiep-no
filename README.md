@@ -1,4 +1,4 @@
-# 🐺 Sói Factory — Bảng điều khiển Quản trò Ma Sói
+# 🐺 Làng Xí Nghiệp Nợ — Bảng điều khiển Quản trò Ma Sói
 
 Ứng dụng web **chỉ gồm một file** giúp Quản trò dẫn ván **Ma Sói** (theo luật Ultimate Werewolf và luật riêng của nhóm): chọn người chơi, xếp chỗ ngồi quanh bàn, thiết lập bộ bài, gọi vai từng đêm, tự xử lý luật sống/chết và theo dõi toàn bộ ván đấu.
 Chạy trên điện thoại, iPad hay máy tính — **không cần cài đặt, không cần máy chủ, không cần tài khoản**.
@@ -41,7 +41,7 @@ Chạy trên điện thoại, iPad hay máy tính — **không cần cài đặt
 **Cách 2 — Dùng qua đường link (GitHub Pages):**
 1. Vào **Settings → Pages** của kho mã này.
 2. Ở mục *Build and deployment*, chọn **Source: Deploy from a branch**, **Branch: `main`**, thư mục **`/ (root)`** rồi bấm **Save**.
-3. Sau 1–2 phút, ứng dụng chạy tại `https://<tên-tài-khoản>.github.io/<tên-kho-mã>/`.
+3. Sau 1–2 phút, ứng dụng chạy tại `https://<tên-tài-khoản>.github.io/lang-xi-nghiep-no/`.
 
 > 💡 Trên điện thoại / iPad: mở đường link rồi chọn **Thêm vào Màn hình chính** để dùng như một ứng dụng.
 
@@ -72,7 +72,7 @@ Người chơi ngoài danh sách có thể thêm ngay trong ứng dụng (ô **N
 
 ## ⚠️ Lưu ý
 
-- **Luật nhà:** ứng dụng làm theo luật Ultimate Werewolf kết hợp **luật riêng của nhóm Sói Factory** (ví dụ: Cặp Đôi được gọi dậy thảo luận mỗi đêm, người bị cấm túc không thể bị treo cổ, Du Côn cướp phần thắng, Già Làng chết vì bất kỳ lý do nào ngoài Sói cắn đều làm Dân Làng mất chức năng…). Nếu nhóm bạn chơi luật khác, hãy chỉnh trong `index.html` hoặc thống nhất trước khi chơi.
+- **Luật nhà:** ứng dụng làm theo luật Ultimate Werewolf kết hợp **luật riêng của nhóm** (ví dụ: Cặp Đôi được gọi dậy thảo luận mỗi đêm, người bị cấm túc không thể bị treo cổ, Du Côn cướp phần thắng, Già Làng chết vì bất kỳ lý do nào ngoài Sói cắn đều làm Dân Làng mất chức năng…). Nếu nhóm bạn chơi luật khác, hãy chỉnh trong `index.html` hoặc thống nhất trước khi chơi.
 - **Chức năng Admin** (Sống / Chết, đổi vai) là công cụ sửa nhanh của Quản trò: **cố ý không** kích hoạt hiệu ứng dây chuyền (chết theo, thừa hưởng vai…) và không tự kiểm tra thắng thua.
 - **Dữ liệu chỉ lưu trên máy đang dùng** (bộ nhớ trình duyệt). Đổi máy, đổi trình duyệt, dùng chế độ ẩn danh hoặc xoá dữ liệu trình duyệt sẽ mất ván đang chơi và danh sách người chơi tự thêm.
 - **Cần mạng ở lần mở đầu tiên** để tải giao diện (Tailwind CSS, Font Awesome, phông chữ) và thư viện xuất PDF.
@@ -82,7 +82,7 @@ Người chơi ngoài danh sách có thể thêm ngay trong ứng dụng (ô **N
 
 ## 📢 Miễn trừ trách nhiệm
 
-- *Ma Sói* / *Ultimate Werewolf* là trò chơi do **Bézier Games** phát hành. Sói Factory là **công cụ hỗ trợ Quản trò do cộng đồng tự làm**, **không** liên kết, **không** được tài trợ hay chứng nhận bởi nhà phát hành.
+- *Ma Sói* / *Ultimate Werewolf* là trò chơi do **Bézier Games** phát hành. Làng Xí Nghiệp Nợ là **công cụ hỗ trợ Quản trò do cộng đồng tự làm**, **không** liên kết, **không** được tài trợ hay chứng nhận bởi nhà phát hành.
 - Tên vai, mô tả luật và điểm cân bằng được viết lại / ước lượng phục vụ việc chơi trong nhóm, có thể khác với bản chính thức.
 - Biểu tượng vai, logo và giao diện do nhóm tự thiết kế. Nhạc nền và âm thanh được nhúng sẵn chỉ dùng cho mục đích giải trí, phi thương mại.
 - Phần mềm được cung cấp **"nguyên trạng"**, không kèm bất kỳ bảo đảm nào. Người dùng tự chịu trách nhiệm khi sử dụng; nhóm phát triển không chịu trách nhiệm cho bất kỳ thiệt hại hay tranh cãi nào phát sinh trong ván chơi. 🙂

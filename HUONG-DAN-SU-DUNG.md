@@ -1,6 +1,6 @@
-# 📖 Hướng dẫn sử dụng Sói Factory
+# 📖 Hướng dẫn sử dụng Làng Xí Nghiệp Nợ
 
-Tài liệu này hướng dẫn Quản trò dẫn một ván Ma Sói từ đầu tới cuối bằng Sói Factory.
+Tài liệu này hướng dẫn Quản trò dẫn một ván Ma Sói từ đầu tới cuối bằng Làng Xí Nghiệp Nợ.
 
 ## Mục lục
 
