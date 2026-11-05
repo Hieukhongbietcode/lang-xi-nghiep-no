@@ -711,6 +711,10 @@
         .seat-chip.drag .av { box-shadow: 0 0 0 3px #7E63F2, 0 10px 24px rgba(0,0,0,.6); transform: scale(1.12); }
         .seat-chip.seat-target .av { box-shadow: 0 0 0 3px #22c55e, 0 0 16px rgba(34,197,94,.6); }
         .seat-ring.dragging .seat-chip:not(.drag):not(.seat-target) { opacity:.7; }
+        .seat-chip.swap-selected { z-index:10; }
+        .seat-chip.swap-selected .av { box-shadow: 0 0 0 3px #7E63F2, 0 0 18px rgba(126,99,242,.7); transform: scale(1.12); transition: transform .2s, box-shadow .2s; }
+        .seat-chip.swap-selected .seat-nm { color:#a5b4fc; }
+        .seat-chip.swap-anim { transition: left .4s cubic-bezier(.4,0,.2,1), top .4s cubic-bezier(.4,0,.2,1); }
         .seat-gm, .ring-gm { display:none !important; position:absolute; left:50%; bottom:3%; transform:translate(-50%, 0); display:flex; align-items:center; gap:6px; font-size:12px; font-weight:800; color:#fcd34d;
             background:#1A2340; border:1px solid #f59e0b; padding:4px 10px; border-radius:999px; white-space:nowrap; }
         .seat-tool { display:inline-flex; align-items:center; gap:7px; padding:9px 14px; border-radius:12px; background:#1A2340; border:1px solid #2C3758; color:#cbd5e1; font-size:13px; font-weight:700; }
@@ -885,6 +889,26 @@
         body.seat-mode #app[data-view="view-day-discuss"], body.seat-mode #app[data-view="view-day-defense"], body.seat-mode #app[data-view="view-day-execute"] { max-width: 820px; }
         body.seat-mode .day-body .village-board, body.seat-mode .discuss-body .village-board { margin-top:0 !important; }
         body.seat-mode .day-body .ring-board, body.seat-mode .discuss-body .ring-board { max-width:600px; }
+
+        /* ===== Vòng làng luôn nằm gọn trong 1 màn hình (không phải cuộn) =====
+           Đo thực tế: màn Thảo luận cần chừa 303px cho thanh tiêu đề + nút bên dưới,
+           Biện hộ 255px, Biểu quyết 177px. Lấy chung 310px cho cả 3 màn để vòng
+           KHÔNG đổi kích thước khi chuyển Thảo luận → Biện hộ → Biểu quyết. */
+        @media (min-height: 560px) {
+            body.seat-mode .day-body .ring-board,
+            body.seat-mode .discuss-body .ring-board { max-width: min(600px, calc(100svh - 310px)); }
+        }
+        /* Màn hình thấp: ưu tiên vừa khít hơn là vòng to */
+        @media (max-height: 559px) {
+            body.seat-mode .day-body .ring-board,
+            body.seat-mode .discuss-body .ring-board { max-width: min(600px, calc(100svh - 230px)); }
+        }
+
+        /* ===== Lá bài kết quả soi: khóa cứng căn giữa =====
+           .soi-single trước đây để align-items mặc định (stretch) nên lá bài có thể
+           bị kéo giãn theo container và nội dung lệch khỏi tâm. */
+        .soi-single { align-items: center; }
+        .soi-single .soi-card, .soi-fan .soi-card { align-self: center; flex: 0 0 auto; justify-content: center; }
         /* Chạm giữ để phóng to */
         .seat-zoom { position:fixed; z-index:3600; background:#0f1830; border:1.5px solid #6366f1; border-radius:18px; padding:14px 16px; text-align:center; box-shadow:0 18px 40px rgba(0,0,0,.6);
             display:flex; flex-direction:column; align-items:center; gap:6px; max-width:260px; pointer-events:none; animation: szIn .15s ease-out; }
@@ -1199,7 +1223,11 @@
         .vb-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap:8px; }
         .vb-card { display:flex; flex-direction:column; align-items:center; gap:4px; padding:10px 4px 8px; border-radius:14px; background:#131D3A; border:1px solid #26314F; min-width:0; }
         .vb-card .vb-name { font-size:13px; font-weight:700; color:#EAEDF7; max-width:100%; white-space:normal; text-align:center; line-height:1.2; padding:0 2px; }
-        .vb-card.dead { opacity:.42; filter: grayscale(.85); cursor:pointer; font:inherit; }
+        .vb-card.dead { opacity:1; filter:none; cursor:pointer; font:inherit; }
+        .vb-card.dead .av { opacity:.42; filter: grayscale(.85); }
+        .vb-card.dead .vb-name { opacity:.55; }
+        .vb-dead-when { position:absolute; left:50%; top:38px; transform:translateX(-50%); font-size:10px; font-weight:900; color:#fecaca;
+            background:#2a0f12; border:1px solid #7f1d1d; padding:0 5px; border-radius:7px; line-height:15px; white-space:nowrap; z-index:3; }
         .vb-card.dead .vb-name { text-decoration: line-through; }
         .vb-card.dead:active { transform: scale(.95); }
         /* Khung thông tin người chết (cùng kiểu khung của bảng Đàn Sói) */
@@ -2087,7 +2115,7 @@
             n1TempData: {}, currentNightActions: {}, currentView: 'view-count', nightResultHtml: '',
             history: { guardLastProtected: null, witchHealUsed: false, witchPoisonUsed: false, coupledIds: [], hunterLastTargetId: null, wolfDied: false, alphaWolfUsed: false, pendingCoupleDeath: null, cubDoubleBiteActive: false,
                 diseasedBlockNight: null, toughPending: [], pendingTeenDeaths: [], dreamAwake: false, virginia: null, direLinks: [], doppel: null },
-            elderLives: 2, villagerPowersDisabled: false, explorerUsed: false, eventLog: [],
+            elderLives: 2, villagerPowersDisabled: false, explorerUsed: false, eventLog: [], ghostLetters: [],
             timers: { discuss: { m: 2, s: 30, running: false }, defense: { m: 0, s: 30, running: false } },
             timerPrefs: { discuss: { m: 2, s: 30 }, defense: { m: 0, s: 30 } },
             gameOver: false, gameResult: "", endLogged: false, silencedIds: [], banishedIds: [], teenSpokenIds: [], mayorUsedToday: false
@@ -2739,8 +2767,20 @@
             let tough = alive.filter(p => p.toughWounded);
             let toughHtml = tough.map(t => `<div class="flex items-center gap-2 bg-orange-900/20 border border-orange-800/50 text-orange-200 px-4 py-3 rounded-2xl text-sm font-semibold mb-3 w-full"><i class="fa-solid fa-ic-tough_guy text-base shrink-0"></i><span>(Quản trò) <b class="text-white">${t.name}</b> sẽ chết vào đêm sau.</span></div>`).join('');
 
+            // Con Ma: hiện các chữ cái đã viết
+            let ghostLetterHtml = '';
+            if ((state.ghostLetters || []).some(l => l)) {
+                let letters = state.ghostLetters.filter(l => l).join(' ');
+                ghostLetterHtml = `<div class="ghost-letters-bar w-full mb-3">
+                    <button type="button" onclick="showGhostLettersFull()" class="flex items-center gap-2 bg-slate-800/70 border border-slate-600 text-slate-300 px-4 py-2.5 rounded-2xl text-sm font-semibold w-full">
+                        <span class="text-base">👻</span><span>Con Ma đã viết: <b class="text-white tracking-[.25em] ml-1">${letters}</b></span>
+                        <i class="fa-solid fa-expand ml-auto text-slate-500"></i>
+                    </button>
+                    </div>`;
+            }
+
             let dp = document.getElementById('discuss-special-panel');
-            if (dp) dp.innerHTML = banHtml + toughHtml + teenHtml;
+            if (dp) dp.innerHTML = ghostLetterHtml + banHtml + toughHtml + teenHtml;
 
             let ep = document.getElementById('execute-special-panel');
             if (ep) {
@@ -3181,7 +3221,7 @@
 
             pushHistory();
             p.isAlive = (action === 'revive');
-            if (action === 'kill') p.deathInfo = { day: state.dayCount, phase: '', reason: 'Quản trò can thiệp' };
+            if (action === 'kill') p.deathInfo = { day: state.dayCount, phase: (String(state.currentView || '').indexOf('view-day') === 0 ? 'Ngày' : 'Đêm'), reason: 'Quản trò can thiệp' };
             else p.deathInfo = null;
             let verb = action === 'kill' ? 'GIẾT' : 'CỨU SỐNG';
             let color = action === 'kill' ? 'text-red-400' : 'text-green-400';
@@ -3393,6 +3433,9 @@
                     ordered.push({ type: 'single', role: r, order: r.n1Order }); 
                 });
                 
+                // Con Ma: Đêm 1 điền tên đầu tiên (order 0.5), rồi gọi lại SAU TẤT CẢ để viết chữ cái
+                let ghostR = activeRoles.find(r => r.id === 'ghost');
+                if (ghostR) ordered.push({ type: 'ghost_n1_action', id: 'ghost_n1_action', role: ghostR, order: 97.5 });
                 // Pháp Sư Sói: Đêm 1 điền tên trước bầy Sói, rồi được gọi lại để SOI ngay sau Tiên Tri (để có cơ hội soi ra Tiên Tri)
                 let sorcR = activeRoles.find(r => r.id === 'wolf_sorcerer');
                 if (sorcR) ordered.push({ type: 'sorcerer_n1', id: 'sorcerer_n1', role: sorcR, order: 14.5 });
@@ -3735,7 +3778,17 @@
             let bypassRoles = ['elder', 'villager', 'beholder', 'frankenstein', 'ghost'];
             let isDisabled = isVillagerPower && state.villagerPowersDisabled && !bypassRoles.includes(baseRole.id);
 
-            if (step.type === 'sorcerer_n1') {
+            if (step.type === 'ghost_n1_action') {
+                let names = (state.n1TempData.ghost || []).filter(Boolean);
+                setupRoleHeader(iconContainer, icon, title, instruction, step.role, holderChipsHtml(names));
+                title.innerText = 'Con Ma — viết chữ cái';
+                instruction.innerText = 'Gọi Con Ma dậy lần 2 để viết 1 chữ cái gợi ý cho làng. Sau bước này Con Ma sẽ chết.';
+                let gl = (state.ghostLetters || []);
+                container.innerHTML += `<div class="h-px bg-gray-700 my-5"></div><div class="p-5 rounded-2xl bg-slate-800/70 border border-slate-600 text-center relative z-10"><div class="text-5xl mb-2">👻✍️</div>
+                    <div class="text-white font-extrabold text-xl mb-1">Con Ma viết 1 chữ cái</div>
+                    <input type="text" maxlength="1" class="act-ghost-letter mt-4 w-20 h-16 text-center text-3xl font-black bg-slate-900 border-2 border-indigo-500 rounded-xl text-white uppercase" placeholder="?" value="${gl[0] || ''}" oninput="this.value=this.value.toUpperCase().slice(0,1); saveGhostLetter()">
+                    </div>`;
+            } else if (step.type === 'sorcerer_n1') {
                 let names = (state.n1TempData.wolf_sorcerer || []).filter(Boolean);
                 setupRoleHeader(iconContainer, icon, title, instruction, step.role, holderChipsHtml(names));
                 title.innerText = 'Pháp Sư Sói — soi Tiên Tri';
@@ -4258,8 +4311,13 @@
                     + `<label class="text-xs font-bold text-green-400 mb-2 block"><i class="fa-solid fa-ic-blob mr-1"></i> Người ngồi bên phải Chất Nhầy <span class="text-red-400 font-bold">*</span></label>
                        <select onchange="saveCurrentStepData()" class="act-blob-sel mod-input relative z-10">${opts(act.blobAbsorb || '', '-- BẮT BUỘC chọn người --')}</select>`;
             } else if (roleId === 'ghost' && !n1) {
+                let gl = (state.ghostLetters || []);
+                let prev = gl.length ? '<div class="mt-3 text-sm text-slate-400">Các chữ đã viết: <b class="text-white tracking-[.3em]">' + gl.join(' ') + '</b></div>' : '';
                 html = `<div class="p-5 rounded-2xl bg-slate-800/70 border border-slate-600 text-center relative z-10"><div class="text-5xl mb-2">👻✍️</div>
-                        <div class="text-white font-extrabold text-xl mb-1">Con Ma viết thêm 1 chữ cái</div><div class="text-sm text-slate-300">Gọi Con Ma dậy (dù đã chết) để viết 1 chữ cái gợi ý cho làng.</div></div>`;
+                        <div class="text-white font-extrabold text-xl mb-1">Con Ma viết thêm 1 chữ cái</div><div class="text-sm text-slate-300">Gọi Con Ma dậy (dù đã chết) để viết 1 chữ cái gợi ý cho làng.</div>
+                        ${prev}
+                        <input type="text" maxlength="1" class="act-ghost-letter mt-4 w-20 h-16 text-center text-3xl font-black bg-slate-900 border-2 border-indigo-500 rounded-xl text-white uppercase" placeholder="?" value="${gl.length >= state.dayCount ? (gl[state.dayCount - 1] || '') : ''}" oninput="this.value=this.value.toUpperCase().slice(0,1); saveGhostLetter()">
+                        </div>`;
             } else return false;
             container.innerHTML += div + html;
             setTimeout(refreshInfoResults, 30);
@@ -4867,6 +4925,30 @@
 
         // evaluateSeerN2 đã được thay bằng onSoiChange (hỗ trợ nhiều người soi độc lập).
 
+        function showGhostLettersFull() {
+            let letters = (state.ghostLetters || []).filter(l => l).join(' ');
+            if (!letters) return;
+            let existing = document.getElementById('ghost-letters-overlay');
+            if (existing) existing.remove();
+            let ov = document.createElement('div');
+            ov.id = 'ghost-letters-overlay';
+            ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,1);display:flex;align-items:center;justify-content:center;cursor:pointer';
+            ov.innerHTML = '<div style="text-align:center"><div style="font-size:60px;margin-bottom:24px">👻</div>'
+                + '<div style="color:#fff;font-weight:900;letter-spacing:.5em;line-height:1.6;font-size:min(15vw,120px)">' + letters + '</div>'
+                + '</div>';
+            ov.addEventListener('click', () => ov.remove());
+            document.body.appendChild(ov);
+        }
+        function saveGhostLetter() {
+            let inp = document.querySelector('.act-ghost-letter');
+            if (!inp) return;
+            let letter = inp.value.toUpperCase().trim();
+            if (!state.ghostLetters) state.ghostLetters = [];
+            let idx = state.dayCount - 1; // Đêm 1 = index 0, Đêm 2 = index 1, ...
+            if (letter) state.ghostLetters[idx] = letter;
+            else if (idx < state.ghostLetters.length) state.ghostLetters[idx] = '';
+            saveGame();
+        }
         function saveCurrentStepData() {
             let act = state.currentNightActions;
             let getVal = (id) => { let el = document.getElementById(id); return el ? el.value.trim() : undefined; }
@@ -5391,6 +5473,7 @@
             addTo('brainlessIds', act.zombieTarget, 'zombie');
             addTo('blobIds', act.blobAbsorb, 'blob');
             if ((act.piPicks || []).length === 3) { let pp = state.players.find(p => p.roleId === 'pi'); if (pp) pp.piUsed = true; }
+            // Con Ma: chữ cái được track trong state.ghostLetters, hiện ở màn Thảo luận — không ghi vào nguyên nhân tử vong
             if (state.dayCount === 1) state.players.filter(p => p.roleId === 'ghost' && p.isAlive).forEach(g => {
                 killLogs.push(`Con Ma (${g.name}) ➡ Chết ngay Đêm 1 (luật Con Ma)`);
                 processKill(g.id, 'ghost', diedIds, killLogs);
@@ -5414,7 +5497,7 @@
             if (diedNames.length === 0 && convertedNames.length) {
                 diedListHtml = '<div class="text-green-400 font-bold mb-3"><i class="fa-solid fa-peace mr-2"></i>Đêm qua không ai chết.</div>' + convHtml;
                 if (killLogs.length > 0) diedListHtml += `<div class="censor-box mt-3 pt-3 border-t border-gray-700 text-xs text-red-300 text-left" onclick="this.classList.toggle('revealed')">
-                        <div class="censor-head"><span class="font-bold text-gray-400 uppercase tracking-wider text-[11px]">Chi tiết đêm qua:</span><span class="censor-hint"><i class="fa-solid fa-eye-slash"></i> Chỉ quản trò — chạm để xem</span></div>
+                        <div class="censor-head"><span class="font-bold text-gray-400 uppercase tracking-wider text-[11px]">Chi tiết đêm qua:</span></div>
                         <div class="censor-body space-y-1.5">${killLogs.map(k => `<div class="flex items-start gap-1.5 bg-gray-900/60 p-2 rounded-lg border border-gray-800"><i class="fa-solid fa-angles-right text-red-400 mt-0.5 shrink-0"></i><span>${k}</span></div>`).join('')}
                     </div></div>`;
             } else if (diedNames.length === 0) {
@@ -5426,7 +5509,7 @@
                 `</div>` + convHtml;
                 if (killLogs.length > 0) {
                     diedListHtml += `<div class="censor-box mt-3 pt-3 border-t border-gray-700 text-xs text-red-300 text-left" onclick="this.classList.toggle('revealed')">
-                        <div class="censor-head"><span class="font-bold text-gray-400 uppercase tracking-wider text-[11px]">Nguyên nhân tử vong:</span><span class="censor-hint"><i class="fa-solid fa-eye-slash"></i> Chỉ quản trò — chạm để xem</span></div>
+                        <div class="censor-head"><span class="font-bold text-gray-400 uppercase tracking-wider text-[11px]">Nguyên nhân tử vong:</span></div>
                         <div class="censor-body space-y-1.5">${killLogs.map(k => `<div class="flex items-start gap-1.5 bg-gray-900/60 p-2 rounded-lg border border-gray-800"><i class="fa-solid fa-angles-right text-red-400 mt-0.5 shrink-0"></i><span>${k}</span></div>`).join('')}
                     </div></div>`;
                 }
@@ -5973,9 +6056,56 @@
 
         // ---------- Ảnh thật nhân viên (đã cắt theo mặt, 160×160 WebP) ----------
         const STAFF_AVATARS = {
-            // Ảnh đại diện theo tên người chơi (tuỳ chọn). Ví dụ:
-            // "Allie": 'data:image/webp;base64,....',
-            // Người không có ảnh sẽ tự dùng avatar 2 chữ cái đầu.
+            "Allie": '',
+            "Amy": '',
+            "Aslan": '',
+            "Benjamin": '',
+            "Brenna": '',
+            "Brian": '',
+            "Caroline": '',
+            "Chloe": '',
+            "Dat": '',
+            "Dean": '',
+            "Dylan": '',
+            "Emi": '',
+            "Emma": '',
+            "Evelyn": '',
+            "Faye": '',
+            "Gilbert": '',
+            "Harry": '',
+            "Hoai": '',
+            "IT Bảo Anh": '',
+            "IT Hải": '',
+            "IT Việt": '',
+            "IT Yên": '',
+            "Jake": '',
+            "Jamie": '',
+            "Jason": '',
+            "Jessica": '',
+            "Kane": '',
+            "Kaylin": '',
+            "Lena": '',
+            "Lily": '',
+            "Lucy": '',
+            "Marcus": '',
+            "Max": '',
+            "Mia": '',
+            "Mike": '',
+            "Nicole": '',
+            "Norah": '',
+            "Paul": '',
+            "Serena": '',
+            "Steve": '',
+            "Summer": '',
+            "Thea": '',
+            "Tom": '',
+            "Tracy Nguyen": '',
+            "Tracy Trinh": '',
+            "Van": '',
+            "Viet": '',
+            "Vincent": '',
+            "Vivian": '',
+            "Will": ''
         };
         // ---------- Avatar: ảnh thật nếu có, không thì chữ cái đầu (màu cố định theo tên) ----------
         function avatarHtml(name, size) {
@@ -5990,7 +6120,7 @@
         }
 
         // Logo Làng Xí Nghiệp Nợ (bản nhỏ, cắt từ logo trang đầu)
-        const SOI_LOGO_SMALL = 'data:image/webp;base64,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';
+        const SOI_LOGO_SMALL = '';
         // ---------- Người giữ vai ở đầu mỗi bước gọi: [avatar] Tên ----------
         function holderChipsHtml(names) {
             let list = (names || []).filter(Boolean);
@@ -6274,7 +6404,7 @@
                     }
                     if (blocked.has(nm) && !(SF && SF.activeNames.includes(nm))) { cls += ' blocked'; extra += '<span class="seat-block">⛔</span>'; }
                     if (p && showRoles) { let r = ROLES_DB.find(x => x.id === p.roleId); if (r) extra += `<span class="seat-role ${r.text || ''}" title="${escapeHtml(r.name)}"><i class="fa-solid ${r.icon}"></i></span>`; }
-                    if (p && !p.isAlive) { let d = p.deathInfo || {}; extra += `<span class="seat-dead">${deathIcon(d.reason)}${d.day ? ' ' + (d.phase === 'Ngày' ? 'N' : 'Đ') + d.day : ''}</span>`; }
+                    if (p && !p.isAlive) { let d = p.deathInfo || {}; extra += `<span class="seat-dead">${deathWhen(d)}</span>`; }
                     return `<button type="button" class="${cls}" data-pid="${p ? escapeHtml(p.id) : ''}" data-name="${escapeHtml(nm)}" style="${style}">${p && showMarks ? badges(p) : ''}${avatarHtml(nm, 44)}${extra}<span class="ring-nm">${escapeHtml(nm)}</span></button>`;
                 }).join('');
                 let arrows = SF ? ringArrowsSvg(SF, o, n, R, k) : '';
@@ -6288,7 +6418,7 @@
                 ? (marksOf(p).length
                     ? `<button type="button" class="vb-card has-marks${called.has(p.name) ? ' called called-' + ((ROLES_DB.find(r => r.id === p.roleId) || {}).faction || 'villager') : ''}" data-pid="${escapeHtml(p.id)}" onclick="showBoardTip(this)">${badges(p)}${avatarHtml(p.name, 40)}<div class="vb-name">${escapeHtml(p.name)}</div></button>`
                     : `<div class="vb-card${called.has(p.name) ? ' called called-' + ((ROLES_DB.find(r => r.id === p.roleId) || {}).faction || 'villager') : ''}">${avatarHtml(p.name, 40)}<div class="vb-name">${escapeHtml(p.name)}</div></div>`)
-                : `<button type="button" class="vb-card dead" data-pid="${escapeHtml(p.id)}" onclick="showBoardTip(this)">${avatarHtml(p.name, 40)}<div class="vb-name">${escapeHtml(p.name)}</div></button>`
+                : `<button type="button" class="vb-card dead" data-pid="${escapeHtml(p.id)}" onclick="showBoardTip(this)">${avatarHtml(p.name, 40)}<span class="vb-dead-when">${deathWhen(p.deathInfo)}</span><div class="vb-name">${escapeHtml(p.name)}</div></button>`
             ).join('');
             return `<div class="vb"><div class="vb-head"><span class="vb-title"><img class="vb-logo" src="${SOI_LOGO_SMALL}" alt="">Làng Xí Nghiệp Nợ</span><span class="flex items-center gap-2"><span class="vb-count">${alive} sống · ${list.length - alive} chết</span>${tools}</span></div>
                 <div class="vb-tip hidden"></div><div class="vb-grid">${cards}</div>${boardLegendHtml(usedMarks)}</div>`;
@@ -6429,30 +6559,43 @@
             let o = ensureSeatOrder(), n = o.length;
             let size = n <= 10 ? 52 : n <= 16 ? 44 : n <= 24 ? 36 : 34;
             host.innerHTML = `<div class="seat-ring" style="--seat:${size}px">
-                <div class="seat-table"><i class="fa-solid fa-rotate-right"></i><span>Chiều kim đồng hồ</span><small>Kéo thả để đổi chỗ</small></div>
+                <div class="seat-table"><i class="fa-solid fa-rotate-right"></i><span>Chiều kim đồng hồ</span><small>Chạm 2 người để đổi chỗ</small></div>
                 ${o.map((nm, i) => { let c = seatXY(i, n); return `<div class="seat-chip" data-i="${i}" style="left:${c.x}%;top:${c.y}%">${avatarHtml(nm, size)}<span class="seat-nm">${escapeHtml(nm)}</span></div>`; }).join('')}
                 <div class="seat-slot"></div></div>`;
             let ring = host.querySelector('.seat-ring');
+            let _swapFirst = null; // index của chip đã chọn lần 1
             ring.querySelectorAll('.seat-chip').forEach(chip => {
-                chip.addEventListener('pointerdown', ev => {
-                    ev.preventDefault(); chip.setPointerCapture(ev.pointerId); chip.classList.add('drag'); ring.classList.add('dragging');
-                    let from = +chip.dataset.i, order = state.seatOrder.slice(), preview = order.slice(), last = from;
-                    let layout = target => {
-                        preview = order.filter((_, k) => k !== from); preview.splice(target, 0, order[from]);
-                        ring.querySelectorAll('.seat-chip').forEach(c => { if (c === chip) return; let idx = preview.indexOf(order[+c.dataset.i]), p = seatXY(idx, n); c.style.left = p.x + '%'; c.style.top = p.y + '%'; });
-                        let slot = ring.querySelector('.seat-slot'); let p = seatXY(target, n);
-                        if (slot) { slot.style.left = p.x + '%'; slot.style.top = p.y + '%'; slot.style.display = 'block'; }
-                    };
-                    let move = e => {
-                        let r = ring.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * 100, y = (e.clientY - r.top) / r.height * 100;
-                        chip.style.left = x + '%'; chip.style.top = y + '%';
-                        let best = nearestSeat(x, y, n); if (best !== last) { last = best; layout(best); }
-                    };
-                    let up = () => {
-                        chip.removeEventListener('pointermove', move); chip.removeEventListener('pointerup', up); chip.removeEventListener('pointercancel', up);
-                        state.seatOrder = preview; seatChanged(hostId);
-                    };
-                    chip.addEventListener('pointermove', move); chip.addEventListener('pointerup', up); chip.addEventListener('pointercancel', up);
+                chip.addEventListener('click', () => {
+                    let idx = +chip.dataset.i;
+                    if (_swapFirst === null) {
+                        // Click lần 1: chọn chip này
+                        _swapFirst = idx;
+                        ring.querySelectorAll('.seat-chip').forEach(c => c.classList.remove('swap-selected'));
+                        chip.classList.add('swap-selected');
+                    } else if (_swapFirst === idx) {
+                        // Click lại chính nó: huỷ chọn
+                        _swapFirst = null;
+                        chip.classList.remove('swap-selected');
+                    } else {
+                        // Click lần 2: đổi chỗ 2 chip với animation
+                        let fromIdx = _swapFirst, toIdx = idx;
+                        let chipA = ring.querySelector(`.seat-chip[data-i="${fromIdx}"]`);
+                        let chipB = chip;
+                        // Bật transition cho animation
+                        chipA.classList.add('swap-anim'); chipB.classList.add('swap-anim');
+                        // Đổi vị trí hiển thị
+                        let posA = seatXY(fromIdx, n), posB = seatXY(toIdx, n);
+                        chipA.style.left = posB.x + '%'; chipA.style.top = posB.y + '%';
+                        chipB.style.left = posA.x + '%'; chipB.style.top = posA.y + '%';
+                        // Sau animation xong: cập nhật state thật
+                        setTimeout(() => {
+                            let order = state.seatOrder.slice();
+                            let tmp = order[fromIdx]; order[fromIdx] = order[toIdx]; order[toIdx] = tmp;
+                            state.seatOrder = order;
+                            _swapFirst = null;
+                            seatChanged(hostId);
+                        }, 420);
+                    }
                 });
             });
         }
@@ -6516,6 +6659,12 @@
         setInterval(() => { if (document.querySelector('.rc-time, .rc-ntime')) syncRingTimer(); }, 250);
         function ringPref(k) { try { return localStorage.getItem(k) === '1'; } catch (e) { return false; } }
         function setRingPref(k, on) { try { localStorage.setItem(k, on ? '1' : '0'); } catch (e) {} renderVillageBoards(); }
+        // Nhãn "chết khi nào" — chỉ N1 / Đ2, KHÔNG kèm lý do (lý do chỉ hiện khi chạm vào người đã chết)
+        function deathWhen(d) {
+            d = d || {};
+            if (!d.day) return '💀';
+            return (d.phase === 'Ngày' ? 'N' : 'Đ') + d.day;
+        }
         function deathIcon(reason) {
             let r = String(reason || '').toLowerCase();
             if (/treo/.test(r)) return '🪢'; if (/độc/.test(r)) return '☠️'; if (/nổ/.test(r)) return '💣'; if (/con ma/.test(r)) return '👻';
@@ -6900,15 +7049,21 @@
         }
         document.addEventListener('pointerdown', e => {
             let s = e.target.closest && e.target.closest('.ring-seat');
+            // Nếu đang có popup zoom mở, chạm bất kỳ chỗ nào NGOÀI popup → đóng
+            if (document.querySelector('.seat-zoom') && !(e.target.closest && e.target.closest('.seat-zoom'))) {
+                hideSeatZoom();
+                // Nếu chạm ra ngoài (không phải ghế khác) thì chặn sự kiện để không trigger gì thêm
+                if (!s) { _rsDown = null; return; }
+            }
             _rsDown = s ? { name: s.dataset.name, x: e.clientX, y: e.clientY, zoomed: false } : null;
             if (s && !s.classList.contains('home-seat')) { let d = _rsDown; d.timer = setTimeout(() => { if (_rsDown === d) { d.zoomed = true; showSeatZoom(s); } }, 450); }
         }, true);
         document.addEventListener('pointermove', e => { if (_rsDown && !_rsDown.zoomed && Math.hypot(e.clientX - _rsDown.x, e.clientY - _rsDown.y) > 14) clearTimeout(_rsDown.timer); }, true);
-        document.addEventListener('pointercancel', () => { if (_rsDown) clearTimeout(_rsDown.timer); _rsDown = null; hideSeatZoom(); }, true);
+        document.addEventListener('pointercancel', () => { if (_rsDown) clearTimeout(_rsDown.timer); _rsDown = null; }, true);
         document.addEventListener('pointerup', e => {
             let d = _rsDown; _rsDown = null; if (!d) return;
             clearTimeout(d.timer);
-            if (d.zoomed) { hideSeatZoom(); e.preventDefault(); return; }
+            if (d.zoomed) { /* popup giữ mở, chờ chạm nơi khác để đóng */ e.preventDefault(); return; }
             if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > 14) return;
             let el = document.elementFromPoint(e.clientX, e.clientY), s = el && el.closest('.ring-seat');
             if (!s || s.dataset.name !== d.name) return;
