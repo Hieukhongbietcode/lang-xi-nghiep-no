@@ -1,6 +1,6 @@
 # 🐺 Làng Xí Nghiệp Nợ — Bảng điều khiển Quản trò Ma Sói
 
-Ứng dụng web **chỉ gồm một file** giúp Quản trò dẫn ván **Ma Sói** (theo luật Ultimate Werewolf và luật riêng của nhóm): chọn người chơi, xếp chỗ ngồi quanh bàn, thiết lập bộ bài, gọi vai từng đêm, tự xử lý luật sống/chết và theo dõi toàn bộ ván đấu.
+Ứng dụng web **chỉ gồm một file** giúp Quản trò dẫn ván **Ma Sói** (theo luật Ultimate Werewolf và luật riêng của nhóm): chọn người chơi, xếp chỗ ngồi quanh bàn, thiết lập bộ bài, **chia bài ngay trên máy**, gọi vai từng đêm, tự xử lý luật sống/chết và theo dõi toàn bộ ván đấu.
 Chạy trên điện thoại, iPad hay máy tính — **không cần cài đặt, không cần máy chủ, không cần tài khoản**.
 
 <p align="center">
@@ -24,15 +24,54 @@ Chạy trên điện thoại, iPad hay máy tính — **không cần cài đặt
 
 ## ✨ Tính năng chính
 
+### Chuẩn bị ván
+
 - **48 vai** chia 3 phe (Dân Làng · Sói · Thứ 3), mỗi vai có biểu tượng riêng, mô tả chức năng và điểm cân bằng.
-- **Chơi trên vòng tròn chỗ ngồi**: xếp người chơi đúng vị trí quanh bàn; chạm vào mặt người chơi để điền tên và chọn mục tiêu; mũi tên hiệu ứng từ người giữ vai tới mục tiêu; tự tìm người ngồi cạnh cho Thám Tử, Mất Ngủ, Chất Nhầy, Kẻ Đánh Bom.
-- **Gọi vai đúng thứ tự** mỗi đêm, kiểm tra lựa chọn bắt buộc, có ghi chú riêng cho Quản trò, quay lại bước trước bất cứ lúc nào.
+- **Xếp chỗ ngồi** đúng vị trí quanh bàn; muốn đổi chỗ chỉ cần **chạm lần lượt 2 người**, hai ghế tự trượt đổi cho nhau.
+- **Lưu bộ bài thường dùng** thành mẫu có tên, lần sau chạm 1 lần là nạp lại.
+- **Hai cách chia bài:**
+  - **Chia bài vật lý** — dùng lá bài thật như bình thường, Quản trò gọi từng vai dậy để ghi tên ở Đêm 1.
+  - **Chia bài bằng app** — app tự xáo và chia. Mỗi người chạm vào tên mình → hiện lá **❓** → chạm vào lá để lật xem vai → bấm *"Tôi đã nhớ vai trò"* để úp lại và trả máy. Màu phe trên lá được để xám để người đứng cạnh không đoán được.
+
+### Chống xem trộm khi chia bằng app
+
+- Ô của người đã xem có viền **xanh lá**; xem từ lần thứ 2 trở đi chuyển **vàng** kèm *"Đã xem ×2"*.
+- Chạm vào lá của người đã xem sẽ hiện cảnh báo trước khi cho xem lại.
+- Trước khi bắt đầu Đêm 1, app liệt kê những ai đã xem nhiều lần và cho Quản trò chọn **chia bài lại** hoặc **vẫn bắt đầu**.
+
+### Ban đêm
+
+- **Gọi vai đúng thứ tự**, kiểm tra lựa chọn bắt buộc, có ghi chú riêng cho Quản trò, quay lại bước trước bất cứ lúc nào.
+- Khi **chia bài bằng app**, app đã biết ai giữ vai gì nên **bỏ hết các bước gọi dậy chỉ để ghi tên**; Đêm 1 chỉ gọi những vai có chức năng. Các lời dặn cho phe Sói (Nanh Sói, Pháp Sư Sói, Sói Chiêm Bao) được gộp vào một bước.
+- **Chơi trên vòng tròn chỗ ngồi:**
+  - Người giữ vai đang được gọi sáng **viền theo phe** (xanh lá: Dân · đỏ: Sói · vàng: Thứ 3).
+  - Chạm vào mặt người chơi để chọn mục tiêu, có mũi tên từ người giữ vai tới mục tiêu.
+  - Giữ lâu vào một ghế để xem thông tin; thả tay vẫn hiện, chạm chỗ khác để đóng.
+  - Sói chưa được phép dậy hiện hiệu ứng **zzz** đang ngủ.
+- **Tự tìm người ngồi cạnh:**
+  - **Chất Nhầy**: tự lấy người ngồi bên phải, có mũi tên, Quản trò chỉ bấm *Tiếp theo*.
+  - **Ma Cà Rồng Thân Thiện**: điểm bắt đầu là người ngồi đối diện qua tâm bàn, có mũi tên chỉ hướng trái/phải.
+  - **Thám Tử, Mất Ngủ, Kẻ Đánh Bom**: tự tính người ngồi cạnh.
+- **Theo dõi phe phụ**: Trưởng Giáo Phái, Xác Sống, Chất Nhầy có ô liệt kê những ai đang cùng phe.
+- **Con Ma** dậy cuối mỗi đêm và bắt buộc viết 1 chữ cái. Các chữ đã viết hiện ở màn Thảo luận, chạm để phóng to cho cả làng xem.
+
+### Kết quả soi
+
+- Kết quả soi (Tiên Tri, Tinh Thần Học, Pháp Sư Sói, Hào Quang, Bí Ẩn, Thám Tử, Mất Ngủ, Ma Cà Rồng…) **luôn được úp** dưới dạng tên người + lá **❓**.
+- Chạm lần 1 để **phóng to**. Ở khung phóng to:
+  - **Chạm đúng vào lá bài** thì lá mới lật ra kết quả.
+  - Chạm chỗ khác hoặc nút ✕ thì thu nhỏ lại mà **không lật**. Quản trò chỉ nhầm người thì chọn lại được, không lộ kết quả.
+- Có nút **lật màn hình 180°** để đưa máy cho người ngồi đối diện xem.
+
+### Ban ngày và tổng kết
+
+- Đồng hồ **Thảo luận / Biện minh** ngay giữa vòng làng; chạm vào ghế để chọn người bị treo cổ. Vòng làng tự co để **vừa một màn hình** iPad, không phải cuộn.
+- **Báo cáo đêm** có hiệu ứng trời sáng và lật thẻ.
+  - Nguyên nhân tử vong được che mờ, chỉ Quản trò chạm vào mới xem.
+  - Người đã chết mang nhãn thời điểm chết (**Đ1** = Đêm 1, **N2** = Ngày 2).
 - **Tự xử lý luật**: Cặp Đôi, Mẹ Trẻ, Sói Tuyết, Thợ Săn, Frankenstein / Nhân Bản thừa hưởng vai, Sói Con, Sói Đầu Đàn, Sói Trùm, Người Bệnh, Kẻ Bị Nguyền, Phù Thủy Già, Hoàng Tử, Già Làng… và kiểm tra thắng thua, kể cả các phe Thứ 3.
-- **Kết quả soi trực quan** bằng lá bài phe và 👍/👎 — chạm để phóng to toàn màn hình đưa cho người chơi xem.
-- **Ban ngày**: đồng hồ Thảo luận / Biện minh ngay giữa vòng làng; chạm vào ghế để chọn người bị treo cổ.
-- **Báo cáo đêm** với hiệu ứng lật thẻ; nguyên nhân tử vong được che mờ, chỉ Quản trò chạm vào mới xem.
 - **Nhật ký sự kiện, dòng thời gian và xuất PDF** tổng hợp ván đấu.
-- Nhạc nền, hiệu ứng chuyển cảnh, giữ màn hình luôn sáng, **tự lưu ván** (tải lại trang vẫn chơi tiếp), hoàn tác nhiều bước.
+- Nhạc nền, hiệu ứng chuyển cảnh mượt, rung khi thao tác (trên máy hỗ trợ), giữ màn hình luôn sáng, **tự lưu ván** (tải lại trang vẫn chơi tiếp), hoàn tác nhiều bước.
 
 ## 🚀 Bắt đầu sử dụng
 
@@ -70,12 +109,23 @@ Người chơi ngoài danh sách có thể thêm ngay trong ứng dụng (ô **N
 
 ## ⚠️ Lưu ý
 
-- **Luật nhà:** ứng dụng làm theo luật Ultimate Werewolf kết hợp **luật riêng của nhóm** (ví dụ: Cặp Đôi được gọi dậy thảo luận mỗi đêm, người bị cấm túc không thể bị treo cổ, Du Côn cướp phần thắng, Già Làng chết vì bất kỳ lý do nào ngoài Sói cắn đều làm Dân Làng mất chức năng…). Nếu nhóm bạn chơi luật khác, hãy chỉnh trong `index.html` hoặc thống nhất trước khi chơi.
+- **Luật nhà:** ứng dụng làm theo luật Ultimate Werewolf kết hợp **luật riêng của nhóm**. Một vài ví dụ:
+  - Cặp Đôi được gọi dậy thảo luận mỗi đêm.
+  - Người bị cấm túc không thể bị treo cổ.
+  - Du Côn cướp phần thắng.
+  - Già Làng chết vì bất kỳ lý do nào ngoài Sói cắn đều làm Dân Làng mất chức năng.
+  - Tiên Tri Tập Sự chỉ được gọi từ Đêm 2.
+  - Sói Đầu Đàn có thể biến Nanh Sói đang ngủ hoặc Pháp Sư Sói thành Ma Sói thường (mất chức năng cũ, từ đêm sau dậy cùng bầy).
+
+  Nếu nhóm bạn chơi luật khác, hãy chỉnh trong `index.html` hoặc thống nhất trước khi chơi.
 - **Chức năng Admin** (Sống / Chết, đổi vai) là công cụ sửa nhanh của Quản trò: **cố ý không** kích hoạt hiệu ứng dây chuyền (chết theo, thừa hưởng vai…) và không tự kiểm tra thắng thua.
-- **Dữ liệu chỉ lưu trên máy đang dùng** (bộ nhớ trình duyệt). Đổi máy, đổi trình duyệt, dùng chế độ ẩn danh hoặc xoá dữ liệu trình duyệt sẽ mất ván đang chơi và danh sách người chơi tự thêm.
+- **Dữ liệu chỉ lưu trên máy đang dùng** (bộ nhớ trình duyệt). Đổi máy, đổi trình duyệt, dùng chế độ ẩn danh hoặc xoá dữ liệu trình duyệt sẽ mất những thứ sau:
+  - ván đang chơi,
+  - danh sách người chơi tự thêm,
+  - các mẫu bộ bài đã lưu.
 - **Cần mạng ở lần mở đầu tiên** để tải giao diện (Tailwind CSS, Font Awesome, phông chữ) và thư viện xuất PDF.
-- **Nên mở trên trình duyệt mới** (Chrome, Safari, Edge bản gần đây). Rung khi hết giờ không hoạt động trên iPhone (giới hạn của Safari).
-- **Không để người chơi nhìn màn hình** khi Quản trò đang thao tác ban đêm — chỉ đưa máy khi hiện kết quả cần cho người chơi xem.
+- **Nên mở trên trình duyệt mới** (Chrome, Safari, Edge bản gần đây). Rung khi thao tác / hết giờ không hoạt động trên iPhone (giới hạn của Safari).
+- **Không để người chơi nhìn màn hình** khi Quản trò đang thao tác ban đêm — chỉ đưa máy khi đã phóng to kết quả cần cho người chơi xem.
 - **Danh sách tên người chơi** trong file là tên thành viên của nhóm. Hãy cân nhắc trước khi để kho mã ở chế độ công khai (Public).
 
 ## 📢 Miễn trừ trách nhiệm
