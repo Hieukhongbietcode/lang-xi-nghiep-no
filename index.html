@@ -1576,6 +1576,15 @@
         .ol-btn.main { background:#4f46e5; color:#fff; } .ol-btn.ghost { background:transparent; color:#cbd5e1; border:1px solid #334155; font-size:14px; padding:11px; } .ol-btn.danger { color:#f87171; border-color:rgba(239,68,68,.4); }
         .ol-row { display:flex; gap:8px; margin-top:8px; }
         .ol-hint { text-align:center; color:#94a3b8; font-size:12px; font-weight:600; margin-top:6px; }
+        /* ===== Chia bài online ===== */
+        .od-card .deal-av { position:relative; overflow:visible; }
+        .od-dot { position:absolute; right:-1px; bottom:1px; width:13px; height:13px; border-radius:50%; background:#475569; border:2px solid #0b1120; transition: background-color .3s; }
+        .od-dot.on { background:#22c55e; }
+        #online-toast { position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom, 0px) + 96px); transform:translateX(-50%) translateY(20px); opacity:0; z-index:9600;
+            background:#1e293b; color:#e2e8f0; border:1px solid #334155; padding:10px 16px; border-radius:999px; font-weight:700; font-size:14px; pointer-events:none;
+            transition: opacity .25s, transform .25s; box-shadow:0 8px 24px rgba(0,0,0,.45); white-space:nowrap; }
+        #online-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+        .deal-redeal-btn { width:100%; margin-top:8px; padding:11px; border-radius:12px; background:transparent; border:1px solid #334155; color:#cbd5e1; font-weight:700; font-size:14px; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -1751,13 +1760,14 @@
                 <div class="deal-progress" onclick="openDealAdmin()"><span id="deal-viewed-count">0</span> / <span id="deal-total-count">0</span> đã xem</div>
             </div>
             <div class="flex-1 overflow-y-auto no-scrollbar p-4">
-                <p class="text-sm text-gray-400 mb-4 text-center">Mỗi người chơi bấm vào tên mình để xem vai. Đảm bảo không ai nhìn thấy màn hình khi bạn đang xem.</p>
+                <p id="deal-instr" class="text-sm text-gray-400 mb-4 text-center">Mỗi người chơi bấm vào tên mình để xem vai. Đảm bảo không ai nhìn thấy màn hình khi bạn đang xem.</p>
                 <div id="deal-grid" class="deal-grid"></div>
             </div>
             <div class="glass-header border-t border-gray-800 p-4 shrink-0 bottom-safe">
                 <button id="btn-deal-start" onclick="dealStartGame()" disabled class="w-full py-4 bg-gray-700 rounded-xl text-white font-bold text-lg opacity-50 transition duration-300">
                     Bắt đầu Đêm 1
                 </button>
+                <button id="btn-deal-redeal" type="button" class="deal-redeal-btn hidden" onclick="onlineRedeal()">🔀 Chia bài lại</button>
             </div>
         </div>
         <div id="deal-reveal" class="hidden"></div>
@@ -8593,7 +8603,9 @@
                 <div class="ol-list">${ps.length ? ps.map(p => `<div class="ol-p">${avatarHtml(p.name, 32)}<span class="ol-pn">${escapeHtml(p.name)}</span><span class="ol-dot${p.online ? ' on' : ''}"></span>${locked ? '' : `<button type="button" class="ol-kick" title="Mời ra" onclick="onlineKick('${p.id}')"><i class="fa-solid fa-xmark"></i></button>`}</div>`).join('') : '<div class="ol-empty">Chưa có ai vào phòng</div>'}</div>`;
             let enough = ps.length >= 5;
             document.getElementById('online-foot').innerHTML = locked
-                ? `<button type="button" class="ol-btn main" onclick="onlineProceed()">Tiếp tục thiết lập bộ bài <i class="fa-solid fa-arrow-right"></i></button>
+                ? (state.online.deal && !state.online.deal.started
+                    ? `<button type="button" class="ol-btn main" onclick="onlineResumeDeal()">Tiếp tục chia bài <i class="fa-solid fa-arrow-right"></i></button>`
+                    : `<button type="button" class="ol-btn main" onclick="onlineProceed()">Tiếp tục thiết lập bộ bài <i class="fa-solid fa-arrow-right"></i></button>`) + `
                    <div class="ol-row"><button type="button" class="ol-btn ghost" onclick="onlineUnlock()"><i class="fa-solid fa-lock-open"></i> Mở khoá phòng</button><button type="button" class="ol-btn ghost danger" onclick="onlineClose()">Đóng phòng</button></div>`
                 : `<button type="button" class="ol-btn main" ${enough ? '' : 'disabled'} onclick="onlineLockAndGo()"><i class="fa-solid fa-lock"></i> Khoá phòng & thiết lập bộ bài (${ps.length} người)</button>
                    ${enough ? '' : '<div class="ol-hint">Cần ít nhất 5 người chơi</div>'}
@@ -8635,6 +8647,173 @@
         (function () {
             const _resume = resumeSavedGame;
             resumeSavedGame = function (saved) { _resume(saved); onlineLoadRoom(); setTimeout(() => { renderOnlineHomeBtn(); if (onlineActive()) gmConnect(); }, 50); };
+        })();
+
+    
+        // =====================================================================
+        //  CHƠI ONLINE — Giai đoạn 2: chia bài online (máy quản trò)
+        //  Mỗi lá bài gửi RIÊNG tới đúng người. Server giữ lại để ai vào lại thì nhận lại đúng lá của mình.
+        // =====================================================================
+        function onlineDeal() { return onlineActive() && !!state.online.locked && state.dealMode === 'app'; }
+        function onlineIdOf(name) { let p = ((state.online && state.online.players) || []).find(x => x.name === name); return p && p.id; }
+        function onlineNameOf(id) { let p = ((state.online && state.online.players) || []).find(x => x.id === id); return p && p.name; }
+        function onlineToast(msg) {
+            let t = document.getElementById('online-toast');
+            if (!t) { t = document.createElement('div'); t.id = 'online-toast'; document.body.appendChild(t); }
+            t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2200);
+        }
+        // Biểu tượng vai -> ảnh (để trang người chơi không cần bộ biểu tượng của app)
+        const _roleIconCache = {};
+        function roleIconURL(role) {
+            if (!role || !role.icon) return '';
+            if (_roleIconCache[role.icon]) return _roleIconCache[role.icon];
+            let i = document.createElement('i'); i.className = 'fa-solid ' + role.icon;
+            i.style.cssText = 'position:absolute;left:-9999px;top:0;font-size:96px;color:#e2e8f0';
+            document.body.appendChild(i);
+            let cs = getComputedStyle(i, '::before'), out = '';
+            let m = /^url\(["']?(.*?)["']?\)$/s.exec(cs.backgroundImage || '');
+            if (m && m[1].startsWith('data:')) out = m[1];
+            else {
+                let ch = (cs.content || '').replace(/^["']|["']$/g, '');
+                if (ch && ch !== 'none') {
+                    let c = document.createElement('canvas'); c.width = c.height = 128; let x = c.getContext('2d');
+                    x.fillStyle = '#e2e8f0'; x.textAlign = 'center'; x.textBaseline = 'middle';
+                    x.font = `${cs.fontWeight || 900} 92px ${cs.fontFamily}`; x.fillText(ch, 64, 66);
+                    out = c.toDataURL('image/png');
+                }
+            }
+            i.remove(); _roleIconCache[role.icon] = out; return out;
+        }
+        function onlineCardFor(name, assignment, dealId) {
+            let rid = assignment[name], r = ROLES_DB.find(x => x.id === rid) || {};
+            let fac = r.faction === 'wolf' ? 'Phe Sói' : (r.faction === 'independent' ? 'Phe Thứ 3' : 'Phe Dân Làng');
+            return { kind: 'card', dealId, name, role: { id: rid, name: r.name || rid, desc: r.desc || '', faction: fac }, icon: roleIconURL(r) };
+        }
+        function onlineSendCards(assignment, dealId) {
+            Object.keys(assignment || {}).forEach(n => { let id = onlineIdOf(n); if (id) gmSend({ t: 'to', to: id, keep: 'card', data: onlineCardFor(n, assignment, dealId) }); });
+        }
+        function onlineCancelCards(names) {
+            (names || []).forEach(n => { let id = onlineIdOf(n); if (id) gmSend({ t: 'to', to: id, keep: 'card', data: { kind: 'card_cancel' } }); });
+            gmSend({ t: 'all', keep: 'phase', data: { kind: 'waiting' } });
+        }
+        function onlineSaveDeal(extra) {
+            if (!onlineActive() || !state.dealId) return;
+            let prev = state.online.deal && state.online.deal.dealId === state.dealId ? state.online.deal : {};
+            state.online.deal = Object.assign({ started: false }, prev, {
+                dealId: state.dealId, assignment: state.dealAssignment, viewed: Object.assign({}, state.dealViewed || {}),
+                deck: Object.assign({}, state.deck), seatOrder: (state.seatOrder || []).slice()
+            }, extra || {});
+            onlineSave();
+        }
+        // Quản trò tải lại trang giữa lúc chia bài -> khôi phục đúng ván chia
+        function onlineResumeDeal() {
+            let d = state.online && state.online.deal; if (!d) return;
+            let names = (state.online.players || []).map(p => p.name);
+            state.totalPlayers = names.length; state.selectedPlayers = names.slice(); state.homeSeats = names.slice();
+            state.seatOrder = (d.seatOrder && d.seatOrder.length === names.length) ? d.seatOrder.slice() : names.slice(); state.seatMode = 'on';
+            Object.keys(state.deck).forEach(k => state.deck[k] = 0); Object.assign(state.deck, d.deck || {});
+            state.dealMode = 'app'; state.dealAssignment = d.assignment; state.dealViewed = Object.assign({}, d.viewed || {}); state.dealId = d.dealId;
+            renderDealView(); switchView('view-deal');
+        }
+        function onlineResendAll() {
+            let d = state.online && state.online.deal; if (!d) return;
+            onlineSendCards(d.assignment, d.dealId);
+            gmSend({ t: 'all', keep: 'phase', data: { kind: d.started ? 'started' : 'dealing' } });
+        }
+        function onlineFromPlayer(pid, data) {
+            let name = onlineNameOf(pid); if (!name || !data) return;
+            if (data.kind === 'viewed') {
+                let d = state.online && state.online.deal;
+                if (d && data.dealId === d.dealId) { d.viewed = d.viewed || {}; if (!d.viewed[name]) d.viewed[name] = 1; }
+                if (state.dealId && data.dealId === state.dealId) {
+                    if (!state.dealViewed) state.dealViewed = {};
+                    if (!state.dealViewed[name]) state.dealViewed[name] = 1;   // xem lại trên máy riêng không tính là "xem nhiều lần"
+                    onlineSaveDeal();
+                    if (state.currentView === 'view-deal') renderDealView();
+                } else onlineSave();
+            }
+        }
+        function renderOnlineDealView() {
+            let grid = document.getElementById('deal-grid'); if (!grid) return;
+            let names = Object.keys(state.dealAssignment || {}), viewed = state.dealViewed || {}, live = window._onlineRoster;
+            grid.innerHTML = names.map(n => {
+                let id = onlineIdOf(n), on = !!(live && (live.players.find(x => x.id === id) || {}).online), v = viewed[n] > 0;
+                return `<div class="deal-card od-card${v ? ' viewed' : ''}" data-name="${escapeHtml(n)}" onclick="dealShowRole(this.dataset.name)">
+                    <div class="deal-av">${avatarHtml(n, 56)}<span class="od-dot${on ? ' on' : ''}"></span></div>
+                    <div class="deal-name">${escapeHtml(n)}</div>
+                    <div class="deal-status">${v ? '✅ Đã xem' : (on ? 'Chưa xem' : '📶 Mất kết nối')}</div></div>`;
+            }).join('');
+            let total = names.length, cnt = names.filter(n => viewed[n] > 0).length;
+            let vc = document.getElementById('deal-viewed-count'); if (vc) vc.innerText = cnt;
+            let tc = document.getElementById('deal-total-count'); if (tc) tc.innerText = total;
+            let btn = document.getElementById('btn-deal-start');
+            if (btn) {
+                let all = cnt >= total && total > 0;
+                btn.disabled = !all;
+                btn.classList.toggle('opacity-50', !all); btn.classList.toggle('bg-gray-700', !all);
+                btn.classList.toggle('bg-indigo-600', all); btn.classList.toggle('active:bg-indigo-500', all);
+            }
+            onlineDealChrome(true);
+        }
+        function onlineDealChrome(on) {
+            let p = document.getElementById('deal-instr');
+            if (p) p.textContent = on ? 'Mỗi người chơi xem lá bài trên điện thoại của mình. Khi tất cả đã xem, bấm Bắt đầu Đêm 1.'
+                                      : 'Mỗi người chơi bấm vào tên mình để xem vai. Đảm bảo không ai nhìn thấy màn hình khi bạn đang xem.';
+            let r = document.getElementById('btn-deal-redeal'); if (r) r.classList.toggle('hidden', !on);
+        }
+        function onlineRedeal() {
+            if (!confirm('Chia bài lại? Mọi người sẽ nhận lá bài MỚI và phải xem lại.')) return;
+            prepareDealView();
+        }
+        (function () {
+            const _prep = prepareDealView;
+            prepareDealView = function () {
+                _prep.apply(this, arguments);
+                if (!onlineDeal()) return;
+                state.dealId = 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+                onlineSendCards(state.dealAssignment, state.dealId);
+                gmSend({ t: 'all', keep: 'phase', data: { kind: 'dealing' } });
+                onlineSaveDeal({ started: false });
+                renderDealView();
+            };
+            const _render = renderDealView;
+            renderDealView = function () {
+                if (onlineDeal() && state.dealAssignment) return renderOnlineDealView();
+                onlineDealChrome(false); return _render.apply(this, arguments);
+            };
+            const _show = dealShowRole;
+            dealShowRole = function (name) {
+                if (onlineDeal()) { onlineToast('📱 ' + name + ' xem bài trên điện thoại của mình'); return; }
+                return _show.apply(this, arguments);
+            };
+            const _force = dealForceStart;
+            dealForceStart = function () {
+                if (onlineDeal()) { gmSend({ t: 'all', keep: 'phase', data: { kind: 'started' } }); onlineSaveDeal({ started: true }); }
+                return _force.apply(this, arguments);
+            };
+            const _back = backFromDeal;
+            backFromDeal = function () {
+                let names = Object.keys(state.dealAssignment || {}), was = onlineDeal() && names.length;
+                _back.apply(this, arguments);
+                if (was && !state.dealAssignment) { onlineCancelCards(names); delete state.online.deal; onlineSave(); }
+            };
+            const _unlock = onlineUnlock;
+            onlineUnlock = function () {
+                let before = state.online && state.online.locked;
+                _unlock.apply(this, arguments);
+                if (before && state.online && state.online.deal && !state.online.deal.started) {
+                    onlineCancelCards(Object.keys(state.online.deal.assignment || {})); delete state.online.deal; onlineSave();
+                }
+            };
+            const _gm = gmOnMsg;
+            gmOnMsg = function (m) {
+                _gm(m);
+                if (m.t === 'msg' && m.from && m.from !== 'gm') onlineFromPlayer(m.from, m.data);
+                else if (m.t === 'roster' && state.currentView === 'view-deal' && onlineDeal()) renderDealView();
+                else if (m.t === 'gm_ok' && m.restored) onlineResendAll();
+            };
+            const _proceed = onlineProceed;
+            onlineProceed = function () { state.dealMode = 'app'; return _proceed.apply(this, arguments); };
         })();
 
     </script>
