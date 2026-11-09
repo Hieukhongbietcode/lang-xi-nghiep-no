@@ -1585,6 +1585,36 @@
             transition: opacity .25s, transform .25s; box-shadow:0 8px 24px rgba(0,0,0,.45); white-space:nowrap; }
         #online-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
         .deal-redeal-btn { width:100%; margin-top:8px; padding:11px; border-radius:12px; background:transparent; border:1px solid #334155; color:#cbd5e1; font-weight:700; font-size:14px; cursor:pointer; }
+        /* ===== Chat của quản trò ===== */
+        #gm-chat-btn { position:fixed; left:14px; bottom:calc(env(safe-area-inset-bottom, 0px) + 96px); z-index:2950; width:52px; height:52px; border-radius:50%;
+            display:none; align-items:center; justify-content:center; font-size:21px; color:#fff; background:#4f46e5; border:none; cursor:pointer;
+            box-shadow:0 8px 24px rgba(79,70,229,.45); transition: transform .15s; }
+        #gm-chat-btn:active { transform:scale(.92); }
+        #gm-chat-badge { position:absolute; top:-4px; right:-4px; min-width:22px; height:22px; padding:0 6px; border-radius:999px; background:#ef4444; color:#fff;
+            font-size:12px; font-weight:800; display:none; align-items:center; justify-content:center; border:2px solid #0b1120; }
+        #gm-chat { position:fixed; top:0; right:0; bottom:0; width:min(420px, 100vw); z-index:2960; background:#0d1424; border-left:1px solid #26324a;
+            display:flex; flex-direction:column; transform:translateX(105%); transition: transform .32s cubic-bezier(.2,.8,.2,1); box-shadow:-12px 0 40px rgba(0,0,0,.5);
+            padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+        #gm-chat.open { transform:none; }
+        .gc-head { display:flex; justify-content:space-between; align-items:center; padding:14px 14px 8px; }
+        .gc-title { color:#f1f5f9; font-weight:900; font-size:17px; }
+        .gc-x { width:40px; height:40px; border-radius:50%; color:#ef4444; background:rgba(239,68,68,.16); border:1px solid rgba(239,68,68,.45); font-size:18px; cursor:pointer; }
+        .gc-status { margin:0 14px 8px; padding:8px 10px; border-radius:10px; background:#111a33; color:#c7d2fe; font-size:12px; line-height:1.45; }
+        .gc-status b { color:#fff; }
+        .gc-filters { display:flex; gap:6px; overflow-x:auto; padding:0 14px 8px; scrollbar-width:none; }
+        .gc-f { flex-shrink:0; font-size:12px; font-weight:700; color:#94a3b8; background:#111827; border:1px solid #1f2937; border-radius:999px; padding:5px 10px; cursor:pointer; }
+        .gc-f.on { color:#fff; background:#312e81; border-color:#4f46e5; } .gc-f span { opacity:.7; }
+        .gc-feed { flex:1; overflow-y:auto; padding:6px 14px; display:flex; flex-direction:column; gap:3px; }
+        .gc-m { font-size:14px; line-height:1.4; color:#e2e8f0; padding:3px 6px; border-radius:6px; word-wrap:break-word; animation: chipIn .2s ease-out; }
+        .gc-m.me { background:rgba(251,191,36,.07); }
+        .gc-ch { margin-right:4px; } .gc-t { color:#475569; font-size:11px; margin-right:6px; } .gc-dm { color:#a78bfa; font-size:12px; font-weight:700; }
+        .gc-empty { color:#475569; text-align:center; padding:30px 0; font-weight:600; }
+        .gc-compose { border-top:1px solid #1f2937; padding:10px 14px 12px; display:flex; flex-direction:column; gap:8px; }
+        .gc-to { display:flex; gap:6px; } .gc-to select { flex:1; font-size:13px; font-weight:700; color:#e2e8f0; background:#111827; border:1px solid #334155; border-radius:10px; padding:7px; }
+        .gc-row { display:flex; gap:8px; }
+        #gc-in { flex:1; font-size:15px; color:#f1f5f9; background:#0b1222; border:1.5px solid #334155; border-radius:12px; padding:10px 12px; outline:none; }
+        #gc-in:focus { border-color:#6366f1; }
+        #gc-send { width:46px; border-radius:12px; border:none; background:#4f46e5; color:#fff; font-size:16px; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -8815,6 +8845,172 @@
             const _proceed = onlineProceed;
             onlineProceed = function () { state.dealMode = 'app'; return _proceed.apply(this, arguments); };
         })();
+
+    
+        // =====================================================================
+        //  CHƠI ONLINE — Giai đoạn 3: chat (máy quản trò)
+        //  App tự tính "ai được nói ở kênh nào" theo bước đang chơi rồi báo server; server tự chặn tin sai lượt.
+        // =====================================================================
+        const CH_INFO = {
+            public: { ic: '💬', name: 'Làng',          col: '#93c5fd' },
+            wolves: { ic: '🐺', name: 'Sói',           col: '#f87171' },
+            couple: { ic: '💞', name: 'Cặp Đôi',       col: '#f9a8d4' },
+            dead:   { ic: '👻', name: 'Người chết',    col: '#a1a1aa' },
+            dm:     { ic: '💌', name: 'Riêng',         col: '#c4b5fd' }
+        };
+        window._gmChat = []; window._gmChatSeen = new Set(); window._gmUnread = 0; window._gmPermNames = null; window._gmChatFilter = 'all';
+        const GM_CHAT_KEY = 'lxn_gm_chat_v1';
+        function gmChatLoad() {
+            try { let d = JSON.parse(localStorage.getItem(GM_CHAT_KEY) || 'null'); if (d && state.online && d.code === state.online.code) { window._gmChat = d.list || []; window._gmChat.forEach(m => window._gmChatSeen.add(m.id)); } } catch (e) {}
+        }
+        function gmChatSave() { try { if (state.online) localStorage.setItem(GM_CHAT_KEY, JSON.stringify({ code: state.online.code, list: window._gmChat.slice(-500) })); } catch (e) {} }
+        function gmChatAdd(list, fromHistory) {
+            let added = 0;
+            (list || []).forEach(m => { if (!m || window._gmChatSeen.has(m.id)) return; window._gmChatSeen.add(m.id); window._gmChat.push(m); added++; if (!fromHistory && m.from !== 'gm' && !gmChatOpen()) window._gmUnread++; });
+            if (!added) return;
+            window._gmChat.sort((a, b) => a.ts - b.ts); gmChatSave(); renderGmChat(); renderGmChatBtn();
+        }
+        // ---------- Ai được nói ở kênh nào ----------
+        function onlineComputePerm() {
+            let P = (state.online && state.online.players) || [];
+            let gp = (state.players && state.players.length) ? state.players : null;
+            let aliveNames = gp ? gp.filter(p => p.isAlive).map(p => p.name) : P.map(p => p.name);
+            let deadNames = gp ? gp.filter(p => !p.isAlive).map(p => p.name) : [];
+            let perm = { public: [], wolves: [], couple: [], dead: deadNames, dm: [] }, label = '', v = state.currentView, d = state.dayCount || 1;
+            if (v === 'view-day-discuss' || v === 'view-day-defense') {
+                let muted = new Set([...(typeof getBanishedAliveNames === 'function' ? getBanishedAliveNames() : []), ...(typeof getSilencedAliveNames === 'function' ? getSilencedAliveNames() : [])]);
+                perm.public = aliveNames.filter(n => !muted.has(n));
+                label = v === 'view-day-discuss' ? `☀️ Ngày ${d} — Thảo luận` : `☀️ Ngày ${d} — Biện minh`;
+            } else if (v === 'view-day-execute') label = `⚖️ Ngày ${d} — Biểu quyết`;
+            else if (v === 'view-night' || v === 'view-night-transition') {
+                label = `🌙 Đêm ${d} — mọi người nhắm mắt`;
+                if (v === 'view-night') {
+                    let st = state.nightSequence && state.nightSequence[state.currentStepIndex], called = st ? namesCalledInStep(st) : [];
+                    called = called.filter(n => !deadNames.includes(n));
+                    if (st && (st.type === 'group_action' || st.type === 'bigbad_action')) perm.wolves = called;
+                    else if (st && st.type === 'couple') perm.couple = called;
+                    else perm.dm = called;
+                }
+            } else if (v === 'view-night-result') label = '🌅 Trời sáng';
+            else if (v === 'view-end') label = '🏁 Ván đã kết thúc';
+            else if (v === 'view-deal') label = '🃏 Đang chia bài';
+            else label = state.online && state.online.locked ? '🔒 Chờ quản trò' : '⏳ Sảnh chờ';
+            let ids = {}; Object.keys(perm).forEach(k => ids[k] = [...new Set(perm[k])].map(onlineIdOf).filter(Boolean));
+            return { names: perm, ids, label };
+        }
+        let _lastPermKey = '';
+        function onlineSyncPerm(force) {
+            if (!onlineActive() || !state.online.locked || !gmWs || gmWs.readyState !== 1) return;
+            let p = onlineComputePerm(), key = JSON.stringify([p.ids, p.label]);
+            window._gmPermNames = p.names;
+            if (!force && key === _lastPermKey) return;
+            _lastPermKey = key; gmSend({ t: 'perm', perm: p.ids, label: p.label }); renderGmChatStatus();
+        }
+        setInterval(() => { try { onlineSyncPerm(false); } catch (e) {} }, 600);
+        // ---------- Giao diện khung chat ----------
+        function gmChatOpen() { let d = document.getElementById('gm-chat'); return !!(d && d.classList.contains('open')); }
+        function ensureGmChat() {
+            if (document.getElementById('gm-chat')) return;
+            let btn = document.createElement('button'); btn.id = 'gm-chat-btn'; btn.type = 'button'; btn.onclick = toggleGmChat;
+            btn.innerHTML = '<i class="fa-solid fa-comments"></i><span id="gm-chat-badge"></span>'; document.body.appendChild(btn);
+            let d = document.createElement('div'); d.id = 'gm-chat';
+            d.innerHTML = `<div class="gc-head"><div class="gc-title"><i class="fa-solid fa-comments"></i> Chat</div>
+                    <button type="button" class="gc-x" onclick="toggleGmChat()"><i class="fa-solid fa-xmark"></i></button></div>
+                <div class="gc-status" id="gc-status"></div>
+                <div class="gc-filters" id="gc-filters"></div>
+                <div class="gc-feed" id="gc-feed"></div>
+                <div class="gc-compose">
+                    <div class="gc-to"><select id="gc-ch" onchange="gmChatChannelChanged()"></select><select id="gc-dm" class="hidden"></select></div>
+                    <div class="gc-row"><input id="gc-in" maxlength="300" placeholder="Nhắn với tư cách Quản trò…" autocomplete="off"><button type="button" id="gc-send" onclick="gmChatSend()"><i class="fa-solid fa-paper-plane"></i></button></div>
+                </div>`;
+            document.body.appendChild(d);
+            document.getElementById('gc-in').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); gmChatSend(); } });
+        }
+        function renderGmChatBtn() {
+            ensureGmChat();
+            let show = onlineActive() && !!state.online.locked;
+            document.getElementById('gm-chat-btn').style.display = show ? 'flex' : 'none';
+            if (!show) document.getElementById('gm-chat').classList.remove('open');
+            let b = document.getElementById('gm-chat-badge'); b.textContent = window._gmUnread > 99 ? '99+' : (window._gmUnread || ''); b.style.display = window._gmUnread ? 'flex' : 'none';
+        }
+        function toggleGmChat() {
+            ensureGmChat(); let d = document.getElementById('gm-chat'); d.classList.toggle('open');
+            if (d.classList.contains('open')) { window._gmUnread = 0; renderGmChatBtn(); renderGmChat(); gmChatSuggestChannel(); setTimeout(() => document.getElementById('gc-in').focus(), 250); }
+        }
+        function gmPlayerName(id) { return onlineNameOf(id) || '?'; }
+        function renderGmChatStatus() {
+            let el = document.getElementById('gc-status'); if (!el) return;
+            let n = window._gmPermNames; if (!n) { el.innerHTML = ''; return; }
+            let parts = [];
+            if (n.public.length) parts.push(`💬 Làng (${n.public.length})`);
+            if (n.wolves.length) parts.push(`🐺 Sói: ${n.wolves.map(escapeHtml).join(', ')}`);
+            if (n.couple.length) parts.push(`💞 Cặp Đôi: ${n.couple.map(escapeHtml).join(', ')}`);
+            if (n.dm.length) parts.push(`💌 Hỏi quản trò: ${n.dm.map(escapeHtml).join(', ')}`);
+            if (n.dead.length) parts.push(`👻 Người chết (${n.dead.length})`);
+            el.innerHTML = '<b>Đang mở:</b> ' + (parts.length ? parts.join(' · ') : 'không ai được chat');
+        }
+        function renderGmChat() {
+            if (!document.getElementById('gm-chat')) return;
+            renderGmChatStatus();
+            let f = window._gmChatFilter, list = window._gmChat;
+            let cnt = c => list.filter(m => m.ch === c).length;
+            document.getElementById('gc-filters').innerHTML = [['all', 'Tất cả', list.length], ...Object.keys(CH_INFO).map(c => [c, CH_INFO[c].ic + ' ' + CH_INFO[c].name, cnt(c)])]
+                .map(([k, t, c]) => `<button type="button" class="gc-f${f === k ? ' on' : ''}" onclick="window._gmChatFilter='${k}';renderGmChat()">${t}${c ? ` <span>${c}</span>` : ''}</button>`).join('');
+            let feed = document.getElementById('gc-feed'), atBottom = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 60;
+            let shown = list.filter(m => f === 'all' || m.ch === f).slice(-300);
+            feed.innerHTML = shown.length ? shown.map(m => {
+                let ci = CH_INFO[m.ch] || CH_INFO.public, gm = m.from === 'gm';
+                let who = gm ? 'Quản trò' : escapeHtml(m.name);
+                let dmTag = m.ch === 'dm' ? (gm ? ` → ${escapeHtml(gmPlayerName(m.dm))}` : ' → Quản trò') : '';
+                let t = new Date(m.ts); let hh = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
+                return `<div class="gc-m${gm ? ' me' : ''}"><span class="gc-ch" style="color:${ci.col}" title="${ci.name}">${ci.ic}</span><span class="gc-t">${hh}</span>
+                    <b class="gc-n" style="color:${gm ? '#fbbf24' : nameColor(m.name)}">${who}</b><span class="gc-dm">${dmTag}</span>: <span class="gc-txt">${escapeHtml(m.text)}</span></div>`;
+            }).join('') : '<div class="gc-empty">Chưa có tin nhắn</div>';
+            if (atBottom) feed.scrollTop = feed.scrollHeight;
+            gmChatFillSelectors();
+        }
+        function nameColor(name) { let h = 0; for (const ch of String(name)) h = (h * 31 + ch.codePointAt(0)) >>> 0; return ['#f87171','#fb923c','#facc15','#4ade80','#2dd4bf','#38bdf8','#818cf8','#c084fc','#f472b6','#a3e635'][h % 10]; }
+        function gmChatFillSelectors() {
+            let ch = document.getElementById('gc-ch'), dm = document.getElementById('gc-dm'); if (!ch) return;
+            let cur = ch.value || 'public';
+            ch.innerHTML = Object.keys(CH_INFO).map(c => `<option value="${c}">${CH_INFO[c].ic} ${c === 'dm' ? 'Nhắn riêng' : CH_INFO[c].name}</option>`).join(''); ch.value = cur;
+            let curDm = dm.value;
+            dm.innerHTML = ((state.online && state.online.players) || []).map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+            if (curDm) dm.value = curDm;
+            dm.classList.toggle('hidden', ch.value !== 'dm');
+        }
+        function gmChatChannelChanged() { document.getElementById('gc-dm').classList.toggle('hidden', document.getElementById('gc-ch').value !== 'dm'); }
+        // Mở khung chat: tự chọn kênh đang mở (vd đang tới lượt Tiên Tri -> nhắn riêng Tiên Tri)
+        function gmChatSuggestChannel() {
+            let n = window._gmPermNames; if (!n) return; gmChatFillSelectors();
+            let ch = document.getElementById('gc-ch'), dm = document.getElementById('gc-dm');
+            if (n.dm.length) { ch.value = 'dm'; let id = onlineIdOf(n.dm[0]); if (id) dm.value = id; }
+            else if (n.wolves.length) ch.value = 'wolves';
+            else if (n.couple.length) ch.value = 'couple';
+            else if (n.public.length) ch.value = 'public';
+            gmChatChannelChanged();
+        }
+        function gmChatSend() {
+            let inp = document.getElementById('gc-in'), text = inp.value.trim(); if (!text) return;
+            let ch = document.getElementById('gc-ch').value, msg = { t: 'chat', ch, text };
+            if (ch === 'dm') msg.to = document.getElementById('gc-dm').value;
+            if (!gmSend(msg)) { onlineToast('📶 Mất kết nối server, thử lại sau'); return; }
+            inp.value = ''; inp.focus();
+        }
+        (function () {
+            const _gm = gmOnMsg;
+            gmOnMsg = function (m) {
+                _gm(m);
+                if (m.t === 'chat') gmChatAdd([m.m], false);
+                else if (m.t === 'chat_hist') gmChatAdd(m.list, true);
+                else if (m.t === 'gm_ok') { _lastPermKey = ''; setTimeout(() => onlineSyncPerm(true), 100); }
+                else if (m.t === 'error' && m.code === 'CHAT_SLOW') onlineToast('⏳ ' + m.msg);
+                renderGmChatBtn();
+            };
+            const _close = onlineClose;
+            onlineClose = function () { _close.apply(this, arguments); if (!onlineActive()) { window._gmChat = []; window._gmChatSeen = new Set(); try { localStorage.removeItem(GM_CHAT_KEY); } catch (e) {} renderGmChatBtn(); } };
+        })();
+        setTimeout(() => { gmChatLoad(); renderGmChatBtn(); }, 600);
 
     </script>
 </body>

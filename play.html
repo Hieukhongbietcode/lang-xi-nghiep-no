@@ -88,6 +88,32 @@
         color:#ef4444; background:rgba(239,68,68,.16); border:1px solid rgba(239,68,68,.45); cursor:pointer; }
     .dl-confirm { margin-top:18px; opacity:0; transform:translateY(8px); pointer-events:none; transition: opacity .3s ease .45s, transform .3s ease .45s; }
     .dl-wrap.is-open .dl-confirm { opacity:1; transform:none; pointer-events:auto; }
+    /* ---- Chat (Giai đoạn 3) ---- */
+    .chat { margin-top:14px; border-top:1px solid var(--line); padding-top:12px; }
+    .ch-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
+    .ch-head b { font-size:13px; font-weight:800; color:var(--mute); text-transform:uppercase; letter-spacing:.06em; }
+    #ch-label { font-size:12px; font-weight:800; color:#fde68a; background:#2a2410; padding:4px 10px; border-radius:999px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:70%; }
+    .ch-dead { font-size:12px; font-weight:700; color:#d4d4d8; background:#27272a; border-radius:10px; padding:8px 10px; margin-bottom:8px; }
+    .ch-feed { height:min(46vh, 420px); min-height:200px; overflow-y:auto; background:#0b1222; border:1px solid var(--line); border-radius:14px; padding:8px 10px; display:flex; flex-direction:column; gap:3px; }
+    .cm { font-size:14px; line-height:1.42; word-wrap:break-word; padding:2px 4px; border-radius:6px; animation: pop .2s ease both; }
+    .cm.mine { background:rgba(126,99,242,.12); } .cm.gm { background:rgba(251,191,36,.08); }
+    .cm .tag { font-size:11px; font-weight:800; padding:1px 6px; border-radius:6px; margin-right:5px; vertical-align:1px; }
+    .tag.wolves { background:#450a0a; color:#fca5a5; } .tag.dead { background:#27272a; color:#d4d4d8; } .tag.couple { background:#500724; color:#f9a8d4; } .tag.dm { background:#2e1065; color:#c4b5fd; }
+    .ch-empty { color:#475569; text-align:center; margin:auto; font-size:13px; font-weight:600; }
+    .ch-chips { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+    .ch-chip { font:inherit; font-size:12px; font-weight:800; color:var(--mute); background:#111827; border:1px solid var(--line); border-radius:999px; padding:5px 10px; cursor:pointer; }
+    .ch-chip.on { color:#fff; background:#3b2f8f; border-color:var(--iris); }
+    .ch-row { display:flex; gap:8px; margin-top:8px; }
+    #ch-in { flex:1; font-size:15px; padding:11px 12px; }
+    #ch-in:disabled { opacity:.55; }
+    #ch-send { width:48px; border:none; border-radius:14px; background:var(--iris); color:#fff; font-size:18px; cursor:pointer; }
+    #ch-send:disabled { opacity:.35; }
+    .ch-err { min-height:16px; font-size:12px; font-weight:700; color:#f87171; margin-top:4px; }
+    #turn-toast { position:fixed; left:50%; top:calc(env(safe-area-inset-top, 0px) + 58px); transform:translateX(-50%) translateY(-200%); z-index:45; max-width:92vw;
+        background:#3b2f8f; color:#fff; font-weight:800; font-size:14px; padding:12px 16px; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.5); transition: transform .35s cubic-bezier(.2,.8,.2,1); text-align:center; }
+    #turn-toast.show { transform:translateX(-50%) translateY(0); }
+    details.roster summary { cursor:pointer; list-style:none; } details.roster summary::-webkit-details-marker { display:none; }
+    details.roster summary .list-head span:first-child::after { content:' ▾'; } details.roster:not([open]) summary .list-head span:first-child::after { content:' ▸'; }
     .hidden { display:none !important; }
     @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
 </style>
@@ -95,6 +121,7 @@
 <body>
 <div id="net"></div>
 <div id="card-ov" class="hidden"></div>
+<div id="turn-toast"></div>
 <div class="wrap">
     <div class="brand">
         <img src="data:image/webp;base64,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" alt="">
@@ -124,8 +151,18 @@
         <div class="me">👤 <span id="lb-me"></span></div>
         <div id="lb-status" class="status"></div>
         <div id="card-zone" class="hidden"></div>
-        <div class="list-head"><span>Người chơi</span><span id="lb-count"></span></div>
-        <div id="lb-list" class="plist"></div>
+        <details id="lb-roster" class="roster" open>
+            <summary><div class="list-head"><span>Người chơi</span><span id="lb-count"></span></div></summary>
+            <div id="lb-list" class="plist"></div>
+        </details>
+        <div id="chat" class="chat hidden">
+            <div class="ch-head"><b>💬 Chat</b><span id="ch-label"></span></div>
+            <div id="ch-dead" class="ch-dead hidden">💀 Bạn đã chết — tin của bạn chỉ người chết khác và quản trò thấy.</div>
+            <div id="ch-feed" class="ch-feed"><div class="ch-empty">Chưa có tin nhắn</div></div>
+            <div id="ch-chips" class="ch-chips"></div>
+            <div class="ch-row"><input id="ch-in" maxlength="300" autocomplete="off" placeholder="Chưa tới lượt bạn chat" disabled><button id="ch-send" disabled aria-label="Gửi">➤</button></div>
+            <div id="ch-err" class="ch-err"></div>
+        </div>
         <div class="gm-line"><span id="lb-gmdot" class="dot"></span><span id="lb-gm"></span></div>
         <button id="btn-leave" class="btn btn-ghost">Rời phòng</button>
     </div>
@@ -194,8 +231,13 @@ function onMsg(m) {
         me = { code: m.code, token: m.token, name: m.name, id: m.playerId }; save(me);
         try { localStorage.setItem('lxn_last_name', m.name); } catch (e) {}
         pending = null; resumeMiss = 0;
+        if (!chatList.length) chatLoad();
         history.replaceState(null, '', location.pathname + '?room=' + m.code + (qs.get('ws') ? '&ws=' + encodeURIComponent(qs.get('ws')) : '') + (qs.get('tab') ? '&tab=1' : ''));
         renderLobby(); show('scr-lobby');
+    } else if (m.t === 'chat') { chatAdd([m.m], false);
+    } else if (m.t === 'chat_hist') { chatAdd(m.list, true);
+    } else if (m.t === 'chat_perm') { onPerm(m);
+    } else if (m.t === 'error' && (m.code === 'CHAT_LOCKED' || m.code === 'CHAT_SLOW' || m.code === 'BAD_CH')) { $('ch-err').textContent = m.msg; clearTimeout(window._ceT); window._ceT = setTimeout(() => $('ch-err').textContent = '', 3500);
     } else if (m.t === 'msg' && m.from === 'gm' && m.data) {
         onGm(m.data);
     } else if (m.t === 'roster') {
@@ -289,6 +331,58 @@ function closeCard(instant) {
     }, was ? 520 : 0);
 }
 
+// ---------------- Chat (Giai đoạn 3) ----------------
+const CH = { public: { ic: '💬', name: 'Làng' }, wolves: { ic: '🐺', name: 'Sói' }, couple: { ic: '💞', name: 'Cặp Đôi' }, dead: { ic: '👻', name: 'Người chết' }, dm: { ic: '💌', name: 'Quản trò' } };
+let chatList = [], chatSeen = new Set(), can = {}, label = '', chatCh = null;
+const chatKey = () => 'lxn_chat_' + (me ? me.code + '_' + me.id : '');
+function chatLoad() { try { const d = JSON.parse(IDS.getItem(chatKey()) || '[]'); d.forEach(m => { if (!chatSeen.has(m.id)) { chatSeen.add(m.id); chatList.push(m); } }); } catch (e) {} }
+function chatSave() { try { IDS.setItem(chatKey(), JSON.stringify(chatList.slice(-300))); } catch (e) {} }
+function chatAdd(list, fromHist) {
+    let n = 0;
+    (list || []).forEach(m => { if (!m || chatSeen.has(m.id)) return; chatSeen.add(m.id); chatList.push(m); n++; });
+    if (!n) return; chatList.sort((a, b) => a.ts - b.ts); chatSave(); renderChat();
+}
+const nameCol = name => { let h = 0; for (const ch of String(name)) h = (h * 31 + ch.codePointAt(0)) >>> 0; return ['#f87171','#fb923c','#facc15','#4ade80','#2dd4bf','#38bdf8','#818cf8','#c084fc','#f472b6','#a3e635'][h % 10]; };
+function turnToast(t) { const el = $('turn-toast'); el.textContent = t; el.classList.add('show'); clearTimeout(el._h); el._h = setTimeout(() => el.classList.remove('show'), 4000); if (navigator.vibrate) { try { navigator.vibrate([60, 40, 60]); } catch (e) {} } }
+function onPerm(m) {
+    const before = can; can = m.can || {}; label = m.label || '';
+    // vừa tới lượt -> báo cho người chơi
+    if (can.wolves && !before.wolves) turnToast('🐺 Bầy Sói đã thức dậy — nhắn với đồng đội');
+    else if (can.couple && !before.couple) turnToast('💞 Cặp Đôi thức dậy — nhắn với người ấy');
+    else if (can.dm && !before.dm) turnToast('💌 Tới lượt bạn — có thể nhắn riêng quản trò');
+    else if (can.public && !before.public) turnToast('☀️ Làng đang thảo luận — bạn có thể chat');
+    const w = writable(); if (!w.includes(chatCh)) chatCh = w[0] || null;
+    renderChat();
+}
+function writable() { return ['wolves', 'couple', 'dm', 'public', 'dead'].filter(c => can[c]); }
+function renderChat() {
+    const box = $('chat'); if (!me) return;
+    const show = !!(roster && roster.locked) || chatList.length > 0;
+    box.classList.toggle('hidden', !show); if (!show) return;
+    $('ch-label').textContent = label; $('ch-label').classList.toggle('hidden', !label);
+    $('ch-dead').classList.toggle('hidden', !can.dead);
+    const feed = $('ch-feed'), atBottom = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 60;
+    feed.innerHTML = chatList.length ? chatList.slice(-300).map(m => {
+        const gm = m.from === 'gm', mine = me && m.from === me.id;
+        const tag = m.ch !== 'public' ? `<span class="tag ${m.ch}">${CH[m.ch].ic} ${m.ch === 'dm' ? (gm ? 'Quản trò → bạn' : 'Bạn → Quản trò') : CH[m.ch].name}</span>` : '';
+        return `<div class="cm${mine ? ' mine' : ''}${gm ? ' gm' : ''}">${tag}<b style="color:${gm ? '#fbbf24' : nameCol(m.name)}">${esc(gm ? 'Quản trò' : m.name)}</b>: ${esc(m.text)}</div>`;
+    }).join('') : '<div class="ch-empty">Chưa có tin nhắn</div>';
+    if (atBottom) feed.scrollTop = feed.scrollHeight;
+    const w = writable();
+    $('ch-chips').innerHTML = w.length > 1 ? w.map(c => `<button class="ch-chip${c === chatCh ? ' on' : ''}" data-c="${c}">${CH[c].ic} ${c === 'dm' ? 'Nhắn quản trò' : CH[c].name}</button>`).join('') : '';
+    $('ch-chips').querySelectorAll('.ch-chip').forEach(b => b.onclick = () => { chatCh = b.dataset.c; renderChat(); $('ch-in').focus(); });
+    const inp = $('ch-in'), on = !!chatCh;
+    inp.disabled = !on; $('ch-send').disabled = !on;
+    inp.placeholder = !on ? (label.startsWith('🌙') ? '🌙 Ban đêm — chỉ chat khi tới lượt bạn' : '🔒 Chưa tới lượt bạn chat')
+        : chatCh === 'dm' ? '💌 Nhắn riêng quản trò…' : chatCh === 'wolves' ? '🐺 Nhắn với bầy Sói…' : chatCh === 'couple' ? '💞 Nhắn với người ấy…' : chatCh === 'dead' ? '👻 Nhắn với người chết…' : '💬 Nhắn với cả làng…';
+}
+function chatSend() {
+    const inp = $('ch-in'), text = inp.value.trim(); if (!text || !chatCh) return;
+    sendJ({ t: 'chat', ch: chatCh, text }); inp.value = ''; inp.focus();
+}
+$('ch-send').onclick = chatSend;
+$('ch-in').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); chatSend(); } });
+
 // ---------------- Giao diện ----------------
 function showJoin(msg) {
     show('scr-join');
@@ -316,6 +410,8 @@ function renderLobby() {
         : r.locked ? (phase === 'waiting' && card === null && r.locked ? '🔒 Phòng đã khoá — chờ quản trò chia bài<span class="dots"></span>' : '🔒 Phòng đã khoá')
         : '<span class="dots">Đang chờ quản trò bắt đầu</span>';
     renderCardZone();
+    if (phase === 'started' && !window._rosterFolded) { window._rosterFolded = true; $('lb-roster').open = false; }
+    renderChat();
     $('lb-count').textContent = r.players.length + ' người';
     $('lb-list').innerHTML = r.players.map(p => `<div class="pl${p.id === me.id ? ' mine' : ''}">${avatar(p.name)}<span class="nm">${esc(p.name)}${p.id === me.id ? ' (bạn)' : ''}</span><span class="dot${p.online ? ' on' : ''}"></span></div>`).join('');
     $('lb-gmdot').classList.toggle('on', !!r.gmOnline);
@@ -337,7 +433,7 @@ $('btn-join').onclick = doJoin;
 ['in-name', 'in-code'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') doJoin(); }));
 $('btn-leave').onclick = () => {
     if (!confirm('Rời phòng ' + me.code + '?')) return;
-    sendJ({ t: 'leave' }); me = null; save(null); roster = null; card = null; phase = 'waiting'; showJoin('');
+    sendJ({ t: 'leave' }); me = null; save(null); roster = null; card = null; phase = 'waiting'; chatList = []; chatSeen = new Set(); can = {}; showJoin('');
 };
 $('btn-wait-cancel').onclick = () => { me = null; save(null); showJoin(''); };
 
