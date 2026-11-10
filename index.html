@@ -1628,8 +1628,47 @@
         .gc-pinbtn { font-size:12px; font-weight:700; color:#fde68a; background:#2a2410; border:1px solid #574a16; border-radius:8px; padding:5px 8px; cursor:pointer; }
         .gc-pin { margin:0 14px 8px; padding:7px 10px; border-radius:10px; background:#2a2410; color:#fde68a; font-size:13px; font-weight:700; display:flex; justify-content:space-between; gap:8px; }
         .gc-pin button { color:#fca5a5; background:none; border:none; cursor:pointer; font-weight:900; }
+        .gc-pin.hidden { display:none !important; }
         .gc-typing { min-height:18px; padding:2px 14px; font-size:12px; color:#a5b4fc; font-style:italic; }
         .gc-react { display:flex; gap:4px; margin:2px 0 0 22px; } .gc-react span { font-size:12px; background:#1e293b; border-radius:99px; padding:1px 7px; color:#cbd5e1; }
+        /* ===== Chat quản trò luôn mở ===== */
+        body.gm-docked #gm-chat-btn { display:none !important; }
+        body.gm-docked #gm-chat { transform:none; box-shadow:none; }
+        body.gm-docked #gm-chat .gc-x { display:none; }
+        @media (min-width: 900px) { body.gm-docked #app { margin-right:400px; } body.gm-docked #gm-chat { width:400px; } }
+        @media (max-width: 899px) { body.gm-docked #gm-chat { top:auto; height:42vh; width:100vw; border-left:none; border-top:1px solid #26324a; }
+            body.gm-docked #app { height:58vh !important; max-height:58vh; overflow:hidden; } }
+        .vt-open { width:100%; margin-top:6px; padding:12px; border-radius:12px; border:none; background:#4f46e5; color:#fff; font-weight:800; font-size:15px; cursor:pointer; }
+        .vt-row { grid-template-columns:auto auto 1fr auto auto !important; }
+        .vt-up { font-size:12px; font-weight:800; color:#fff; background:#b91c1c; border:none; border-radius:8px; padding:5px 8px; cursor:pointer; white-space:nowrap; }
+
+        .vt-mayor { color:#fde68a; font-size:11px; }
+
+        /* ===== Sảnh chờ nâng cấp ===== */
+        .ol-qr { display:flex; gap:14px; align-items:center; margin:0 0 12px; padding:10px; border-radius:14px; background:#0f172a; border:1px solid #334155; }
+        .ol-qr-img { background:#fff; border-radius:10px; padding:6px; cursor:zoom-in; line-height:0; flex-shrink:0; } .ol-qr-img svg { width:128px; height:128px; }
+        .ol-qr-side { display:flex; flex-direction:column; gap:8px; color:#94a3b8; font-size:13px; font-weight:700; flex:1; }
+        .ol-share { padding:9px 10px; border-radius:10px; border:none; background:#16a34a; color:#fff; font-weight:800; font-size:13px; cursor:pointer; text-align:left; }
+        .ol-share.ghost { background:transparent; border:1px solid #334155; color:#cbd5e1; }
+        .ol-qr-big { position:fixed; inset:0; z-index:9800; background:rgba(2,6,16,.94); display:flex; align-items:center; justify-content:center; animation: ovFade .2s ease-out; cursor:pointer; }
+        .ol-qr-card { background:#fff; border-radius:24px; padding:22px; text-align:center; } .ol-qr-card svg { width:min(70vw, 70vh, 460px); height:auto; }
+        .ol-qr-code { font-size:42px; font-weight:900; letter-spacing:.25em; color:#0f172a; } .ol-qr-hint { color:#475569; font-weight:700; margin-top:6px; }
+        .ol-seat-h { display:flex; justify-content:space-between; align-items:center; margin:16px 2px 6px; color:#94a3b8; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; }
+        .ol-seat-h button { font-size:12px; font-weight:800; color:#fde68a; background:#2a2410; border:1px solid #574a16; border-radius:9px; padding:6px 10px; cursor:pointer; text-transform:none; letter-spacing:0; }
+        .ol-seats { display:flex; flex-wrap:wrap; gap:6px; } .ol-seats span { font-size:12px; font-weight:700; color:#e2e8f0; background:#111827; border:1px solid #1f2937; border-radius:8px; padding:4px 8px; }
+        .ol-spec { margin-top:12px; font-size:13px; color:#a5b4fc; font-weight:700; }
+        .net { font-size:11px; font-weight:800; margin-top:1px; } .net.weak { color:#facc15; } .net.bad { color:#f87171; }
+        .ol-pn .net { display:inline-block; margin-left:8px; }
+        #gm-knocks { position:fixed; top:calc(env(safe-area-inset-top,0px) + 12px); left:50%; transform:translateX(-50%); z-index:9700; display:flex; flex-direction:column; gap:8px; }
+        .kn { display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:14px; background:#1e293b; border:1px solid #4f46e5; color:#e2e8f0; font-size:14px; box-shadow:0 10px 30px rgba(0,0,0,.5); animation: popIn .25s ease both; }
+        .kn button { border:none; border-radius:9px; padding:6px 10px; font-weight:800; font-size:13px; cursor:pointer; } .kn-ok { background:#16a34a; color:#fff; } .kn-no { background:#334155; color:#e2e8f0; }
+        /* ===== Chia bài online: nhắc / đánh dấu ===== */
+        .od-act { display:flex; gap:6px; justify-content:center; margin-top:6px; }
+        .od-act button { width:32px; height:28px; border-radius:8px; border:1px solid #334155; background:#111827; color:#e2e8f0; font-size:14px; cursor:pointer; }
+        .rand-deck { font-size:12px; padding:6px 12px; border-radius:8px; background:#7c2d12; color:#fed7aa; font-weight:800; border:1px solid #c2410c; cursor:pointer; margin-right:6px; }
+        /* ===== Lá ❓ màu cam ===== */
+        .res-cover .rc-card, .dl-back-card { position:relative; overflow:hidden; color:#fff !important; border-color:#fdba74 !important; background:linear-gradient(145deg,#fb923c,#ea580c 60%,#c2410c) !important; text-shadow:0 2px 6px rgba(124,45,18,.6); }
+        .res-cover .rc-card::before, .dl-back-card::before { content:''; position:absolute; inset:12%; background:var(--lxn-logo) center/contain no-repeat; opacity:.22; filter:brightness(2.2) grayscale(1); }
 </style>
 </head>
 <body>
@@ -3803,7 +3842,8 @@
                     ...ACTION_UI_ROLES.filter(id => id !== 'apprentice_seer'), // Tập Sự: chỉ từ đêm 2. tiên tri, bảo vệ, phù thủy, thợ săn, khám phá, phù phép, TT bí ẩn, pháp sư sói, hào quang, tinh thần học, phù thủy già, nữ thợ săn
                     'cupid', 'doppelganger', 'snow_wolf', 'dire_wolf', 'friendly_vampire',
                     'priest', 'cult_leader', 'zombie', 'pi', 'insomniac', 'blob',
-                    'beholder'   // Kẻ Si Tình: Đêm 1 dậy để Quản trò chỉ cho biết Tiên Tri là ai
+                    'beholder',  // Kẻ Si Tình: Đêm 1 dậy để Quản trò chỉ cho biết Tiên Tri là ai
+                    'hoodlum', 'virginia'   // Du Côn chọn 2 mục tiêu, Mẹ Trẻ chọn Người Phụ Thuộc (Đêm 1)
                     // Con Ma: chỉ dậy CUỐI đêm (ghost_n1_action). Frankenstein: chỉ từ đêm 2.
                     // Nanh Sói / Pháp Sư Sói / Sói Chiêm Bao: gộp vào bước "Dặn dò phe Sói".
                 ]);
@@ -9074,7 +9114,7 @@
         };
         gmChatSend = function () {
             let inp = document.getElementById('gc-in'), text = inp.value.trim(); if (!text) return;
-            let v = document.getElementById('gc-ch').value || 'public', night = /^view-night/.test(state.currentView);
+            let v = document.getElementById('gc-ch').value || 'public', night = state.currentView === 'view-night' || state.currentView === 'view-night-transition';
             if (v === 'public' && night && !confirm('Đang là BAN ĐÊM. Gửi tin này cho CẢ LÀNG?\n\n"' + text + '"')) return;
             let msg = v.startsWith('dm:') ? { t: 'chat', ch: 'dm', to: v.slice(3), text } : { t: 'chat', ch: v, text };
             if (!gmSend(msg)) { onlineToast('📶 Mất kết nối server, thử lại sau'); return; }
@@ -9336,6 +9376,2926 @@
                 el.innerHTML = el.innerHTML.replace(/💌/g, '✉️') + ((n.muted || []).length ? ` · 🤐 Bị cấm nói: ${n.muted.map(escapeHtml).join(', ')}` : '');
             };
         })();
+
+    
+        // =====================================================================
+        //  CHƠI ONLINE — Giai đoạn 3d: người chơi tự chọn mục tiêu, kết quả soi tự gửi, bầy Sói thống nhất,
+        //  chat quản trò luôn mở, biểu quyết đề cử lên giàn
+        // =====================================================================
+        // ---------- Khung chat quản trò luôn mở (bỏ nút tròn) ----------
+        (function () {
+            const _btn = renderGmChatBtn;
+            renderGmChatBtn = function () {
+                _btn.apply(this, arguments);
+                let on = onlineActive() && !!state.online.locked, d = document.getElementById('gm-chat');
+                document.body.classList.toggle('gm-docked', on);
+                if (d) { d.classList.toggle('open', on); if (on && !d._docked) { d._docked = true; window._gmUnread = 0; renderGmChat(); gmChatSuggestChannel(true); } if (!on) d._docked = false; }
+            };
+        })();
+        setInterval(() => { try { renderGmChatBtn(); } catch (e) {} }, 1000);
+        // ---------- Ô cần chọn của bước hiện tại -> gửi riêng cho người giữ vai ----------
+        function onlineStepFields() {
+            if (state.currentView !== 'view-night') return [];
+            let out = [];
+            seatFields().forEach((f, fi) => {
+                if (f.isName || f.locked || f.vamp) return;
+                let sels = f.type === 'single' ? [f.sel] : f.sels, s0 = sels[0]; if (!s0) return;
+                let nm = v => valToName(v) || v, cls = s0.className || '';
+                let st = ARROW_STYLE[f.theme] || ARROW_STYLE.link || ['#a5b4fc', ''];
+                out.push({ fi, label: f.label, n: f.type === 'single' ? 1 : f.n, optional: !!f.optional, color: st[0], dash: st[1] || '',
+                    allowed: [...s0.options].filter(o => o.value && !o.disabled).map(o => nm(o.value)),
+                    values: f.values.map(nm), heal: cls.includes('act-heal-sel'), poison: cls.includes('act-poison-sel'), bite: f.theme === 'bite' || f.theme === 'convert' });
+            });
+            return out;
+        }
+        let _fieldsSent = {}, _lastHolders = [], _resultSent = {};
+        function onlineSendFields() {
+            let n = window._gmPermNames || {}, key = seatStepKey();
+            let night = state.currentView === 'view-night';
+            let ch = (n.wolves || []).length ? 'wolves' : 'dm', holders = night ? (ch === 'wolves' ? n.wolves : (n.dm || [])) : [];
+            // người vừa hết lượt -> tắt ô chọn
+            _lastHolders.filter(h => !holders.includes(h)).forEach(h => { let id = onlineIdOf(h); if (id) gmSend({ t: 'to', to: id, keep: 'fields', data: { kind: 'fields', off: true } }); delete _fieldsSent[h]; });
+            _lastHolders = holders.slice();
+            if (!holders.length) return;
+            let st = state.nightSequence && state.nightSequence[state.currentStepIndex];
+            let fields = onlineStepFields(), roleName = st && st.role ? st.role.name : (st && st.type === 'group_action' ? 'Bầy Sói' : '');
+            holders.forEach(h => {
+                let id = onlineIdOf(h); if (!id) return;
+                let data = { kind: 'fields', key, ch, role: roleName, fields, holders };
+                let k = JSON.stringify(data); if (_fieldsSent[h] === k) return; _fieldsSent[h] = k;
+                gmSend({ t: 'to', to: id, keep: 'fields', data });
+            });
+            // kết quả soi -> gửi riêng (lá ❓ trên máy người soi)
+            if (ch === 'dm') {
+                let items = onlineReadResults();
+                if (items.length) holders.forEach(h => {
+                    let id = onlineIdOf(h), k = key + JSON.stringify(items); if (!id || _resultSent[h] === k) return; _resultSent[h] = k;
+                    gmSend({ t: 'to', to: id, keep: 'result', data: { kind: 'result', key, items } });
+                });
+            }
+        }
+        function onlineReadResults() {
+            let c = document.getElementById('night-action-container'); if (!c) return [];
+            let out = [];
+            c.querySelectorAll(COVER_SEL).forEach(box => {
+                if (box.classList.contains('hidden') || box.offsetParent === null && !box.closest('.res-covered')) return;
+                let txt = ''; box.childNodes.forEach(nd => { if (!(nd.classList && nd.classList.contains('res-cover'))) txt += ' ' + (nd.innerText || nd.textContent || ''); });
+                txt = txt.replace(/\s+/g, ' ').trim(); if (!txt) return;
+                let nmEl = box.querySelector('.soi-result-name'), title = nmEl ? nmEl.textContent.trim() : '';
+                let text = title ? txt.replace(title, '').trim() : txt;
+                // màu của dòng chữ to nhất trong ô kết quả
+                let best = null, bs = 0;
+                box.querySelectorAll('*').forEach(e => { if (e.closest('.res-cover') || !e.childNodes.length || ![...e.childNodes].some(x => x.nodeType === 3 && x.textContent.trim())) return; let fs = parseFloat(getComputedStyle(e).fontSize) || 0; if (fs > bs) { bs = fs; best = e; } });
+                out.push({ title, text, color: best ? getComputedStyle(best).color : '#e2e8f0' });
+            });
+            return out;
+        }
+        // ---------- Người chơi gửi lựa chọn -> tự điền vào màn hình quản trò ----------
+        function onlineApplyFieldValues(fi, names) {
+            let F = seatFields(), f = F[fi]; if (!f || f.isName || f.locked || f.vamp) return false;
+            let sels = f.type === 'single' ? [f.sel] : f.sels, changed = false;
+            sels.forEach((sel, k) => {
+                let nm = (names || [])[k], opt = nm ? [...sel.options].find(o => o.value && !o.disabled && (valToName(o.value) || o.value) === nm) : null;
+                let v = opt ? opt.value : ''; if (sel.value !== v) { sel.value = v; sel.dispatchEvent(new Event('change', { bubbles: true })); changed = true; }
+            });
+            return changed;
+        }
+        function onlineOnPick(pid, d) {
+            let name = onlineNameOf(pid); if (!name || state.currentView !== 'view-night' || d.key !== seatStepKey()) return;
+            let n = window._gmPermNames || {};
+            if ((n.wolves || []).includes(name)) {           // bầy Sói: ghi đề xuất, cả bầy thống nhất thì tự điền
+                let wp = state.online.wolfPicks && state.online.wolfPicks.key === d.key ? state.online.wolfPicks : (state.online.wolfPicks = { key: d.key, picks: {} });
+                let f0 = (d.fields || [])[0] || {}; wp.picks[name] = (f0.names || [])[0] || ''; wp.fi = f0.fi;
+                n.wolves.forEach(w => { let id = onlineIdOf(w); if (id) gmSend({ t: 'to', to: id, keep: 'wpicks', data: { kind: 'wpicks', key: d.key, picks: wp.picks } }); });
+                let vals = n.wolves.map(w => wp.picks[w] || ''), agree = vals.every(v => v && v === vals[0]);
+                if (agree && wp.fi != null) { onlineApplyFieldValues(wp.fi, [vals[0]]); onlineToast(`🐺 Cả bầy thống nhất cắn ${vals[0]}`); }
+                else onlineToast(`🐺 ${name} đề xuất cắn ${wp.picks[name] || '(bỏ chọn)'}`);
+                return;
+            }
+            if (!(n.dm || []).includes(name)) return;
+            (d.fields || []).forEach(x => onlineApplyFieldValues(x.fi, x.names));
+            try { buildSeatFieldBar(); renderVillageBoards(); } catch (e) {}
+            onlineToast(`✉️ ${name} đã chọn`);
+        }
+        // ---------- Biểu quyết đề cử lên giàn (cuối Thảo luận) ----------
+        function onlineDiscussOver() { let T = state.timers && state.timers.discuss; return !!(T && !T.running && T.m === 0 && T.s === 0); }
+        function onlineVoteOpen() { let v = state.online && state.online.dayVote; return !!(v && v.day === state.dayCount && v.open); }
+        function onlineOpenVote() { state.online.dayVote = { day: state.dayCount, open: true }; state.online.votes = { day: state.dayCount, map: {} }; onlineSave(); gmSend({ t: 'chat', ch: 'public', text: '🗳️ Mở biểu quyết: chạm vào một người trên vòng làng để đề cử lên giàn biện minh' }); renderVoteTally(); }
+        function onlineToDefense(name) {
+            if (!confirm(`Cho ${name} lên giàn biện minh?`)) return;
+            state.online.dayVote = { day: state.dayCount, open: false }; state.online.accused = { day: state.dayCount, name }; onlineSave();
+            gmSend({ t: 'chat', ch: 'public', text: `⚖️ ${name} được đưa lên giàn biện minh` });
+            goToDefense();
+        }
+        (function () {
+            const _perm = onlineComputePerm;
+            onlineComputePerm = function () {
+                let r = _perm.apply(this, arguments);
+                if (state.currentView === 'view-day-discuss' && (onlineDiscussOver() || onlineVoteOpen())) {   // hết giờ / đang biểu quyết -> khoá chat Làng
+                    r.names.public = []; r.ids.public = [];
+                    r.label = onlineVoteOpen() ? `🗳️ Ngày ${state.dayCount} — Biểu quyết` : `⏳ Ngày ${state.dayCount} — Hết giờ thảo luận`;
+                }
+                return r;
+            };
+            const _status = statusNow;
+            statusNow = function () {
+                let v = state.currentView, muted = mutedNamesToday();
+                let voters = (state.players || []).filter(p => p.isAlive && !muted.includes(p.name)).map(p => p.name);
+                if (v === 'view-day-discuss' && onlineVoteOpen()) return { text: '🗳️ Biểu quyết — chạm vào một người trên vòng làng để đề cử lên giàn biện minh', phase: 'vote', voters };
+                if (v === 'view-day-discuss' && onlineDiscussOver()) return { text: '⏳ Hết giờ thảo luận — chờ quản trò mở biểu quyết', phase: 'day' };
+                if (v === 'view-day-defense') { let a = state.online.accused; return { text: a && a.day === state.dayCount ? `🗣️ ${a.name} đang biện minh — mọi người có thể chat` : '🗣️ Đang biện minh — mọi người có thể chat', phase: 'day' }; }
+                if (v === 'view-day-execute') return { text: '⚖️ Quản trò đang quyết định treo cổ, vui lòng chờ', phase: 'day' };
+                return _status.apply(this, arguments);
+            };
+            onlineOnVote = function (voterName, target) {
+                if (state.currentView !== 'view-day-discuss' || !onlineVoteOpen()) return;
+                let st = statusNow(); if (!st || !(st.voters || []).includes(voterName)) return;
+                let alive = (state.players || []).filter(p => p.isAlive).map(p => p.name), map = onlineVotes();
+                if (!target) delete map[voterName]; else if (alive.includes(target) && target !== voterName) map[voterName] = target; else return;
+                onlineSave(); renderVoteTally();
+                let id = onlineIdOf(voterName); if (id) gmSend({ t: 'to', to: id, data: { kind: 'vote_ack', target: map[voterName] || '' } });
+            };
+            renderVoteTally = function () {
+                document.querySelectorAll('#vote-tally').forEach(b => { if (!b.closest('#view-day-discuss')) b.remove(); });
+                let host = document.querySelector('#view-day-discuss .flex-1') || document.getElementById('view-day-discuss');
+                let box = document.getElementById('vote-tally');
+                let show = onlineActive() && state.online.locked && state.currentView === 'view-day-discuss';
+                if (!show) { if (box) box.remove(); return; }
+                if (!box && host) { box = document.createElement('div'); box.id = 'vote-tally'; host.insertBefore(box, host.firstChild); }
+                if (!box) return;
+                let html;
+                if (!onlineVoteOpen()) html = `<div class="vt-head">🗳️ Biểu quyết đề cử <span>${onlineDiscussOver() ? 'Đã hết giờ thảo luận' : 'Mở sau khi thảo luận xong'}</span></div>
+                    <button type="button" class="vt-open" onclick="onlineOpenVote()">🗳️ Mở biểu quyết đề cử</button>`;
+                else {
+                    let map = onlineVotes(), st = statusNow() || { voters: [] }, tally = {};
+                    Object.entries(map).forEach(([v, t]) => (tally[t] = tally[t] || []).push(v));
+                    let rows = Object.entries(tally).sort((a, b) => b[1].length - a[1].length), max = rows.length ? rows[0][1].length : 0;
+                    html = `<div class="vt-head">🗳️ Đề cử lên giàn <span>${Object.keys(map).length}/${st.voters.length} người đã bầu</span></div>` +
+                        (rows.length ? rows.map(([t, vs]) => `<div class="vt-row${vs.length === max ? ' top' : ''}">${avatarHtml(t, 26)}<b>${escapeHtml(t)}</b><span class="vt-bar"><i style="width:${Math.round(vs.length / Math.max(1, st.voters.length) * 100)}%"></i></span><span class="vt-n">${vs.length}</span>
+                            <button type="button" class="vt-up" onclick="onlineToDefense(this.dataset.n)" data-n="${escapeHtml(t)}">⬆️ Lên giàn</button><div class="vt-who">${vs.map(escapeHtml).join(', ')}</div></div>`).join('')
+                            : '<div class="vt-empty">Chưa có ai bỏ phiếu</div>');
+                }
+                if (box._h !== html) { box._h = html; box.innerHTML = html; }
+            };
+            const _gm = gmOnMsg;
+            gmOnMsg = function (m) {
+                _gm(m);
+                if (m.t === 'msg' && m.data && m.data.kind === 'pick') onlineOnPick(m.from, m.data);
+                else if (m.t === 'gm_ok') { _fieldsSent = {}; _resultSent = {}; }
+            };
+        })();
+        setInterval(() => { try { if (onlineActive() && state.online.locked && gmWs && gmWs.readyState === 1) onlineSendFields(); } catch (e) { console.error(e); } }, 700);
+
+    
+        // =====================================================================
+        //  CHƠI ONLINE — Giai đoạn 3e: kết thúc ván + lật vai, chữ Con Ma, người bị cấm nói, Hoàng Tử,
+        //  thông báo riêng phe Sói, Con Ma / Ma Cà Rồng tự bấm, Thị Trưởng ×2, quay lại bước trước
+        // =====================================================================
+        // ---------- Ô chọn đặc biệt: Con Ma (viết chữ) + Ma Cà Rồng (chọn hướng) + ghi chú riêng cho phe Sói ----------
+        (function () {
+            const _fields = onlineStepFields;
+            onlineStepFields = function () {
+                let out = _fields.apply(this, arguments);
+                if (state.currentView !== 'view-night') return out;
+                let c = document.getElementById('night-action-container');
+                let gi = c && c.querySelector('.act-ghost-letter');
+                if (gi) out.push({ fi: 'ghost', kind: 'letter', label: 'Viết 1 chữ cái gợi ý cho làng', n: 1, optional: false, color: '#c4b5fd', allowed: [], values: gi.value ? [gi.value] : [] });
+                let F = seatFields(), vi = F.findIndex(f => f.vamp);
+                if (vi >= 0 && vampAnchorNow()) {
+                    let f = F[vi], a = window._vampAnchor;
+                    out.push({ fi: vi, kind: 'vamp', label: f.label, n: f.n, optional: false, color: '#fb7185', allowed: [], anchor: a,
+                        left: seatRun(a, 1, f.n), right: seatRun(a, -1, f.n), dir: window._vampDir || 0, values: f.values.map(v => valToName(v) || v) });
+                }
+                return out;
+            };
+            // ghi chú chỉ phe Sói được biết
+            const _send = onlineSendFields;
+            onlineSendFields = function () {
+                let n = window._gmPermNames || {};
+                if (state.currentView === 'view-night' && (n.wolves || []).length) {
+                    let notes = [];
+                    if (state.history && state.history.cubDoubleBiteActive) notes.push('🐺 Sói Con đã chết — đêm nay bầy được cắn 2 người');
+                    if (seatFields().some(f => f.theme === 'convert')) notes.push('🐺 Sói Đầu Đàn: mục tiêu đêm nay sẽ bị BIẾN THÀNH SÓI thay vì chết');
+                    window._wolfNotes = notes;
+                } else window._wolfNotes = [];
+                return _send.apply(this, arguments);
+            };
+        })();
+        // gắn ghi chú phe Sói vào gói ô chọn gửi cho Sói
+        (function () {
+            const _gs = gmSend;
+            gmSend = function (o) {
+                if (o && o.t === 'to' && o.data && o.data.kind === 'fields' && o.data.ch === 'wolves' && !o.data.off) o.data.notes = window._wolfNotes || [];
+                return _gs.apply(this, arguments);
+            };
+        })();
+        // ---------- Áp lựa chọn: Con Ma, Ma Cà Rồng, bầy Sói nhiều mục tiêu ----------
+        onlineOnPick = function (pid, d) {
+            let name = onlineNameOf(pid); if (!name || state.currentView !== 'view-night' || d.key !== seatStepKey()) return;
+            let n = window._gmPermNames || {};
+            if ((n.wolves || []).includes(name)) {
+                let wp = state.online.wolfPicks && state.online.wolfPicks.key === d.key ? state.online.wolfPicks : (state.online.wolfPicks = { key: d.key, picks: {} });
+                let mine = {}; (d.fields || []).forEach(x => mine[x.fi] = (x.names || [])[0] || ''); wp.picks[name] = mine;
+                n.wolves.forEach(w => { let id = onlineIdOf(w); if (id) gmSend({ t: 'to', to: id, keep: 'wpicks', data: { kind: 'wpicks', key: d.key, picks: wp.picks } }); });
+                let agreed = [];
+                (d.fields || []).forEach(x => {
+                    let vals = n.wolves.map(w => (wp.picks[w] || {})[x.fi] || '');
+                    if (vals.every(v => v && v === vals[0])) { onlineApplyFieldValues(x.fi, [vals[0]]); agreed.push(vals[0]); }
+                });
+                onlineToast(agreed.length ? `🐺 Cả bầy thống nhất: ${agreed.join(', ')}` : `🐺 ${name} đề xuất: ${Object.values(mine).filter(Boolean).join(', ') || '(bỏ chọn)'}`);
+                try { buildSeatFieldBar(); renderVillageBoards(); } catch (e) {}
+                return;
+            }
+            if (!(n.dm || []).includes(name)) return;
+            (d.fields || []).forEach(x => {
+                if (x.fi === 'ghost') {
+                    let gi = document.querySelector('#night-action-container .act-ghost-letter');
+                    if (gi) { gi.value = String(x.letter || '').toUpperCase().slice(0, 1); gi.dispatchEvent(new Event('input', { bubbles: true })); }
+                } else if (x.dir) { vampAnchorNow(); vampApply(x.dir === 1 ? 1 : -1); }
+                else onlineApplyFieldValues(x.fi, x.names);
+            });
+            try { buildSeatFieldBar(); renderVillageBoards(); } catch (e) {}
+            onlineToast(`✉️ ${name} đã chọn`);
+        };
+        // ---------- Thông báo công khai: hết ván, chữ Con Ma, người bị cấm nói, Hoàng Tử ----------
+        let _endKey = '', _ghostKey = '', _mutedKey = '';
+        function onlinePublicNews() {
+            if (!onlineActive() || !state.online.locked || !gmWs || gmWs.readyState !== 1 || !(state.online.deal && state.online.deal.started)) return;
+            let a = state.online.ann || (state.online.ann = { dead: [], day: 0 });
+            // Hết ván: kết quả + lật vai của mọi người
+            if (state.currentView === 'view-end' && state.gameResult) {
+                let roles = (state.players || []).map(p => { let r = ROLES_DB.find(x => x.id === p.roleId) || {}; return { n: p.name, r: r.name || p.roleId, f: r.faction || 'villager', a: p.isAlive ? 1 : 0 }; });
+                let k = JSON.stringify([state.gameResult, roles]);
+                if (k !== _endKey) {
+                    _endKey = k; gmSend({ t: 'all', keep: 'end', data: { kind: 'end', result: state.gameResult, roles } });
+                    if (a.endSaid !== state.gameResult) { a.endSaid = state.gameResult; onlineSave(); gmSend({ t: 'chat', ch: 'public', text: `🏆 ${state.gameResult} — ván đã kết thúc, vai của mọi người đã được lật` }); }
+                }
+            } else if (_endKey) { _endKey = ''; a.endSaid = ''; onlineSave(); gmSend({ t: 'all', keep: 'end', data: { kind: 'end', off: true } }); }
+            // Chữ Con Ma: chỉ công bố chữ của những đêm đã qua
+            let isNight = state.currentView === 'view-night' || state.currentView === 'view-night-transition';
+            let gl = (state.ghostLetters || []).map((x, i) => ({ x, i })).filter(o => o.x && !(isNight && o.i === (state.dayCount || 1) - 1)).map(o => o.x);
+            let gk = gl.join('');
+            if (gk !== _ghostKey) {
+                let more = gl.length > (a.ghostN || 0); _ghostKey = gk;
+                gmSend({ t: 'all', keep: 'ghost', data: { kind: 'ghost', letters: gl } });
+                if (more) { a.ghostN = gl.length; onlineSave(); gmSend({ t: 'chat', ch: 'public', text: `👻 Con Ma đã viết: ${gl.join(' ')}` }); }
+            }
+            // Người bị cấm nói hôm nay (công bố khi trời sáng / thảo luận)
+            if (/^view-day/.test(state.currentView)) {
+                let gp = state.players || [], ban = (typeof getBanishedAliveNames === 'function' ? getBanishedAliveNames() : []), sil = (typeof getSilencedAliveNames === 'function' ? getSilencedAliveNames() : []);
+                let br = ((state.history && state.history.brainlessIds) || []).map(id => gp.find(p => p.id === id)).filter(p => p && p.isAlive).map(p => p.name);
+                let list = [...ban.map(n => ({ n, why: 'bị cấm túc' })), ...sil.map(n => ({ n, why: 'bị phù phép' })), ...br.map(n => ({ n, why: 'mất não' }))];
+                let mk = state.dayCount + JSON.stringify(list);
+                if (mk !== _mutedKey) {
+                    _mutedKey = mk; gmSend({ t: 'all', keep: 'muted', data: { kind: 'muted', list } });
+                    if (list.length && a.mutedSaid !== mk) { a.mutedSaid = mk; onlineSave();
+                        let parts = [ban.length ? `${ban.join(', ')} bị cấm túc (không được nói, không biểu quyết, không thể bị treo cổ)` : '', sil.length ? `${sil.join(', ')} bị phù phép (không được nói)` : '', br.length ? `${br.join(', ')} mất não (không được nói, không biểu quyết)` : ''].filter(Boolean);
+                        gmSend({ t: 'chat', ch: 'public', text: `📢 Hôm nay: ${parts.join(' · ')}` }); }
+                }
+            } else if (_mutedKey && !/^view-day/.test(state.currentView)) { _mutedKey = ''; gmSend({ t: 'all', keep: 'muted', data: { kind: 'muted', list: [] } }); }
+            // Hoàng Tử lật bài
+            (state.players || []).filter(p => p.roleId === 'prince' && p.princeRevealed).forEach(p => {
+                a.prince = a.prince || []; if (a.prince.includes(p.name)) return;
+                a.prince.push(p.name); onlineSave();
+                gmSend({ t: 'chat', ch: 'public', text: `👑 ${p.name} lật bài: là HOÀNG TỬ — không bị treo cổ!` });
+                gmSend({ t: 'all', keep: 'prince', data: { kind: 'prince', names: a.prince } });
+            });
+        }
+        setInterval(() => { try { onlinePublicNews(); } catch (e) { console.error(e); } }, 700);
+        // ---------- Thị Trưởng: phiếu ×2 (chỉ quản trò thấy) ----------
+        (function () {
+            const _vt = renderVoteTally;
+            renderVoteTally = function () {
+                _vt.apply(this, arguments);
+                let box = document.getElementById('vote-tally'); if (!box || !onlineVoteOpen()) return;
+                let mayors = (state.players || []).filter(p => p.isAlive && p.roleId === 'mayor').map(p => p.name);
+                if (!mayors.length) return;
+                let map = onlineVotes(), w = v => mayors.includes(v) ? 2 : 1, tally = {};
+                Object.entries(map).forEach(([v, t]) => tally[t] = (tally[t] || 0) + w(v));
+                let rows = [...box.querySelectorAll('.vt-row')], total = Math.max(1, ((statusNow() || {}).voters || []).reduce((s, v) => s + w(v), 0));
+                rows.forEach(r => { let nm = (r.querySelector('b') || {}).textContent; if (!(nm in tally)) return;
+                    r.querySelector('.vt-n').textContent = tally[nm]; r.querySelector('.vt-bar i').style.width = Math.round(tally[nm] / total * 100) + '%';
+                    let who = r.querySelector('.vt-who'); if (who) who.innerHTML = who.innerHTML.split(', ').map(x => mayors.includes(x) ? `${x} <b class="vt-mayor">×2 Thị Trưởng</b>` : x).join(', '); });
+                rows.sort((x, y) => (+y.querySelector('.vt-n').textContent) - (+x.querySelector('.vt-n').textContent)).forEach(r => box.insertBefore(r, box.querySelector('.vt-empty') || null));
+                let top = rows.length ? +rows[0].querySelector('.vt-n').textContent : 0; rows.forEach(r => r.classList.toggle('top', +r.querySelector('.vt-n').textContent === top));
+                box._h = '';   // lần vẽ sau tính lại
+            };
+        })();
+        // ---------- Quay lại bước trước (←): giữ nguyên dữ liệu phòng, đồng bộ lại điện thoại người chơi ----------
+        (function () {
+            const _pop = popHistory;
+            popHistory = function () {
+                let keep = state.online ? JSON.parse(JSON.stringify(state.online)) : null;
+                _pop.apply(this, arguments);
+                if (keep) { state.online = keep; onlineSave(); }
+                onlineAfterUndo();
+            };
+        })();
+        function onlineAfterUndo() {
+            if (!onlineActive()) return;
+            let a = state.online.ann;
+            if (a) {
+                let gp = state.players || [], back = (a.dead || []).filter(n => { let p = gp.find(x => x.name === n); return !p || p.isAlive; });
+                if (back.length) { a.dead = a.dead.filter(n => !back.includes(n)); gmSend({ t: 'chat', ch: 'public', text: `↩️ Quản trò quay lại bước trước — ${back.join(', ')} vẫn còn sống` }); }
+                if ((state.currentView === 'view-night' || state.currentView === 'view-night-transition') && a.day >= (state.dayCount || 1)) a.day = (state.dayCount || 1) - 1;
+                onlineSave();
+            }
+            state.online.wolfPicks = null;
+            // gửi lại toàn bộ trạng thái cho khớp với màn hình quản trò
+            _statusKey = _turnKey = _deckKey = _villageKey = _endKey = _ghostKey = _mutedKey = _packKey = ''; _timerSent = null; _fieldsSent = {}; _resultSent = {}; _lastPermKey = '';
+            setTimeout(() => { try { onlineSyncPerm(true); onlineBroadcastGame(); onlineSendFields(); onlinePublicNews(); } catch (e) {} }, 150);
+        }
+
+    
+        // ---- qrcode-generator 1.4.4 — (c) Kazuhiko Arase — MIT License ----
+//---------------------------------------------------------------------
+//
+// QR Code Generator for JavaScript
+//
+// Copyright (c) 2009 Kazuhiko Arase
+//
+// URL: http://www.d-project.com/
+//
+// Licensed under the MIT license:
+//  http://www.opensource.org/licenses/mit-license.php
+//
+// The word 'QR Code' is registered trademark of
+// DENSO WAVE INCORPORATED
+//  http://www.denso-wave.com/qrcode/faqpatent-e.html
+//
+//---------------------------------------------------------------------
+
+var qrcode = function() {
+
+  //---------------------------------------------------------------------
+  // qrcode
+  //---------------------------------------------------------------------
+
+  /**
+   * qrcode
+   * @param typeNumber 1 to 40
+   * @param errorCorrectionLevel 'L','M','Q','H'
+   */
+  var qrcode = function(typeNumber, errorCorrectionLevel) {
+
+    var PAD0 = 0xEC;
+    var PAD1 = 0x11;
+
+    var _typeNumber = typeNumber;
+    var _errorCorrectionLevel = QRErrorCorrectionLevel[errorCorrectionLevel];
+    var _modules = null;
+    var _moduleCount = 0;
+    var _dataCache = null;
+    var _dataList = [];
+
+    var _this = {};
+
+    var makeImpl = function(test, maskPattern) {
+
+      _moduleCount = _typeNumber * 4 + 17;
+      _modules = function(moduleCount) {
+        var modules = new Array(moduleCount);
+        for (var row = 0; row < moduleCount; row += 1) {
+          modules[row] = new Array(moduleCount);
+          for (var col = 0; col < moduleCount; col += 1) {
+            modules[row][col] = null;
+          }
+        }
+        return modules;
+      }(_moduleCount);
+
+      setupPositionProbePattern(0, 0);
+      setupPositionProbePattern(_moduleCount - 7, 0);
+      setupPositionProbePattern(0, _moduleCount - 7);
+      setupPositionAdjustPattern();
+      setupTimingPattern();
+      setupTypeInfo(test, maskPattern);
+
+      if (_typeNumber >= 7) {
+        setupTypeNumber(test);
+      }
+
+      if (_dataCache == null) {
+        _dataCache = createData(_typeNumber, _errorCorrectionLevel, _dataList);
+      }
+
+      mapData(_dataCache, maskPattern);
+    };
+
+    var setupPositionProbePattern = function(row, col) {
+
+      for (var r = -1; r <= 7; r += 1) {
+
+        if (row + r <= -1 || _moduleCount <= row + r) continue;
+
+        for (var c = -1; c <= 7; c += 1) {
+
+          if (col + c <= -1 || _moduleCount <= col + c) continue;
+
+          if ( (0 <= r && r <= 6 && (c == 0 || c == 6) )
+              || (0 <= c && c <= 6 && (r == 0 || r == 6) )
+              || (2 <= r && r <= 4 && 2 <= c && c <= 4) ) {
+            _modules[row + r][col + c] = true;
+          } else {
+            _modules[row + r][col + c] = false;
+          }
+        }
+      }
+    };
+
+    var getBestMaskPattern = function() {
+
+      var minLostPoint = 0;
+      var pattern = 0;
+
+      for (var i = 0; i < 8; i += 1) {
+
+        makeImpl(true, i);
+
+        var lostPoint = QRUtil.getLostPoint(_this);
+
+        if (i == 0 || minLostPoint > lostPoint) {
+          minLostPoint = lostPoint;
+          pattern = i;
+        }
+      }
+
+      return pattern;
+    };
+
+    var setupTimingPattern = function() {
+
+      for (var r = 8; r < _moduleCount - 8; r += 1) {
+        if (_modules[r][6] != null) {
+          continue;
+        }
+        _modules[r][6] = (r % 2 == 0);
+      }
+
+      for (var c = 8; c < _moduleCount - 8; c += 1) {
+        if (_modules[6][c] != null) {
+          continue;
+        }
+        _modules[6][c] = (c % 2 == 0);
+      }
+    };
+
+    var setupPositionAdjustPattern = function() {
+
+      var pos = QRUtil.getPatternPosition(_typeNumber);
+
+      for (var i = 0; i < pos.length; i += 1) {
+
+        for (var j = 0; j < pos.length; j += 1) {
+
+          var row = pos[i];
+          var col = pos[j];
+
+          if (_modules[row][col] != null) {
+            continue;
+          }
+
+          for (var r = -2; r <= 2; r += 1) {
+
+            for (var c = -2; c <= 2; c += 1) {
+
+              if (r == -2 || r == 2 || c == -2 || c == 2
+                  || (r == 0 && c == 0) ) {
+                _modules[row + r][col + c] = true;
+              } else {
+                _modules[row + r][col + c] = false;
+              }
+            }
+          }
+        }
+      }
+    };
+
+    var setupTypeNumber = function(test) {
+
+      var bits = QRUtil.getBCHTypeNumber(_typeNumber);
+
+      for (var i = 0; i < 18; i += 1) {
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+        _modules[Math.floor(i / 3)][i % 3 + _moduleCount - 8 - 3] = mod;
+      }
+
+      for (var i = 0; i < 18; i += 1) {
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+        _modules[i % 3 + _moduleCount - 8 - 3][Math.floor(i / 3)] = mod;
+      }
+    };
+
+    var setupTypeInfo = function(test, maskPattern) {
+
+      var data = (_errorCorrectionLevel << 3) | maskPattern;
+      var bits = QRUtil.getBCHTypeInfo(data);
+
+      // vertical
+      for (var i = 0; i < 15; i += 1) {
+
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+
+        if (i < 6) {
+          _modules[i][8] = mod;
+        } else if (i < 8) {
+          _modules[i + 1][8] = mod;
+        } else {
+          _modules[_moduleCount - 15 + i][8] = mod;
+        }
+      }
+
+      // horizontal
+      for (var i = 0; i < 15; i += 1) {
+
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+
+        if (i < 8) {
+          _modules[8][_moduleCount - i - 1] = mod;
+        } else if (i < 9) {
+          _modules[8][15 - i - 1 + 1] = mod;
+        } else {
+          _modules[8][15 - i - 1] = mod;
+        }
+      }
+
+      // fixed module
+      _modules[_moduleCount - 8][8] = (!test);
+    };
+
+    var mapData = function(data, maskPattern) {
+
+      var inc = -1;
+      var row = _moduleCount - 1;
+      var bitIndex = 7;
+      var byteIndex = 0;
+      var maskFunc = QRUtil.getMaskFunction(maskPattern);
+
+      for (var col = _moduleCount - 1; col > 0; col -= 2) {
+
+        if (col == 6) col -= 1;
+
+        while (true) {
+
+          for (var c = 0; c < 2; c += 1) {
+
+            if (_modules[row][col - c] == null) {
+
+              var dark = false;
+
+              if (byteIndex < data.length) {
+                dark = ( ( (data[byteIndex] >>> bitIndex) & 1) == 1);
+              }
+
+              var mask = maskFunc(row, col - c);
+
+              if (mask) {
+                dark = !dark;
+              }
+
+              _modules[row][col - c] = dark;
+              bitIndex -= 1;
+
+              if (bitIndex == -1) {
+                byteIndex += 1;
+                bitIndex = 7;
+              }
+            }
+          }
+
+          row += inc;
+
+          if (row < 0 || _moduleCount <= row) {
+            row -= inc;
+            inc = -inc;
+            break;
+          }
+        }
+      }
+    };
+
+    var createBytes = function(buffer, rsBlocks) {
+
+      var offset = 0;
+
+      var maxDcCount = 0;
+      var maxEcCount = 0;
+
+      var dcdata = new Array(rsBlocks.length);
+      var ecdata = new Array(rsBlocks.length);
+
+      for (var r = 0; r < rsBlocks.length; r += 1) {
+
+        var dcCount = rsBlocks[r].dataCount;
+        var ecCount = rsBlocks[r].totalCount - dcCount;
+
+        maxDcCount = Math.max(maxDcCount, dcCount);
+        maxEcCount = Math.max(maxEcCount, ecCount);
+
+        dcdata[r] = new Array(dcCount);
+
+        for (var i = 0; i < dcdata[r].length; i += 1) {
+          dcdata[r][i] = 0xff & buffer.getBuffer()[i + offset];
+        }
+        offset += dcCount;
+
+        var rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount);
+        var rawPoly = qrPolynomial(dcdata[r], rsPoly.getLength() - 1);
+
+        var modPoly = rawPoly.mod(rsPoly);
+        ecdata[r] = new Array(rsPoly.getLength() - 1);
+        for (var i = 0; i < ecdata[r].length; i += 1) {
+          var modIndex = i + modPoly.getLength() - ecdata[r].length;
+          ecdata[r][i] = (modIndex >= 0)? modPoly.getAt(modIndex) : 0;
+        }
+      }
+
+      var totalCodeCount = 0;
+      for (var i = 0; i < rsBlocks.length; i += 1) {
+        totalCodeCount += rsBlocks[i].totalCount;
+      }
+
+      var data = new Array(totalCodeCount);
+      var index = 0;
+
+      for (var i = 0; i < maxDcCount; i += 1) {
+        for (var r = 0; r < rsBlocks.length; r += 1) {
+          if (i < dcdata[r].length) {
+            data[index] = dcdata[r][i];
+            index += 1;
+          }
+        }
+      }
+
+      for (var i = 0; i < maxEcCount; i += 1) {
+        for (var r = 0; r < rsBlocks.length; r += 1) {
+          if (i < ecdata[r].length) {
+            data[index] = ecdata[r][i];
+            index += 1;
+          }
+        }
+      }
+
+      return data;
+    };
+
+    var createData = function(typeNumber, errorCorrectionLevel, dataList) {
+
+      var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectionLevel);
+
+      var buffer = qrBitBuffer();
+
+      for (var i = 0; i < dataList.length; i += 1) {
+        var data = dataList[i];
+        buffer.put(data.getMode(), 4);
+        buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber) );
+        data.write(buffer);
+      }
+
+      // calc num max data.
+      var totalDataCount = 0;
+      for (var i = 0; i < rsBlocks.length; i += 1) {
+        totalDataCount += rsBlocks[i].dataCount;
+      }
+
+      if (buffer.getLengthInBits() > totalDataCount * 8) {
+        throw 'code length overflow. ('
+          + buffer.getLengthInBits()
+          + '>'
+          + totalDataCount * 8
+          + ')';
+      }
+
+      // end code
+      if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) {
+        buffer.put(0, 4);
+      }
+
+      // padding
+      while (buffer.getLengthInBits() % 8 != 0) {
+        buffer.putBit(false);
+      }
+
+      // padding
+      while (true) {
+
+        if (buffer.getLengthInBits() >= totalDataCount * 8) {
+          break;
+        }
+        buffer.put(PAD0, 8);
+
+        if (buffer.getLengthInBits() >= totalDataCount * 8) {
+          break;
+        }
+        buffer.put(PAD1, 8);
+      }
+
+      return createBytes(buffer, rsBlocks);
+    };
+
+    _this.addData = function(data, mode) {
+
+      mode = mode || 'Byte';
+
+      var newData = null;
+
+      switch(mode) {
+      case 'Numeric' :
+        newData = qrNumber(data);
+        break;
+      case 'Alphanumeric' :
+        newData = qrAlphaNum(data);
+        break;
+      case 'Byte' :
+        newData = qr8BitByte(data);
+        break;
+      case 'Kanji' :
+        newData = qrKanji(data);
+        break;
+      default :
+        throw 'mode:' + mode;
+      }
+
+      _dataList.push(newData);
+      _dataCache = null;
+    };
+
+    _this.isDark = function(row, col) {
+      if (row < 0 || _moduleCount <= row || col < 0 || _moduleCount <= col) {
+        throw row + ',' + col;
+      }
+      return _modules[row][col];
+    };
+
+    _this.getModuleCount = function() {
+      return _moduleCount;
+    };
+
+    _this.make = function() {
+      if (_typeNumber < 1) {
+        var typeNumber = 1;
+
+        for (; typeNumber < 40; typeNumber++) {
+          var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, _errorCorrectionLevel);
+          var buffer = qrBitBuffer();
+
+          for (var i = 0; i < _dataList.length; i++) {
+            var data = _dataList[i];
+            buffer.put(data.getMode(), 4);
+            buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber) );
+            data.write(buffer);
+          }
+
+          var totalDataCount = 0;
+          for (var i = 0; i < rsBlocks.length; i++) {
+            totalDataCount += rsBlocks[i].dataCount;
+          }
+
+          if (buffer.getLengthInBits() <= totalDataCount * 8) {
+            break;
+          }
+        }
+
+        _typeNumber = typeNumber;
+      }
+
+      makeImpl(false, getBestMaskPattern() );
+    };
+
+    _this.createTableTag = function(cellSize, margin) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var qrHtml = '';
+
+      qrHtml += '<table style="';
+      qrHtml += ' border-width: 0px; border-style: none;';
+      qrHtml += ' border-collapse: collapse;';
+      qrHtml += ' padding: 0px; margin: ' + margin + 'px;';
+      qrHtml += '">';
+      qrHtml += '<tbody>';
+
+      for (var r = 0; r < _this.getModuleCount(); r += 1) {
+
+        qrHtml += '<tr>';
+
+        for (var c = 0; c < _this.getModuleCount(); c += 1) {
+          qrHtml += '<td style="';
+          qrHtml += ' border-width: 0px; border-style: none;';
+          qrHtml += ' border-collapse: collapse;';
+          qrHtml += ' padding: 0px; margin: 0px;';
+          qrHtml += ' width: ' + cellSize + 'px;';
+          qrHtml += ' height: ' + cellSize + 'px;';
+          qrHtml += ' background-color: ';
+          qrHtml += _this.isDark(r, c)? '#000000' : '#ffffff';
+          qrHtml += ';';
+          qrHtml += '"/>';
+        }
+
+        qrHtml += '</tr>';
+      }
+
+      qrHtml += '</tbody>';
+      qrHtml += '</table>';
+
+      return qrHtml;
+    };
+
+    _this.createSvgTag = function(cellSize, margin, alt, title) {
+
+      var opts = {};
+      if (typeof arguments[0] == 'object') {
+        // Called by options.
+        opts = arguments[0];
+        // overwrite cellSize and margin.
+        cellSize = opts.cellSize;
+        margin = opts.margin;
+        alt = opts.alt;
+        title = opts.title;
+      }
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      // Compose alt property surrogate
+      alt = (typeof alt === 'string') ? {text: alt} : alt || {};
+      alt.text = alt.text || null;
+      alt.id = (alt.text) ? alt.id || 'qrcode-description' : null;
+
+      // Compose title property surrogate
+      title = (typeof title === 'string') ? {text: title} : title || {};
+      title.text = title.text || null;
+      title.id = (title.text) ? title.id || 'qrcode-title' : null;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var c, mc, r, mr, qrSvg='', rect;
+
+      rect = 'l' + cellSize + ',0 0,' + cellSize +
+        ' -' + cellSize + ',0 0,-' + cellSize + 'z ';
+
+      qrSvg += '<svg version="1.1" xmlns="http://www.w3.org/2000/svg"';
+      qrSvg += !opts.scalable ? ' width="' + size + 'px" height="' + size + 'px"' : '';
+      qrSvg += ' viewBox="0 0 ' + size + ' ' + size + '" ';
+      qrSvg += ' preserveAspectRatio="xMinYMin meet"';
+      qrSvg += (title.text || alt.text) ? ' role="img" aria-labelledby="' +
+          escapeXml([title.id, alt.id].join(' ').trim() ) + '"' : '';
+      qrSvg += '>';
+      qrSvg += (title.text) ? '<title id="' + escapeXml(title.id) + '">' +
+          escapeXml(title.text) + '</title>' : '';
+      qrSvg += (alt.text) ? '<description id="' + escapeXml(alt.id) + '">' +
+          escapeXml(alt.text) + '</description>' : '';
+      qrSvg += '<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>';
+      qrSvg += '<path d="';
+
+      for (r = 0; r < _this.getModuleCount(); r += 1) {
+        mr = r * cellSize + margin;
+        for (c = 0; c < _this.getModuleCount(); c += 1) {
+          if (_this.isDark(r, c) ) {
+            mc = c*cellSize+margin;
+            qrSvg += 'M' + mc + ',' + mr + rect;
+          }
+        }
+      }
+
+      qrSvg += '" stroke="transparent" fill="black"/>';
+      qrSvg += '</svg>';
+
+      return qrSvg;
+    };
+
+    _this.createDataURL = function(cellSize, margin) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      return createDataURL(size, size, function(x, y) {
+        if (min <= x && x < max && min <= y && y < max) {
+          var c = Math.floor( (x - min) / cellSize);
+          var r = Math.floor( (y - min) / cellSize);
+          return _this.isDark(r, c)? 0 : 1;
+        } else {
+          return 1;
+        }
+      } );
+    };
+
+    _this.createImgTag = function(cellSize, margin, alt) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+
+      var img = '';
+      img += '<img';
+      img += '\u0020src="';
+      img += _this.createDataURL(cellSize, margin);
+      img += '"';
+      img += '\u0020width="';
+      img += size;
+      img += '"';
+      img += '\u0020height="';
+      img += size;
+      img += '"';
+      if (alt) {
+        img += '\u0020alt="';
+        img += escapeXml(alt);
+        img += '"';
+      }
+      img += '/>';
+
+      return img;
+    };
+
+    var escapeXml = function(s) {
+      var escaped = '';
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charAt(i);
+        switch(c) {
+        case '<': escaped += '&lt;'; break;
+        case '>': escaped += '&gt;'; break;
+        case '&': escaped += '&amp;'; break;
+        case '"': escaped += '&quot;'; break;
+        default : escaped += c; break;
+        }
+      }
+      return escaped;
+    };
+
+    var _createHalfASCII = function(margin) {
+      var cellSize = 1;
+      margin = (typeof margin == 'undefined')? cellSize * 2 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      var y, x, r1, r2, p;
+
+      var blocks = {
+        '██': '█',
+        '█ ': '▀',
+        ' █': '▄',
+        '  ': ' '
+      };
+
+      var blocksLastLineNoMargin = {
+        '██': '▀',
+        '█ ': '▀',
+        ' █': ' ',
+        '  ': ' '
+      };
+
+      var ascii = '';
+      for (y = 0; y < size; y += 2) {
+        r1 = Math.floor((y - min) / cellSize);
+        r2 = Math.floor((y + 1 - min) / cellSize);
+        for (x = 0; x < size; x += 1) {
+          p = '█';
+
+          if (min <= x && x < max && min <= y && y < max && _this.isDark(r1, Math.floor((x - min) / cellSize))) {
+            p = ' ';
+          }
+
+          if (min <= x && x < max && min <= y+1 && y+1 < max && _this.isDark(r2, Math.floor((x - min) / cellSize))) {
+            p += ' ';
+          }
+          else {
+            p += '█';
+          }
+
+          // Output 2 characters per pixel, to create full square. 1 character per pixels gives only half width of square.
+          ascii += (margin < 1 && y+1 >= max) ? blocksLastLineNoMargin[p] : blocks[p];
+        }
+
+        ascii += '\n';
+      }
+
+      if (size % 2 && margin > 0) {
+        return ascii.substring(0, ascii.length - size - 1) + Array(size+1).join('▀');
+      }
+
+      return ascii.substring(0, ascii.length-1);
+    };
+
+    _this.createASCII = function(cellSize, margin) {
+      cellSize = cellSize || 1;
+
+      if (cellSize < 2) {
+        return _createHalfASCII(margin);
+      }
+
+      cellSize -= 1;
+      margin = (typeof margin == 'undefined')? cellSize * 2 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      var y, x, r, p;
+
+      var white = Array(cellSize+1).join('██');
+      var black = Array(cellSize+1).join('  ');
+
+      var ascii = '';
+      var line = '';
+      for (y = 0; y < size; y += 1) {
+        r = Math.floor( (y - min) / cellSize);
+        line = '';
+        for (x = 0; x < size; x += 1) {
+          p = 1;
+
+          if (min <= x && x < max && min <= y && y < max && _this.isDark(r, Math.floor((x - min) / cellSize))) {
+            p = 0;
+          }
+
+          // Output 2 characters per pixel, to create full square. 1 character per pixels gives only half width of square.
+          line += p ? white : black;
+        }
+
+        for (r = 0; r < cellSize; r += 1) {
+          ascii += line + '\n';
+        }
+      }
+
+      return ascii.substring(0, ascii.length-1);
+    };
+
+    _this.renderTo2dContext = function(context, cellSize) {
+      cellSize = cellSize || 2;
+      var length = _this.getModuleCount();
+      for (var row = 0; row < length; row++) {
+        for (var col = 0; col < length; col++) {
+          context.fillStyle = _this.isDark(row, col) ? 'black' : 'white';
+          context.fillRect(row * cellSize, col * cellSize, cellSize, cellSize);
+        }
+      }
+    }
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrcode.stringToBytes
+  //---------------------------------------------------------------------
+
+  qrcode.stringToBytesFuncs = {
+    'default' : function(s) {
+      var bytes = [];
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charCodeAt(i);
+        bytes.push(c & 0xff);
+      }
+      return bytes;
+    }
+  };
+
+  qrcode.stringToBytes = qrcode.stringToBytesFuncs['default'];
+
+  //---------------------------------------------------------------------
+  // qrcode.createStringToBytes
+  //---------------------------------------------------------------------
+
+  /**
+   * @param unicodeData base64 string of byte array.
+   * [16bit Unicode],[16bit Bytes], ...
+   * @param numChars
+   */
+  qrcode.createStringToBytes = function(unicodeData, numChars) {
+
+    // create conversion map.
+
+    var unicodeMap = function() {
+
+      var bin = base64DecodeInputStream(unicodeData);
+      var read = function() {
+        var b = bin.read();
+        if (b == -1) throw 'eof';
+        return b;
+      };
+
+      var count = 0;
+      var unicodeMap = {};
+      while (true) {
+        var b0 = bin.read();
+        if (b0 == -1) break;
+        var b1 = read();
+        var b2 = read();
+        var b3 = read();
+        var k = String.fromCharCode( (b0 << 8) | b1);
+        var v = (b2 << 8) | b3;
+        unicodeMap[k] = v;
+        count += 1;
+      }
+      if (count != numChars) {
+        throw count + ' != ' + numChars;
+      }
+
+      return unicodeMap;
+    }();
+
+    var unknownChar = '?'.charCodeAt(0);
+
+    return function(s) {
+      var bytes = [];
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charCodeAt(i);
+        if (c < 128) {
+          bytes.push(c);
+        } else {
+          var b = unicodeMap[s.charAt(i)];
+          if (typeof b == 'number') {
+            if ( (b & 0xff) == b) {
+              // 1byte
+              bytes.push(b);
+            } else {
+              // 2bytes
+              bytes.push(b >>> 8);
+              bytes.push(b & 0xff);
+            }
+          } else {
+            bytes.push(unknownChar);
+          }
+        }
+      }
+      return bytes;
+    };
+  };
+
+  //---------------------------------------------------------------------
+  // QRMode
+  //---------------------------------------------------------------------
+
+  var QRMode = {
+    MODE_NUMBER :    1 << 0,
+    MODE_ALPHA_NUM : 1 << 1,
+    MODE_8BIT_BYTE : 1 << 2,
+    MODE_KANJI :     1 << 3
+  };
+
+  //---------------------------------------------------------------------
+  // QRErrorCorrectionLevel
+  //---------------------------------------------------------------------
+
+  var QRErrorCorrectionLevel = {
+    L : 1,
+    M : 0,
+    Q : 3,
+    H : 2
+  };
+
+  //---------------------------------------------------------------------
+  // QRMaskPattern
+  //---------------------------------------------------------------------
+
+  var QRMaskPattern = {
+    PATTERN000 : 0,
+    PATTERN001 : 1,
+    PATTERN010 : 2,
+    PATTERN011 : 3,
+    PATTERN100 : 4,
+    PATTERN101 : 5,
+    PATTERN110 : 6,
+    PATTERN111 : 7
+  };
+
+  //---------------------------------------------------------------------
+  // QRUtil
+  //---------------------------------------------------------------------
+
+  var QRUtil = function() {
+
+    var PATTERN_POSITION_TABLE = [
+      [],
+      [6, 18],
+      [6, 22],
+      [6, 26],
+      [6, 30],
+      [6, 34],
+      [6, 22, 38],
+      [6, 24, 42],
+      [6, 26, 46],
+      [6, 28, 50],
+      [6, 30, 54],
+      [6, 32, 58],
+      [6, 34, 62],
+      [6, 26, 46, 66],
+      [6, 26, 48, 70],
+      [6, 26, 50, 74],
+      [6, 30, 54, 78],
+      [6, 30, 56, 82],
+      [6, 30, 58, 86],
+      [6, 34, 62, 90],
+      [6, 28, 50, 72, 94],
+      [6, 26, 50, 74, 98],
+      [6, 30, 54, 78, 102],
+      [6, 28, 54, 80, 106],
+      [6, 32, 58, 84, 110],
+      [6, 30, 58, 86, 114],
+      [6, 34, 62, 90, 118],
+      [6, 26, 50, 74, 98, 122],
+      [6, 30, 54, 78, 102, 126],
+      [6, 26, 52, 78, 104, 130],
+      [6, 30, 56, 82, 108, 134],
+      [6, 34, 60, 86, 112, 138],
+      [6, 30, 58, 86, 114, 142],
+      [6, 34, 62, 90, 118, 146],
+      [6, 30, 54, 78, 102, 126, 150],
+      [6, 24, 50, 76, 102, 128, 154],
+      [6, 28, 54, 80, 106, 132, 158],
+      [6, 32, 58, 84, 110, 136, 162],
+      [6, 26, 54, 82, 110, 138, 166],
+      [6, 30, 58, 86, 114, 142, 170]
+    ];
+    var G15 = (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0);
+    var G18 = (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0);
+    var G15_MASK = (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1);
+
+    var _this = {};
+
+    var getBCHDigit = function(data) {
+      var digit = 0;
+      while (data != 0) {
+        digit += 1;
+        data >>>= 1;
+      }
+      return digit;
+    };
+
+    _this.getBCHTypeInfo = function(data) {
+      var d = data << 10;
+      while (getBCHDigit(d) - getBCHDigit(G15) >= 0) {
+        d ^= (G15 << (getBCHDigit(d) - getBCHDigit(G15) ) );
+      }
+      return ( (data << 10) | d) ^ G15_MASK;
+    };
+
+    _this.getBCHTypeNumber = function(data) {
+      var d = data << 12;
+      while (getBCHDigit(d) - getBCHDigit(G18) >= 0) {
+        d ^= (G18 << (getBCHDigit(d) - getBCHDigit(G18) ) );
+      }
+      return (data << 12) | d;
+    };
+
+    _this.getPatternPosition = function(typeNumber) {
+      return PATTERN_POSITION_TABLE[typeNumber - 1];
+    };
+
+    _this.getMaskFunction = function(maskPattern) {
+
+      switch (maskPattern) {
+
+      case QRMaskPattern.PATTERN000 :
+        return function(i, j) { return (i + j) % 2 == 0; };
+      case QRMaskPattern.PATTERN001 :
+        return function(i, j) { return i % 2 == 0; };
+      case QRMaskPattern.PATTERN010 :
+        return function(i, j) { return j % 3 == 0; };
+      case QRMaskPattern.PATTERN011 :
+        return function(i, j) { return (i + j) % 3 == 0; };
+      case QRMaskPattern.PATTERN100 :
+        return function(i, j) { return (Math.floor(i / 2) + Math.floor(j / 3) ) % 2 == 0; };
+      case QRMaskPattern.PATTERN101 :
+        return function(i, j) { return (i * j) % 2 + (i * j) % 3 == 0; };
+      case QRMaskPattern.PATTERN110 :
+        return function(i, j) { return ( (i * j) % 2 + (i * j) % 3) % 2 == 0; };
+      case QRMaskPattern.PATTERN111 :
+        return function(i, j) { return ( (i * j) % 3 + (i + j) % 2) % 2 == 0; };
+
+      default :
+        throw 'bad maskPattern:' + maskPattern;
+      }
+    };
+
+    _this.getErrorCorrectPolynomial = function(errorCorrectLength) {
+      var a = qrPolynomial([1], 0);
+      for (var i = 0; i < errorCorrectLength; i += 1) {
+        a = a.multiply(qrPolynomial([1, QRMath.gexp(i)], 0) );
+      }
+      return a;
+    };
+
+    _this.getLengthInBits = function(mode, type) {
+
+      if (1 <= type && type < 10) {
+
+        // 1 - 9
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 10;
+        case QRMode.MODE_ALPHA_NUM : return 9;
+        case QRMode.MODE_8BIT_BYTE : return 8;
+        case QRMode.MODE_KANJI     : return 8;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else if (type < 27) {
+
+        // 10 - 26
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 12;
+        case QRMode.MODE_ALPHA_NUM : return 11;
+        case QRMode.MODE_8BIT_BYTE : return 16;
+        case QRMode.MODE_KANJI     : return 10;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else if (type < 41) {
+
+        // 27 - 40
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 14;
+        case QRMode.MODE_ALPHA_NUM : return 13;
+        case QRMode.MODE_8BIT_BYTE : return 16;
+        case QRMode.MODE_KANJI     : return 12;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else {
+        throw 'type:' + type;
+      }
+    };
+
+    _this.getLostPoint = function(qrcode) {
+
+      var moduleCount = qrcode.getModuleCount();
+
+      var lostPoint = 0;
+
+      // LEVEL1
+
+      for (var row = 0; row < moduleCount; row += 1) {
+        for (var col = 0; col < moduleCount; col += 1) {
+
+          var sameCount = 0;
+          var dark = qrcode.isDark(row, col);
+
+          for (var r = -1; r <= 1; r += 1) {
+
+            if (row + r < 0 || moduleCount <= row + r) {
+              continue;
+            }
+
+            for (var c = -1; c <= 1; c += 1) {
+
+              if (col + c < 0 || moduleCount <= col + c) {
+                continue;
+              }
+
+              if (r == 0 && c == 0) {
+                continue;
+              }
+
+              if (dark == qrcode.isDark(row + r, col + c) ) {
+                sameCount += 1;
+              }
+            }
+          }
+
+          if (sameCount > 5) {
+            lostPoint += (3 + sameCount - 5);
+          }
+        }
+      };
+
+      // LEVEL2
+
+      for (var row = 0; row < moduleCount - 1; row += 1) {
+        for (var col = 0; col < moduleCount - 1; col += 1) {
+          var count = 0;
+          if (qrcode.isDark(row, col) ) count += 1;
+          if (qrcode.isDark(row + 1, col) ) count += 1;
+          if (qrcode.isDark(row, col + 1) ) count += 1;
+          if (qrcode.isDark(row + 1, col + 1) ) count += 1;
+          if (count == 0 || count == 4) {
+            lostPoint += 3;
+          }
+        }
+      }
+
+      // LEVEL3
+
+      for (var row = 0; row < moduleCount; row += 1) {
+        for (var col = 0; col < moduleCount - 6; col += 1) {
+          if (qrcode.isDark(row, col)
+              && !qrcode.isDark(row, col + 1)
+              &&  qrcode.isDark(row, col + 2)
+              &&  qrcode.isDark(row, col + 3)
+              &&  qrcode.isDark(row, col + 4)
+              && !qrcode.isDark(row, col + 5)
+              &&  qrcode.isDark(row, col + 6) ) {
+            lostPoint += 40;
+          }
+        }
+      }
+
+      for (var col = 0; col < moduleCount; col += 1) {
+        for (var row = 0; row < moduleCount - 6; row += 1) {
+          if (qrcode.isDark(row, col)
+              && !qrcode.isDark(row + 1, col)
+              &&  qrcode.isDark(row + 2, col)
+              &&  qrcode.isDark(row + 3, col)
+              &&  qrcode.isDark(row + 4, col)
+              && !qrcode.isDark(row + 5, col)
+              &&  qrcode.isDark(row + 6, col) ) {
+            lostPoint += 40;
+          }
+        }
+      }
+
+      // LEVEL4
+
+      var darkCount = 0;
+
+      for (var col = 0; col < moduleCount; col += 1) {
+        for (var row = 0; row < moduleCount; row += 1) {
+          if (qrcode.isDark(row, col) ) {
+            darkCount += 1;
+          }
+        }
+      }
+
+      var ratio = Math.abs(100 * darkCount / moduleCount / moduleCount - 50) / 5;
+      lostPoint += ratio * 10;
+
+      return lostPoint;
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // QRMath
+  //---------------------------------------------------------------------
+
+  var QRMath = function() {
+
+    var EXP_TABLE = new Array(256);
+    var LOG_TABLE = new Array(256);
+
+    // initialize tables
+    for (var i = 0; i < 8; i += 1) {
+      EXP_TABLE[i] = 1 << i;
+    }
+    for (var i = 8; i < 256; i += 1) {
+      EXP_TABLE[i] = EXP_TABLE[i - 4]
+        ^ EXP_TABLE[i - 5]
+        ^ EXP_TABLE[i - 6]
+        ^ EXP_TABLE[i - 8];
+    }
+    for (var i = 0; i < 255; i += 1) {
+      LOG_TABLE[EXP_TABLE[i] ] = i;
+    }
+
+    var _this = {};
+
+    _this.glog = function(n) {
+
+      if (n < 1) {
+        throw 'glog(' + n + ')';
+      }
+
+      return LOG_TABLE[n];
+    };
+
+    _this.gexp = function(n) {
+
+      while (n < 0) {
+        n += 255;
+      }
+
+      while (n >= 256) {
+        n -= 255;
+      }
+
+      return EXP_TABLE[n];
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // qrPolynomial
+  //---------------------------------------------------------------------
+
+  function qrPolynomial(num, shift) {
+
+    if (typeof num.length == 'undefined') {
+      throw num.length + '/' + shift;
+    }
+
+    var _num = function() {
+      var offset = 0;
+      while (offset < num.length && num[offset] == 0) {
+        offset += 1;
+      }
+      var _num = new Array(num.length - offset + shift);
+      for (var i = 0; i < num.length - offset; i += 1) {
+        _num[i] = num[i + offset];
+      }
+      return _num;
+    }();
+
+    var _this = {};
+
+    _this.getAt = function(index) {
+      return _num[index];
+    };
+
+    _this.getLength = function() {
+      return _num.length;
+    };
+
+    _this.multiply = function(e) {
+
+      var num = new Array(_this.getLength() + e.getLength() - 1);
+
+      for (var i = 0; i < _this.getLength(); i += 1) {
+        for (var j = 0; j < e.getLength(); j += 1) {
+          num[i + j] ^= QRMath.gexp(QRMath.glog(_this.getAt(i) ) + QRMath.glog(e.getAt(j) ) );
+        }
+      }
+
+      return qrPolynomial(num, 0);
+    };
+
+    _this.mod = function(e) {
+
+      if (_this.getLength() - e.getLength() < 0) {
+        return _this;
+      }
+
+      var ratio = QRMath.glog(_this.getAt(0) ) - QRMath.glog(e.getAt(0) );
+
+      var num = new Array(_this.getLength() );
+      for (var i = 0; i < _this.getLength(); i += 1) {
+        num[i] = _this.getAt(i);
+      }
+
+      for (var i = 0; i < e.getLength(); i += 1) {
+        num[i] ^= QRMath.gexp(QRMath.glog(e.getAt(i) ) + ratio);
+      }
+
+      // recursive call
+      return qrPolynomial(num, 0).mod(e);
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // QRRSBlock
+  //---------------------------------------------------------------------
+
+  var QRRSBlock = function() {
+
+    var RS_BLOCK_TABLE = [
+
+      // L
+      // M
+      // Q
+      // H
+
+      // 1
+      [1, 26, 19],
+      [1, 26, 16],
+      [1, 26, 13],
+      [1, 26, 9],
+
+      // 2
+      [1, 44, 34],
+      [1, 44, 28],
+      [1, 44, 22],
+      [1, 44, 16],
+
+      // 3
+      [1, 70, 55],
+      [1, 70, 44],
+      [2, 35, 17],
+      [2, 35, 13],
+
+      // 4
+      [1, 100, 80],
+      [2, 50, 32],
+      [2, 50, 24],
+      [4, 25, 9],
+
+      // 5
+      [1, 134, 108],
+      [2, 67, 43],
+      [2, 33, 15, 2, 34, 16],
+      [2, 33, 11, 2, 34, 12],
+
+      // 6
+      [2, 86, 68],
+      [4, 43, 27],
+      [4, 43, 19],
+      [4, 43, 15],
+
+      // 7
+      [2, 98, 78],
+      [4, 49, 31],
+      [2, 32, 14, 4, 33, 15],
+      [4, 39, 13, 1, 40, 14],
+
+      // 8
+      [2, 121, 97],
+      [2, 60, 38, 2, 61, 39],
+      [4, 40, 18, 2, 41, 19],
+      [4, 40, 14, 2, 41, 15],
+
+      // 9
+      [2, 146, 116],
+      [3, 58, 36, 2, 59, 37],
+      [4, 36, 16, 4, 37, 17],
+      [4, 36, 12, 4, 37, 13],
+
+      // 10
+      [2, 86, 68, 2, 87, 69],
+      [4, 69, 43, 1, 70, 44],
+      [6, 43, 19, 2, 44, 20],
+      [6, 43, 15, 2, 44, 16],
+
+      // 11
+      [4, 101, 81],
+      [1, 80, 50, 4, 81, 51],
+      [4, 50, 22, 4, 51, 23],
+      [3, 36, 12, 8, 37, 13],
+
+      // 12
+      [2, 116, 92, 2, 117, 93],
+      [6, 58, 36, 2, 59, 37],
+      [4, 46, 20, 6, 47, 21],
+      [7, 42, 14, 4, 43, 15],
+
+      // 13
+      [4, 133, 107],
+      [8, 59, 37, 1, 60, 38],
+      [8, 44, 20, 4, 45, 21],
+      [12, 33, 11, 4, 34, 12],
+
+      // 14
+      [3, 145, 115, 1, 146, 116],
+      [4, 64, 40, 5, 65, 41],
+      [11, 36, 16, 5, 37, 17],
+      [11, 36, 12, 5, 37, 13],
+
+      // 15
+      [5, 109, 87, 1, 110, 88],
+      [5, 65, 41, 5, 66, 42],
+      [5, 54, 24, 7, 55, 25],
+      [11, 36, 12, 7, 37, 13],
+
+      // 16
+      [5, 122, 98, 1, 123, 99],
+      [7, 73, 45, 3, 74, 46],
+      [15, 43, 19, 2, 44, 20],
+      [3, 45, 15, 13, 46, 16],
+
+      // 17
+      [1, 135, 107, 5, 136, 108],
+      [10, 74, 46, 1, 75, 47],
+      [1, 50, 22, 15, 51, 23],
+      [2, 42, 14, 17, 43, 15],
+
+      // 18
+      [5, 150, 120, 1, 151, 121],
+      [9, 69, 43, 4, 70, 44],
+      [17, 50, 22, 1, 51, 23],
+      [2, 42, 14, 19, 43, 15],
+
+      // 19
+      [3, 141, 113, 4, 142, 114],
+      [3, 70, 44, 11, 71, 45],
+      [17, 47, 21, 4, 48, 22],
+      [9, 39, 13, 16, 40, 14],
+
+      // 20
+      [3, 135, 107, 5, 136, 108],
+      [3, 67, 41, 13, 68, 42],
+      [15, 54, 24, 5, 55, 25],
+      [15, 43, 15, 10, 44, 16],
+
+      // 21
+      [4, 144, 116, 4, 145, 117],
+      [17, 68, 42],
+      [17, 50, 22, 6, 51, 23],
+      [19, 46, 16, 6, 47, 17],
+
+      // 22
+      [2, 139, 111, 7, 140, 112],
+      [17, 74, 46],
+      [7, 54, 24, 16, 55, 25],
+      [34, 37, 13],
+
+      // 23
+      [4, 151, 121, 5, 152, 122],
+      [4, 75, 47, 14, 76, 48],
+      [11, 54, 24, 14, 55, 25],
+      [16, 45, 15, 14, 46, 16],
+
+      // 24
+      [6, 147, 117, 4, 148, 118],
+      [6, 73, 45, 14, 74, 46],
+      [11, 54, 24, 16, 55, 25],
+      [30, 46, 16, 2, 47, 17],
+
+      // 25
+      [8, 132, 106, 4, 133, 107],
+      [8, 75, 47, 13, 76, 48],
+      [7, 54, 24, 22, 55, 25],
+      [22, 45, 15, 13, 46, 16],
+
+      // 26
+      [10, 142, 114, 2, 143, 115],
+      [19, 74, 46, 4, 75, 47],
+      [28, 50, 22, 6, 51, 23],
+      [33, 46, 16, 4, 47, 17],
+
+      // 27
+      [8, 152, 122, 4, 153, 123],
+      [22, 73, 45, 3, 74, 46],
+      [8, 53, 23, 26, 54, 24],
+      [12, 45, 15, 28, 46, 16],
+
+      // 28
+      [3, 147, 117, 10, 148, 118],
+      [3, 73, 45, 23, 74, 46],
+      [4, 54, 24, 31, 55, 25],
+      [11, 45, 15, 31, 46, 16],
+
+      // 29
+      [7, 146, 116, 7, 147, 117],
+      [21, 73, 45, 7, 74, 46],
+      [1, 53, 23, 37, 54, 24],
+      [19, 45, 15, 26, 46, 16],
+
+      // 30
+      [5, 145, 115, 10, 146, 116],
+      [19, 75, 47, 10, 76, 48],
+      [15, 54, 24, 25, 55, 25],
+      [23, 45, 15, 25, 46, 16],
+
+      // 31
+      [13, 145, 115, 3, 146, 116],
+      [2, 74, 46, 29, 75, 47],
+      [42, 54, 24, 1, 55, 25],
+      [23, 45, 15, 28, 46, 16],
+
+      // 32
+      [17, 145, 115],
+      [10, 74, 46, 23, 75, 47],
+      [10, 54, 24, 35, 55, 25],
+      [19, 45, 15, 35, 46, 16],
+
+      // 33
+      [17, 145, 115, 1, 146, 116],
+      [14, 74, 46, 21, 75, 47],
+      [29, 54, 24, 19, 55, 25],
+      [11, 45, 15, 46, 46, 16],
+
+      // 34
+      [13, 145, 115, 6, 146, 116],
+      [14, 74, 46, 23, 75, 47],
+      [44, 54, 24, 7, 55, 25],
+      [59, 46, 16, 1, 47, 17],
+
+      // 35
+      [12, 151, 121, 7, 152, 122],
+      [12, 75, 47, 26, 76, 48],
+      [39, 54, 24, 14, 55, 25],
+      [22, 45, 15, 41, 46, 16],
+
+      // 36
+      [6, 151, 121, 14, 152, 122],
+      [6, 75, 47, 34, 76, 48],
+      [46, 54, 24, 10, 55, 25],
+      [2, 45, 15, 64, 46, 16],
+
+      // 37
+      [17, 152, 122, 4, 153, 123],
+      [29, 74, 46, 14, 75, 47],
+      [49, 54, 24, 10, 55, 25],
+      [24, 45, 15, 46, 46, 16],
+
+      // 38
+      [4, 152, 122, 18, 153, 123],
+      [13, 74, 46, 32, 75, 47],
+      [48, 54, 24, 14, 55, 25],
+      [42, 45, 15, 32, 46, 16],
+
+      // 39
+      [20, 147, 117, 4, 148, 118],
+      [40, 75, 47, 7, 76, 48],
+      [43, 54, 24, 22, 55, 25],
+      [10, 45, 15, 67, 46, 16],
+
+      // 40
+      [19, 148, 118, 6, 149, 119],
+      [18, 75, 47, 31, 76, 48],
+      [34, 54, 24, 34, 55, 25],
+      [20, 45, 15, 61, 46, 16]
+    ];
+
+    var qrRSBlock = function(totalCount, dataCount) {
+      var _this = {};
+      _this.totalCount = totalCount;
+      _this.dataCount = dataCount;
+      return _this;
+    };
+
+    var _this = {};
+
+    var getRsBlockTable = function(typeNumber, errorCorrectionLevel) {
+
+      switch(errorCorrectionLevel) {
+      case QRErrorCorrectionLevel.L :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0];
+      case QRErrorCorrectionLevel.M :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1];
+      case QRErrorCorrectionLevel.Q :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2];
+      case QRErrorCorrectionLevel.H :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3];
+      default :
+        return undefined;
+      }
+    };
+
+    _this.getRSBlocks = function(typeNumber, errorCorrectionLevel) {
+
+      var rsBlock = getRsBlockTable(typeNumber, errorCorrectionLevel);
+
+      if (typeof rsBlock == 'undefined') {
+        throw 'bad rs block @ typeNumber:' + typeNumber +
+            '/errorCorrectionLevel:' + errorCorrectionLevel;
+      }
+
+      var length = rsBlock.length / 3;
+
+      var list = [];
+
+      for (var i = 0; i < length; i += 1) {
+
+        var count = rsBlock[i * 3 + 0];
+        var totalCount = rsBlock[i * 3 + 1];
+        var dataCount = rsBlock[i * 3 + 2];
+
+        for (var j = 0; j < count; j += 1) {
+          list.push(qrRSBlock(totalCount, dataCount) );
+        }
+      }
+
+      return list;
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // qrBitBuffer
+  //---------------------------------------------------------------------
+
+  var qrBitBuffer = function() {
+
+    var _buffer = [];
+    var _length = 0;
+
+    var _this = {};
+
+    _this.getBuffer = function() {
+      return _buffer;
+    };
+
+    _this.getAt = function(index) {
+      var bufIndex = Math.floor(index / 8);
+      return ( (_buffer[bufIndex] >>> (7 - index % 8) ) & 1) == 1;
+    };
+
+    _this.put = function(num, length) {
+      for (var i = 0; i < length; i += 1) {
+        _this.putBit( ( (num >>> (length - i - 1) ) & 1) == 1);
+      }
+    };
+
+    _this.getLengthInBits = function() {
+      return _length;
+    };
+
+    _this.putBit = function(bit) {
+
+      var bufIndex = Math.floor(_length / 8);
+      if (_buffer.length <= bufIndex) {
+        _buffer.push(0);
+      }
+
+      if (bit) {
+        _buffer[bufIndex] |= (0x80 >>> (_length % 8) );
+      }
+
+      _length += 1;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrNumber
+  //---------------------------------------------------------------------
+
+  var qrNumber = function(data) {
+
+    var _mode = QRMode.MODE_NUMBER;
+    var _data = data;
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _data.length;
+    };
+
+    _this.write = function(buffer) {
+
+      var data = _data;
+
+      var i = 0;
+
+      while (i + 2 < data.length) {
+        buffer.put(strToNum(data.substring(i, i + 3) ), 10);
+        i += 3;
+      }
+
+      if (i < data.length) {
+        if (data.length - i == 1) {
+          buffer.put(strToNum(data.substring(i, i + 1) ), 4);
+        } else if (data.length - i == 2) {
+          buffer.put(strToNum(data.substring(i, i + 2) ), 7);
+        }
+      }
+    };
+
+    var strToNum = function(s) {
+      var num = 0;
+      for (var i = 0; i < s.length; i += 1) {
+        num = num * 10 + chatToNum(s.charAt(i) );
+      }
+      return num;
+    };
+
+    var chatToNum = function(c) {
+      if ('0' <= c && c <= '9') {
+        return c.charCodeAt(0) - '0'.charCodeAt(0);
+      }
+      throw 'illegal char :' + c;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrAlphaNum
+  //---------------------------------------------------------------------
+
+  var qrAlphaNum = function(data) {
+
+    var _mode = QRMode.MODE_ALPHA_NUM;
+    var _data = data;
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _data.length;
+    };
+
+    _this.write = function(buffer) {
+
+      var s = _data;
+
+      var i = 0;
+
+      while (i + 1 < s.length) {
+        buffer.put(
+          getCode(s.charAt(i) ) * 45 +
+          getCode(s.charAt(i + 1) ), 11);
+        i += 2;
+      }
+
+      if (i < s.length) {
+        buffer.put(getCode(s.charAt(i) ), 6);
+      }
+    };
+
+    var getCode = function(c) {
+
+      if ('0' <= c && c <= '9') {
+        return c.charCodeAt(0) - '0'.charCodeAt(0);
+      } else if ('A' <= c && c <= 'Z') {
+        return c.charCodeAt(0) - 'A'.charCodeAt(0) + 10;
+      } else {
+        switch (c) {
+        case ' ' : return 36;
+        case '$' : return 37;
+        case '%' : return 38;
+        case '*' : return 39;
+        case '+' : return 40;
+        case '-' : return 41;
+        case '.' : return 42;
+        case '/' : return 43;
+        case ':' : return 44;
+        default :
+          throw 'illegal char :' + c;
+        }
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qr8BitByte
+  //---------------------------------------------------------------------
+
+  var qr8BitByte = function(data) {
+
+    var _mode = QRMode.MODE_8BIT_BYTE;
+    var _data = data;
+    var _bytes = qrcode.stringToBytes(data);
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _bytes.length;
+    };
+
+    _this.write = function(buffer) {
+      for (var i = 0; i < _bytes.length; i += 1) {
+        buffer.put(_bytes[i], 8);
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrKanji
+  //---------------------------------------------------------------------
+
+  var qrKanji = function(data) {
+
+    var _mode = QRMode.MODE_KANJI;
+    var _data = data;
+
+    var stringToBytes = qrcode.stringToBytesFuncs['SJIS'];
+    if (!stringToBytes) {
+      throw 'sjis not supported.';
+    }
+    !function(c, code) {
+      // self test for sjis support.
+      var test = stringToBytes(c);
+      if (test.length != 2 || ( (test[0] << 8) | test[1]) != code) {
+        throw 'sjis not supported.';
+      }
+    }('\u53cb', 0x9746);
+
+    var _bytes = stringToBytes(data);
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return ~~(_bytes.length / 2);
+    };
+
+    _this.write = function(buffer) {
+
+      var data = _bytes;
+
+      var i = 0;
+
+      while (i + 1 < data.length) {
+
+        var c = ( (0xff & data[i]) << 8) | (0xff & data[i + 1]);
+
+        if (0x8140 <= c && c <= 0x9FFC) {
+          c -= 0x8140;
+        } else if (0xE040 <= c && c <= 0xEBBF) {
+          c -= 0xC140;
+        } else {
+          throw 'illegal char at ' + (i + 1) + '/' + c;
+        }
+
+        c = ( (c >>> 8) & 0xff) * 0xC0 + (c & 0xff);
+
+        buffer.put(c, 13);
+
+        i += 2;
+      }
+
+      if (i < data.length) {
+        throw 'illegal char at ' + (i + 1);
+      }
+    };
+
+    return _this;
+  };
+
+  //=====================================================================
+  // GIF Support etc.
+  //
+
+  //---------------------------------------------------------------------
+  // byteArrayOutputStream
+  //---------------------------------------------------------------------
+
+  var byteArrayOutputStream = function() {
+
+    var _bytes = [];
+
+    var _this = {};
+
+    _this.writeByte = function(b) {
+      _bytes.push(b & 0xff);
+    };
+
+    _this.writeShort = function(i) {
+      _this.writeByte(i);
+      _this.writeByte(i >>> 8);
+    };
+
+    _this.writeBytes = function(b, off, len) {
+      off = off || 0;
+      len = len || b.length;
+      for (var i = 0; i < len; i += 1) {
+        _this.writeByte(b[i + off]);
+      }
+    };
+
+    _this.writeString = function(s) {
+      for (var i = 0; i < s.length; i += 1) {
+        _this.writeByte(s.charCodeAt(i) );
+      }
+    };
+
+    _this.toByteArray = function() {
+      return _bytes;
+    };
+
+    _this.toString = function() {
+      var s = '';
+      s += '[';
+      for (var i = 0; i < _bytes.length; i += 1) {
+        if (i > 0) {
+          s += ',';
+        }
+        s += _bytes[i];
+      }
+      s += ']';
+      return s;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // base64EncodeOutputStream
+  //---------------------------------------------------------------------
+
+  var base64EncodeOutputStream = function() {
+
+    var _buffer = 0;
+    var _buflen = 0;
+    var _length = 0;
+    var _base64 = '';
+
+    var _this = {};
+
+    var writeEncoded = function(b) {
+      _base64 += String.fromCharCode(encode(b & 0x3f) );
+    };
+
+    var encode = function(n) {
+      if (n < 0) {
+        // error.
+      } else if (n < 26) {
+        return 0x41 + n;
+      } else if (n < 52) {
+        return 0x61 + (n - 26);
+      } else if (n < 62) {
+        return 0x30 + (n - 52);
+      } else if (n == 62) {
+        return 0x2b;
+      } else if (n == 63) {
+        return 0x2f;
+      }
+      throw 'n:' + n;
+    };
+
+    _this.writeByte = function(n) {
+
+      _buffer = (_buffer << 8) | (n & 0xff);
+      _buflen += 8;
+      _length += 1;
+
+      while (_buflen >= 6) {
+        writeEncoded(_buffer >>> (_buflen - 6) );
+        _buflen -= 6;
+      }
+    };
+
+    _this.flush = function() {
+
+      if (_buflen > 0) {
+        writeEncoded(_buffer << (6 - _buflen) );
+        _buffer = 0;
+        _buflen = 0;
+      }
+
+      if (_length % 3 != 0) {
+        // padding
+        var padlen = 3 - _length % 3;
+        for (var i = 0; i < padlen; i += 1) {
+          _base64 += '=';
+        }
+      }
+    };
+
+    _this.toString = function() {
+      return _base64;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // base64DecodeInputStream
+  //---------------------------------------------------------------------
+
+  var base64DecodeInputStream = function(str) {
+
+    var _str = str;
+    var _pos = 0;
+    var _buffer = 0;
+    var _buflen = 0;
+
+    var _this = {};
+
+    _this.read = function() {
+
+      while (_buflen < 8) {
+
+        if (_pos >= _str.length) {
+          if (_buflen == 0) {
+            return -1;
+          }
+          throw 'unexpected end of file./' + _buflen;
+        }
+
+        var c = _str.charAt(_pos);
+        _pos += 1;
+
+        if (c == '=') {
+          _buflen = 0;
+          return -1;
+        } else if (c.match(/^\s$/) ) {
+          // ignore if whitespace.
+          continue;
+        }
+
+        _buffer = (_buffer << 6) | decode(c.charCodeAt(0) );
+        _buflen += 6;
+      }
+
+      var n = (_buffer >>> (_buflen - 8) ) & 0xff;
+      _buflen -= 8;
+      return n;
+    };
+
+    var decode = function(c) {
+      if (0x41 <= c && c <= 0x5a) {
+        return c - 0x41;
+      } else if (0x61 <= c && c <= 0x7a) {
+        return c - 0x61 + 26;
+      } else if (0x30 <= c && c <= 0x39) {
+        return c - 0x30 + 52;
+      } else if (c == 0x2b) {
+        return 62;
+      } else if (c == 0x2f) {
+        return 63;
+      } else {
+        throw 'c:' + c;
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // gifImage (B/W)
+  //---------------------------------------------------------------------
+
+  var gifImage = function(width, height) {
+
+    var _width = width;
+    var _height = height;
+    var _data = new Array(width * height);
+
+    var _this = {};
+
+    _this.setPixel = function(x, y, pixel) {
+      _data[y * _width + x] = pixel;
+    };
+
+    _this.write = function(out) {
+
+      //---------------------------------
+      // GIF Signature
+
+      out.writeString('GIF87a');
+
+      //---------------------------------
+      // Screen Descriptor
+
+      out.writeShort(_width);
+      out.writeShort(_height);
+
+      out.writeByte(0x80); // 2bit
+      out.writeByte(0);
+      out.writeByte(0);
+
+      //---------------------------------
+      // Global Color Map
+
+      // black
+      out.writeByte(0x00);
+      out.writeByte(0x00);
+      out.writeByte(0x00);
+
+      // white
+      out.writeByte(0xff);
+      out.writeByte(0xff);
+      out.writeByte(0xff);
+
+      //---------------------------------
+      // Image Descriptor
+
+      out.writeString(',');
+      out.writeShort(0);
+      out.writeShort(0);
+      out.writeShort(_width);
+      out.writeShort(_height);
+      out.writeByte(0);
+
+      //---------------------------------
+      // Local Color Map
+
+      //---------------------------------
+      // Raster Data
+
+      var lzwMinCodeSize = 2;
+      var raster = getLZWRaster(lzwMinCodeSize);
+
+      out.writeByte(lzwMinCodeSize);
+
+      var offset = 0;
+
+      while (raster.length - offset > 255) {
+        out.writeByte(255);
+        out.writeBytes(raster, offset, 255);
+        offset += 255;
+      }
+
+      out.writeByte(raster.length - offset);
+      out.writeBytes(raster, offset, raster.length - offset);
+      out.writeByte(0x00);
+
+      //---------------------------------
+      // GIF Terminator
+      out.writeString(';');
+    };
+
+    var bitOutputStream = function(out) {
+
+      var _out = out;
+      var _bitLength = 0;
+      var _bitBuffer = 0;
+
+      var _this = {};
+
+      _this.write = function(data, length) {
+
+        if ( (data >>> length) != 0) {
+          throw 'length over';
+        }
+
+        while (_bitLength + length >= 8) {
+          _out.writeByte(0xff & ( (data << _bitLength) | _bitBuffer) );
+          length -= (8 - _bitLength);
+          data >>>= (8 - _bitLength);
+          _bitBuffer = 0;
+          _bitLength = 0;
+        }
+
+        _bitBuffer = (data << _bitLength) | _bitBuffer;
+        _bitLength = _bitLength + length;
+      };
+
+      _this.flush = function() {
+        if (_bitLength > 0) {
+          _out.writeByte(_bitBuffer);
+        }
+      };
+
+      return _this;
+    };
+
+    var getLZWRaster = function(lzwMinCodeSize) {
+
+      var clearCode = 1 << lzwMinCodeSize;
+      var endCode = (1 << lzwMinCodeSize) + 1;
+      var bitLength = lzwMinCodeSize + 1;
+
+      // Setup LZWTable
+      var table = lzwTable();
+
+      for (var i = 0; i < clearCode; i += 1) {
+        table.add(String.fromCharCode(i) );
+      }
+      table.add(String.fromCharCode(clearCode) );
+      table.add(String.fromCharCode(endCode) );
+
+      var byteOut = byteArrayOutputStream();
+      var bitOut = bitOutputStream(byteOut);
+
+      // clear code
+      bitOut.write(clearCode, bitLength);
+
+      var dataIndex = 0;
+
+      var s = String.fromCharCode(_data[dataIndex]);
+      dataIndex += 1;
+
+      while (dataIndex < _data.length) {
+
+        var c = String.fromCharCode(_data[dataIndex]);
+        dataIndex += 1;
+
+        if (table.contains(s + c) ) {
+
+          s = s + c;
+
+        } else {
+
+          bitOut.write(table.indexOf(s), bitLength);
+
+          if (table.size() < 0xfff) {
+
+            if (table.size() == (1 << bitLength) ) {
+              bitLength += 1;
+            }
+
+            table.add(s + c);
+          }
+
+          s = c;
+        }
+      }
+
+      bitOut.write(table.indexOf(s), bitLength);
+
+      // end code
+      bitOut.write(endCode, bitLength);
+
+      bitOut.flush();
+
+      return byteOut.toByteArray();
+    };
+
+    var lzwTable = function() {
+
+      var _map = {};
+      var _size = 0;
+
+      var _this = {};
+
+      _this.add = function(key) {
+        if (_this.contains(key) ) {
+          throw 'dup key:' + key;
+        }
+        _map[key] = _size;
+        _size += 1;
+      };
+
+      _this.size = function() {
+        return _size;
+      };
+
+      _this.indexOf = function(key) {
+        return _map[key];
+      };
+
+      _this.contains = function(key) {
+        return typeof _map[key] != 'undefined';
+      };
+
+      return _this;
+    };
+
+    return _this;
+  };
+
+  var createDataURL = function(width, height, getPixel) {
+    var gif = gifImage(width, height);
+    for (var y = 0; y < height; y += 1) {
+      for (var x = 0; x < width; x += 1) {
+        gif.setPixel(x, y, getPixel(x, y) );
+      }
+    }
+
+    var b = byteArrayOutputStream();
+    gif.write(b);
+
+    var base64 = base64EncodeOutputStream();
+    var bytes = b.toByteArray();
+    for (var i = 0; i < bytes.length; i += 1) {
+      base64.writeByte(bytes[i]);
+    }
+    base64.flush();
+
+    return 'data:image/gif;base64,' + base64;
+  };
+
+  //---------------------------------------------------------------------
+  // returns qrcode function.
+
+  return qrcode;
+}();
+
+// multibyte support
+!function() {
+
+  qrcode.stringToBytesFuncs['UTF-8'] = function(s) {
+    // http://stackoverflow.com/questions/18729405/how-to-convert-utf8-string-to-byte-array
+    function toUTF8Array(str) {
+      var utf8 = [];
+      for (var i=0; i < str.length; i++) {
+        var charcode = str.charCodeAt(i);
+        if (charcode < 0x80) utf8.push(charcode);
+        else if (charcode < 0x800) {
+          utf8.push(0xc0 | (charcode >> 6),
+              0x80 | (charcode & 0x3f));
+        }
+        else if (charcode < 0xd800 || charcode >= 0xe000) {
+          utf8.push(0xe0 | (charcode >> 12),
+              0x80 | ((charcode>>6) & 0x3f),
+              0x80 | (charcode & 0x3f));
+        }
+        // surrogate pair
+        else {
+          i++;
+          // UTF-16 encodes 0x10000-0x10FFFF by
+          // subtracting 0x10000 and splitting the
+          // 20 bits of 0x0-0xFFFFF into two halves
+          charcode = 0x10000 + (((charcode & 0x3ff)<<10)
+            | (str.charCodeAt(i) & 0x3ff));
+          utf8.push(0xf0 | (charcode >>18),
+              0x80 | ((charcode>>12) & 0x3f),
+              0x80 | ((charcode>>6) & 0x3f),
+              0x80 | (charcode & 0x3f));
+        }
+      }
+      return utf8;
+    }
+    return toUTF8Array(s);
+  };
+
+}();
+
+(function (factory) {
+  if (typeof define === 'function' && define.amd) {
+      define([], factory);
+  } else if (typeof exports === 'object') {
+      module.exports = factory();
+  }
+}(function () {
+    return qrcode;
+}));
+
+
+        // =====================================================================
+        //  CHƠI ONLINE — Giai đoạn 1&2 nâng cấp: QR, chia sẻ, xáo chỗ, chat sảnh chờ, khán giả, xin vào,
+        //  chất lượng mạng, đánh thức server, lá bài đổi khi vai đổi, Sinh Đôi, mô tả vai chi tiết, nhắc / đánh dấu đã xem,
+        //  tiến độ xem bài, ghi nhật ký chia bài, công khai bộ bài, bộ bài ngẫu nhiên cân bằng, lá ❓ màu cam
+        // =====================================================================
+        // ---------- Đánh thức server ngay khi mở app ----------
+        function onlineWake() {
+            if (!onlineConfigured()) return;
+            let u = ONLINE_SERVER.replace(/^wss:/, 'https:').replace(/^ws:/, 'http:');
+            try { fetch(u, { mode: 'no-cors', cache: 'no-store' }).catch(() => {}); } catch (e) {}
+        }
+        setTimeout(onlineWake, 300);
+        // ---------- Mô tả vai cho người chơi: chức năng / khi nào dậy / thắng khi ----------
+        const WIN_DAN = 'Phe Dân Làng thắng khi toàn bộ Sói đã chết.';
+        const WIN_SOI = 'Phe Sói thắng khi số Sói còn sống bằng hoặc nhiều hơn số người còn lại.';
+        const PLAYER_INFO = {
+            villager: ['Bạn không có chức năng đặc biệt. Ban ngày hãy quan sát, lập luận và bỏ phiếu để tìm ra Sói.', 'Không thức dậy.'],
+            seer: ['Mỗi đêm bạn soi 1 người để biết người đó có phải Sói hay không.', 'Mỗi đêm.'],
+            apprentice_seer: ['Khi Tiên Tri chính còn sống, bạn chỉ ngủ. Khi Tiên Tri chết, bạn thay thế: mỗi đêm soi 1 người để biết có phải Sói không.', 'Từ Đêm 2, mỗi đêm.'],
+            mystic_seer: ['Mỗi đêm bạn chọn 1 người và được biết CHÍNH XÁC vai trò của người đó.', 'Mỗi đêm.'],
+            aura_seer: ['Mỗi đêm bạn soi 1 người để biết người đó CÓ chức năng đặc biệt hay không (Dân thường và Sói thường là "không có").', 'Mỗi đêm.'],
+            spirit_medium: ['Mỗi đêm bạn chọn 2 người (không được chọn chính mình) để biết họ CÙNG PHE hay KHÁC PHE. Phe Thứ 3 tính là khác phe với cả Dân lẫn Sói.', 'Mỗi đêm.'],
+            beholder: ['Đêm 1 quản trò cho bạn biết ai là Tiên Tri (Tiên Tri thường, không phải Tiên Tri Bí Ẩn). Hãy âm thầm bảo vệ và ủng hộ Tiên Tri.', 'Chỉ Đêm 1.'],
+            guard: ['Mỗi đêm bạn chọn 1 người để bảo vệ khỏi bị Sói cắn. Không được bảo vệ cùng 1 người 2 đêm liên tiếp.', 'Mỗi đêm.'],
+            witch: ['Bạn có 1 bình cứu và 1 bình độc, mỗi bình chỉ dùng được 1 lần trong cả ván. Khi được gọi, bạn biết ai vừa bị Sói cắn (nếu còn bình cứu) và quyết định có cứu không, có đầu độc ai không.', 'Mỗi đêm, sau bầy Sói.'],
+            hunter: ['Mỗi đêm bạn BẮT BUỘC nhắm vào 1 người. Khi bạn chết, người bạn đang nhắm sẽ chết theo ngay lập tức.', 'Mỗi đêm.'],
+            huntress: ['Bạn có 1 mũi tên dùng 1 lần trong cả ván: đêm nào muốn thì bắn 1 người, người đó chết vào sáng hôm sau — kể cả khi bạn bị cắn chết cùng đêm.', 'Mỗi đêm cho tới khi đã bắn.'],
+            explorer: ['Dùng 1 lần trong cả ván: chọn 1 người. Nếu người đó là Sói, Sói chết. Nếu không phải Sói, chính bạn chết.', 'Mỗi đêm cho tới khi dùng chức năng.'],
+            spellcaster: ['Mỗi đêm bạn chọn 1 người để phù phép: người đó KHÔNG được nói suốt ngày hôm sau.', 'Mỗi đêm.'],
+            old_hag: ['Mỗi đêm bạn chọn 1 người để cấm túc ngày hôm sau: người đó không được nói, không được biểu quyết, và làng không được treo cổ người đó. Không được chọn chính mình, không chọn cùng 1 người 2 đêm liên tiếp.', 'Mỗi đêm.'],
+            priest: ['Đêm 1 bạn ban phước cho 1 người: người đó KHÔNG thể bị Sói cắn chết cho tới khi bạn chết.', 'Chỉ Đêm 1.'],
+            pi: ['Dùng 1 lần trong cả ván: chọn 1 người — bạn được biết trong người đó và 2 người ngồi hai bên họ CÓ Sói hay KHÔNG.', 'Mỗi đêm (chức năng dùng 1 lần/ván).'],
+            insomniac: ['Cuối mỗi đêm bạn được biết trong 2 người ngồi sát hai bên bạn CÓ ai thức dậy làm chức năng hay KHÔNG.', 'Cuối mỗi đêm.'],
+            friendly_vampire: ['Đêm 1 bạn được hỏi về một nhóm bằng một nửa số người chơi, bắt đầu từ người ngồi đối diện bạn (bạn chọn hướng trái hoặc phải), và được biết trong nhóm đó có bao nhiêu Sói.', 'Chỉ Đêm 1.'],
+            frankenstein: ['Khi một người phe Dân có chức năng chết (không tính Dân thường và phe Thứ 3), bạn thừa hưởng chức năng đó và dùng được ngay từ đêm sau.', 'Từ Đêm 2, mỗi đêm.'],
+            ghost: ['Bạn chết ngay trong Đêm 1. Từ đó, cuối mỗi đêm bạn được viết 1 chữ cái gợi ý cho làng — cả làng thấy chữ của bạn vào sáng hôm sau.', 'Cuối mỗi đêm, kể cả khi đã chết.'],
+            lycan: ['Bạn là Dân nhưng mang dòng máu Sói: Tiên Tri soi bạn sẽ ra kết quả "là Sói". Hãy cẩn thận khi bị nghi ngờ.', 'Không thức dậy.'],
+            elder: ['Bạn có 2 mạng trước Sói cắn: lần đầu bị cắn vẫn sống. Chết vì lý do khác (treo cổ, bình độc…) thì chết ngay. Khi bạn chết, TẤT CẢ chức năng phe Dân Làng bị vô hiệu hoá — hãy giữ mạng.', 'Không thức dậy.'],
+            diseased: ['Nếu bạn bị Sói cắn chết, đêm ngay sau đó TOÀN BỘ Sói không được cắn ai. Không có tác dụng nếu bạn được cứu, bị treo cổ hoặc bị đầu độc.', 'Không thức dậy.'],
+            cursed: ['Bạn bị nguyền: nếu bị Sói cắn, bạn KHÔNG chết mà biến thành Sói và từ đêm sau dậy cùng bầy. Bị đầu độc hoặc treo cổ thì chết bình thường.', 'Không thức dậy (khi hoá Sói thì dậy cùng bầy).', 'Khi còn là Dân: thắng cùng phe Dân Làng. Khi đã hoá Sói: thắng cùng phe Sói.'],
+            mayor: ['Phiếu biểu quyết của bạn có giá trị bằng 2 phiếu. Nếu bị cấm túc thì mất cả 2 phiếu trong ngày đó.', 'Không thức dậy.'],
+            tough_guy: ['Bị Sói cắn đêm nào thì sáng hôm đó bạn vẫn sống, thảo luận và bỏ phiếu bình thường, rồi chết vào đêm kế tiếp. Bị treo cổ hoặc bị đầu độc thì chết ngay.', 'Không thức dậy.'],
+            prince: ['Lần đầu bị làng chọn treo cổ, bạn lật bài và KHÔNG chết (làng mất lượt treo hôm đó). Từ đó không thể bị treo cổ nữa, nhưng vẫn có thể bị Sói cắn hoặc đầu độc.', 'Không thức dậy.'],
+            virginia: ['Đêm 1 bạn chọn 1 Người Phụ Thuộc (người đó không biết). Nếu bạn chết vì bất kỳ lý do gì, Người Phụ Thuộc chết theo ngay. Người Phụ Thuộc chết trước thì bạn vẫn sống.', 'Chỉ Đêm 1.'],
+            mad_bomber: ['Khi bạn chết (ngày hay đêm), bạn PHÁT NỔ: đầu đêm kế tiếp, 2 người ngồi cạnh bạn sẽ chết theo. Không thể ngăn cản.', 'Không thức dậy.'],
+            twins: ['Bạn có Sinh Đôi cùng phe Dân Làng — các bạn biết nhau ngay từ đầu và có thể tin tưởng nhau.', 'Không thức dậy.'],
+            cupid: ['Đêm 1 bạn ghép đôi BẢN THÂN với 1 người khác thành Cặp Đôi. Nếu một trong hai chết, người kia chết theo. Mỗi đêm Cặp Đôi được thức dậy nói chuyện riêng.', 'Đêm 1 chọn người; các đêm sau thức dậy cùng Cặp Đôi.', 'Bạn thắng khi bạn và người được ghép là 2 người cuối cùng còn sống.'],
+            tanner: ['Bạn chán đời và muốn bị treo cổ. Hãy khéo léo khiến làng biểu quyết treo cổ bạn.', 'Không thức dậy.', 'Bạn thắng NGAY khi bị làng treo cổ.'],
+            doppelganger: ['Đêm 1 bạn chọn 1 Hình Mẫu (bạn không được biết vai của họ). Khi Hình Mẫu chết, bạn lập tức nhận vai của người đó — nếu là Sói thì bạn gia nhập bầy Sói.', 'Đêm 1 chọn Hình Mẫu; các đêm sau vẫn được gọi để đánh lạc hướng.', 'Khi nhận vai mới, bạn thắng theo phe của vai đó. Nếu Hình Mẫu còn sống tới cuối ván, bạn thắng cùng phe Dân Làng.'],
+            hoodlum: ['Đêm 1 bạn chọn 2 mục tiêu.', 'Chỉ Đêm 1.', 'Khi ván kết thúc, nếu bạn CÒN SỐNG và CẢ 2 mục tiêu đều đã chết, bạn cướp phần thắng.'],
+            blob: ['Mỗi đêm, người ngồi bên PHẢI vùng chất nhầy (còn sống, chưa bị lây) sẽ bị lây nhiễm — người bị lây không hề biết.', 'Chỉ Đêm 1 (các đêm sau chất nhầy tự lây).', 'Bạn thắng MỘT MÌNH ngay khi mọi người còn sống khác đều đã bị lây nhiễm.'],
+            cult_leader: ['Mỗi đêm bạn kết nạp 1 người vào giáo phái.', 'Mỗi đêm.', 'Bạn thắng MỘT MÌNH ngay khi mọi người còn sống khác đều thuộc giáo phái.'],
+            zombie: ['Mỗi đêm bạn ăn não 1 người. Người mất não ban ngày không được nói và không được bỏ phiếu (vẫn có thể bị treo cổ).', 'Mỗi đêm.', 'Bạn thắng MỘT MÌNH ngay khi mọi người còn sống khác đều đã mất não.'],
+            wolf: ['Mỗi đêm bạn cùng bầy Sói chọn 1 người để cắn. Ban ngày hãy giấu thân phận và dẫn dắt làng treo cổ nhầm người.', 'Mỗi đêm cùng bầy Sói.'],
+            wolf_alpha: ['Bạn cắn cùng bầy. Khi đã có đồng đội Sói chết, đêm tiếp theo nạn nhân của bầy sẽ BỊ BIẾN THÀNH SÓI thay vì chết (dùng 1 lần).', 'Mỗi đêm cùng bầy Sói.'],
+            wolf_silver: ['Bạn cắn cùng bầy. Tiên Tri soi bạn sẽ ra kết quả "không phải Sói".', 'Mỗi đêm cùng bầy Sói.'],
+            wolf_cub: ['Bạn cắn cùng bầy, ban ngày nói và bỏ phiếu như thường. Khi bạn chết, đêm hôm sau bầy Sói được cắn 2 người.', 'Mỗi đêm cùng bầy Sói.'],
+            teen_wolf: ['Bạn cắn cùng bầy. Mỗi ngày bạn PHẢI nói to từ "Sói" hoặc "Gâu"; hết ngày mà chưa nói, bạn chết vào đêm kế tiếp (kể cả khi bị cấm nói).', 'Mỗi đêm cùng bầy Sói.'],
+            fang_face: ['Đêm 1 bạn dậy cùng bầy. Từ Đêm 2 bạn ngủ; chỉ khi TOÀN BỘ phe Sói khác (kể cả Pháp Sư Sói) đã chết, bạn mới thức dậy cắn một mình. Tiên Tri soi bạn ra Sói; Tiên Tri Hào Quang soi bạn ra "không có chức năng".', 'Đêm 1 cùng bầy; sau đó chỉ dậy khi mọi Sói khác đã chết.'],
+            fruit_brute: ['Bạn cắn cùng bầy. Khi chỉ còn mình bạn là Sói còn thức, bạn KHÔNG thể cắn ai nữa — nhưng vẫn thắng nếu số Sói bằng số người còn lại.', 'Mỗi đêm cùng bầy Sói.'],
+            dire_wolf: ['Đêm 1 bạn chọn 1 Bạn Đồng Hành. Bạn cắn cùng bầy mỗi đêm. Khi Bạn Đồng Hành chết, bạn chết theo (bạn chết trước thì họ vẫn sống).', 'Đêm 1 chọn Bạn Đồng Hành; mỗi đêm cùng bầy Sói.'],
+            big_bad_wolf: ['Bạn cắn cùng bầy, sau đó được gọi riêng để cắn thêm 1 nạn nhân — chỉ khi CHƯA có Sói nào chết.', 'Mỗi đêm cùng bầy, sau đó dậy riêng.'],
+            dream_wolf: ['Bạn thuộc phe Sói nhưng ban đầu KHÔNG dậy cùng bầy (bầy không biết bạn). Tiên Tri soi bạn vẫn ra Sói. Khi có 1 Sói khác chết, từ đêm sau bạn thức dậy cắn cùng bầy.', 'Chưa dậy cùng bầy cho tới khi có Sói khác chết.'],
+            wolf_sorcerer: ['Bạn thuộc phe Sói nhưng KHÔNG dậy cùng bầy: bạn không biết ai là Sói và bầy cũng không biết bạn. Mỗi đêm bạn soi 1 người để biết có phải Tiên Tri (Tiên Tri thường) hay không. Tiên Tri soi bạn sẽ ra "không phải Sói".', 'Mỗi đêm, dậy riêng (không cùng bầy).']
+        };
+        function playerInfo(r) {
+            let pi = PLAYER_INFO[r.id] || [r.desc || '', ''];
+            let win = pi[2] || (r.faction === 'wolf' ? WIN_SOI : r.faction === 'independent' ? '' : WIN_DAN);
+            return { how: pi[0], wake: pi[1], win };
+        }
+        // ---------- Lá bài: mô tả chi tiết + màu phe + Sinh Đôi ----------
+        onlineCardFor = function (name, assignment, dealId, roleIdOverride) {
+            let rid = roleIdOverride || assignment[name], r = ROLES_DB.find(x => x.id === rid) || {}, info = playerInfo(r);
+            let fac = r.faction === 'wolf' ? 'Phe Sói' : (r.faction === 'independent' ? 'Phe Thứ 3' : 'Phe Dân Làng');
+            let mates = rid === 'twins' ? Object.keys(assignment).filter(n => n !== name && assignment[n] === 'twins') : [];
+            return { kind: 'card', dealId, name, role: { id: rid, name: r.name || rid, desc: info.how, wake: info.wake, win: info.win, faction: fac, f: r.faction || 'villager', mates }, icon: roleIconURL(r) };
+        };
+        // ---------- Vai đổi giữa ván -> gửi lá bài mới + lời báo riêng ----------
+        function onlineRoleChanges() {
+            let d = state.online && state.online.deal; if (!d || !d.started || !(state.players || []).length) return;
+            let cr = state.online.cardRole || (state.online.cardRole = Object.assign({}, d.assignment));
+            state.players.forEach(p => {
+                let old = cr[p.name]; if (!old || old === p.roleId) return;
+                let id = onlineIdOf(p.name); if (!id) return;
+                let ro = ROLES_DB.find(x => x.id === old) || {}, rn = ROLES_DB.find(x => x.id === p.roleId) || {};
+                let text = rn.faction === 'wolf' && ro.faction !== 'wolf' ? '🐺 Bạn đã bị biến thành SÓI! Từ đêm nay bạn thức dậy cùng bầy Sói.'
+                    : ['frankenstein', 'doppelganger'].includes(old) ? `🧬 Bạn đã thừa hưởng vai ${rn.name}.`
+                    : p.roleId === 'wolf' && ro.faction === 'wolf' ? '🐺 Bạn đã trở thành Ma Sói thường — từ đêm nay thức dậy cùng bầy.'
+                    : `🔄 Vai của bạn đã đổi thành ${rn.name}.`;
+                let dealId = 'chg' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+                let card = onlineCardFor(p.name, Object.assign({}, cr, { [p.name]: p.roleId }), dealId, p.roleId);
+                gmSend({ t: 'to', to: id, keep: 'card', data: card });
+                gmSend({ t: 'to', to: id, keep: 'rolechg', data: { kind: 'rolechg', key: dealId, text, card } });
+                cr[p.name] = p.roleId; onlineSave();
+                state.eventLog.push({ title: 'Online', content: `${p.name}: vai đổi ${ro.name || old} → ${rn.name || p.roleId} (đã báo riêng cho người chơi)` });
+            });
+        }
+        // ---------- Đã chia bài -> khoá hẳn phòng; nhật ký chia bài; công khai bộ bài; tiến độ ----------
+        (function () {
+            const _prep = prepareDealView;
+            prepareDealView = function () {
+                _prep.apply(this, arguments);
+                if (onlineDeal()) { gmSend({ t: 'final', on: true }); state.online.cardRole = Object.assign({}, state.dealAssignment); onlineSave(); }
+            };
+            const _back = backFromDeal;
+            backFromDeal = function () { let was = onlineDeal(); _back.apply(this, arguments); if (was && !state.dealAssignment) gmSend({ t: 'final', on: false }); };
+            const _force = dealForceStart;
+            dealForceStart = function () {
+                let a = state.dealAssignment || {};
+                if (Object.keys(a).length) {
+                    let rows = Object.keys(a).map(n => { let r = ROLES_DB.find(x => x.id === a[n]) || {}; return `${escapeHtml(n)}: <b>${escapeHtml(r.name || a[n])}</b>`; });
+                    state.eventLog = state.eventLog || [];
+                    state.eventLog.push({ title: onlineDeal() ? 'Chia bài online' : 'Chia bài bằng app', content: rows.join(', ') });
+                }
+                if (onlineDeal()) { state.online.cardRole = Object.assign({}, a); onlineSave(); }
+                return _force.apply(this, arguments);
+            };
+        })();
+        let _progKey = '';
+        function onlineDealSide() {
+            if (!onlineActive() || !state.online.locked || !gmWs || gmWs.readyState !== 1) return;
+            let d = state.online.deal;
+            if (d && !d.started) {   // bộ bài công khai ngay lúc chia
+                let roles = ROLES_DB.filter(r => (d.deck || {})[r.id] > 0).map(r => ({ n: r.name, c: d.deck[r.id], f: r.faction }));
+                let k = JSON.stringify(roles); if (k !== _deckKey) { _deckKey = k; gmSend({ t: 'all', keep: 'deck', data: { kind: 'deck', roles } }); }
+                let names = Object.keys(d.assignment || {}), v = names.filter(n => (state.dealViewed || d.viewed || {})[n] > 0).length;
+                let pk = v + '/' + names.length; if (pk !== _progKey) { _progKey = pk; gmSend({ t: 'all', keep: 'dealprog', data: { kind: 'dealprog', viewed: v, total: names.length } }); }
+            }
+            onlineRoleChanges();
+        }
+        setInterval(() => { try { onlineDealSide(); } catch (e) { console.error(e); } }, 800);
+        // ---------- Nhắc / đánh dấu đã xem hộ (trang Chia Bài) ----------
+        function onlineNudge(name) { let id = onlineIdOf(name); if (id) { gmSend({ t: 'to', to: id, data: { kind: 'nudge' } }); onlineToast('🔔 Đã nhắc ' + name); } }
+        function onlineMarkViewed(name) {
+            if (!confirm(`Đánh dấu ${name} ĐÃ XEM BÀI?\n(Dùng khi người chơi đã xem nhưng mạng không báo về được)`)) return;
+            state.dealViewed = state.dealViewed || {}; state.dealViewed[name] = 1; onlineSaveDeal(); renderDealView();
+        }
+        (function () {
+            const _r = renderOnlineDealView;
+            renderOnlineDealView = function () {
+                _r.apply(this, arguments);
+                let viewed = state.dealViewed || {};
+                document.querySelectorAll('#deal-grid .od-card').forEach(c => {
+                    let n = c.dataset.name, nb = netBadge(onlineIdOf(n));
+                    if (nb) c.querySelector('.deal-status').insertAdjacentHTML('afterend', nb);
+                    if (viewed[n] > 0) return;
+                    c.insertAdjacentHTML('beforeend', `<div class="od-act"><button type="button" title="Nhắc" onclick="event.stopPropagation();onlineNudge(this.closest('.od-card').dataset.name)">🔔</button><button type="button" title="Đánh dấu đã xem" onclick="event.stopPropagation();onlineMarkViewed(this.closest('.od-card').dataset.name)">✓</button></div>`);
+                });
+            };
+        })();
+        // ---------- Chất lượng mạng ----------
+        window._netQ = {};
+        function netBadge(id) {
+            if (!id) return '';
+            let q = window._netQ[id], live = window._onlineRoster && window._onlineRoster.players.find(x => x.id === id);
+            if (live && !live.online) { let m = live.off ? Math.max(1, Math.round((Date.now() - live.off) / 60000)) : 0; return `<div class="net bad">📶 mất kết nối${m ? ' ' + m + ' phút' : ''}</div>`; }
+            if (q && q.rtt > 800) return `<div class="net weak">📶 mạng yếu</div>`;
+            return '';
+        }
+        // ---------- Sảnh chờ: QR, chia sẻ, xáo chỗ, khán giả, yêu cầu xin vào, mạng ----------
+        function onlineQrSvg(text, cell) { try { let q = qrcode(0, 'M'); q.addData(text); q.make(); return q.createSvgTag(cell || 5, 2); } catch (e) { return ''; } }
+        function onlineShowQr() {
+            let ov = document.createElement('div'); ov.className = 'ol-qr-big';
+            ov.innerHTML = `<div class="ol-qr-card"><div class="ol-qr-code">${state.online.code}</div>${onlineQrSvg(onlineJoinLink(), 9)}<div class="ol-qr-hint">Quét để vào phòng · chạm để đóng</div></div>`;
+            ov.onclick = () => ov.remove(); document.body.appendChild(ov);
+        }
+        function onlineShare() {
+            let url = onlineJoinLink(), text = `🐺 Vào chơi Ma Sói Làng Xí Nghiệp Nợ! Mã phòng: ${state.online.code}`;
+            if (navigator.share) navigator.share({ title: 'Làng Xí Nghiệp Nợ', text, url }).catch(() => {});
+            else onlineCopyLink();
+        }
+        function onlineSeatOrderNow() {
+            let names = (state.online.players || []).map(p => p.name), o = state.online.seatOrder || [];
+            return (o.length === names.length && names.every(n => o.includes(n))) ? o.slice() : names;
+        }
+        function onlineShuffleSeats() {
+            let o = onlineSeatOrderNow();
+            for (let i = o.length - 1; i > 0; i--) { let j = Math.floor(Math.random() * (i + 1)); [o[i], o[j]] = [o[j], o[i]]; }
+            state.online.seatOrder = o; if (state.seatOrder && state.seatOrder.length === o.length) state.seatOrder = o.slice();
+            onlineSave(); _villageKey = ''; renderOnlineLobby(); onlineToast('🔀 Đã xáo chỗ ngồi');
+        }
+        window._knocks = [];
+        function renderKnocks() {
+            let box = document.getElementById('gm-knocks');
+            if (!box) { box = document.createElement('div'); box.id = 'gm-knocks'; document.body.appendChild(box); }
+            box.innerHTML = window._knocks.map(k => `<div class="kn"><span>🚪 <b>${escapeHtml(k.name)}</b> xin vào chơi</span><button type="button" class="kn-ok" onclick="onlineAdmit('${k.reqId}',true)">Đồng ý</button><button type="button" class="kn-no" onclick="onlineAdmit('${k.reqId}',false)">Từ chối</button></div>`).join('');
+        }
+        function onlineAdmit(reqId, ok) { gmSend({ t: 'admit', reqId, ok }); window._knocks = window._knocks.filter(k => k.reqId !== reqId); renderKnocks(); }
+        (function () {
+            const _lob = renderOnlineLobby;
+            renderOnlineLobby = function () {
+                _lob.apply(this, arguments);
+                let box = document.getElementById('online-body'); if (!box || !onlineActive()) return;
+                let link = box.querySelector('.ol-link');
+                if (link && !box.querySelector('.ol-qr')) link.insertAdjacentHTML('afterend', `<div class="ol-qr"><div class="ol-qr-img" onclick="onlineShowQr()" title="Phóng to">${onlineQrSvg(onlineJoinLink(), 4)}</div>
+                    <div class="ol-qr-side"><div>Quét mã để vào phòng</div><button type="button" class="ol-share" onclick="onlineShare()">📤 Chia sẻ (Zalo, Messenger…)</button><button type="button" class="ol-share ghost" onclick="onlineShowQr()">🔍 Phóng to mã QR</button></div></div>`);
+                // mạng của từng người
+                box.querySelectorAll('.ol-p').forEach((row, i) => { let p = (state.online.players || [])[i]; let nb = p && netBadge(p.id); if (nb) row.querySelector('.ol-pn').insertAdjacentHTML('beforeend', nb); });
+                // chỗ ngồi + xáo
+                let ps = state.online.players || [];
+                if (ps.length >= 2) box.insertAdjacentHTML('beforeend', `<div class="ol-seat-h"><span>🪑 Chỗ ngồi (theo chiều kim đồng hồ)</span><button type="button" onclick="onlineShuffleSeats()">🔀 Xáo chỗ ngồi</button></div>
+                    <div class="ol-seats">${onlineSeatOrderNow().map((n, i) => `<span>${i + 1}. ${escapeHtml(n)}</span>`).join('')}</div>`);
+                // khán giả
+                let sp = (window._onlineRoster && window._onlineRoster.spec) || [];
+                if (sp.length) box.insertAdjacentHTML('beforeend', `<div class="ol-spec">👀 Khán giả (${sp.length}): ${sp.map(x => escapeHtml(x.name)).join(', ')}</div>`);
+            };
+            const _gm = gmOnMsg;
+            gmOnMsg = function (m) {
+                _gm(m);
+                if (m.t === 'knock') { window._knocks.push({ reqId: m.reqId, name: m.name }); renderKnocks(); try { haptic && haptic([40, 30, 60]); } catch (e) {} }
+                else if (m.t === 'knock_gone') { window._knocks = window._knocks.filter(k => k.reqId !== m.reqId); renderKnocks(); }
+                else if (m.t === 'net') { (m.list || []).forEach(x => window._netQ[x.id] = x); if (state.currentView === 'view-online') renderOnlineLobby(); if (state.currentView === 'view-deal' && onlineDeal()) renderDealView(); }
+                else if (m.t === 'gm_state' && state.online && state.online.locked && !(state.online.deal)) onlineSyncJoiners();
+            };
+        })();
+        // Có người được duyệt vào sau khi khoá (đang thiết lập bộ bài) -> cập nhật danh sách người chơi
+        function onlineSyncJoiners() {
+            let names = (state.online.players || []).map(p => p.name);
+            if (!state.selectedPlayers || state.selectedPlayers.length === names.length) return;
+            let order = (state.seatOrder || []).filter(n => names.includes(n)); names.forEach(n => { if (!order.includes(n)) order.push(n); });
+            state.totalPlayers = names.length; state.selectedPlayers = names.slice(); state.homeSeats = names.slice(); state.seatOrder = order; state.online.seatOrder = order.slice();
+            onlineSave(); _villageKey = '';
+            if (state.currentView === 'view-deck') renderDeck();
+            onlineToast(`👥 Phòng giờ có ${names.length} người`);
+        }
+        // Xáo chỗ trong sảnh -> dùng khi vào ván
+        (function () {
+            const _proceed = onlineProceed;
+            onlineProceed = function () { let o = onlineSeatOrderNow(); let r = _proceed.apply(this, arguments); state.seatOrder = o.slice(); saveGame(); return r; };
+        })();
+        // Người chơi xem trước vòng làng ngay khi đã khoá phòng
+        onlineSendVillage = function () {
+            if (!onlineActive() || !state.online.locked) return;
+            let started = state.online.deal && state.online.deal.started;
+            let order = started && state.seatOrder && state.seatOrder.length ? state.seatOrder : onlineSeatOrderNow();
+            let gp = started && state.players && state.players.length ? state.players : null;
+            let seats = order.map(nm => { let p = gp && gp.find(x => x.name === nm); return { n: nm, a: p ? (p.isAlive ? 1 : 0) : 1 }; });
+            let key = JSON.stringify(seats); if (key === _villageKey) return; _villageKey = key;
+            gmSend({ t: 'all', keep: 'village', data: { kind: 'village', seats } });
+        };
+        setInterval(() => { try { onlineSendVillage(); } catch (e) {} }, 900);
+        // ---------- Khung chat quản trò mở luôn từ sảnh chờ (chat sảnh chờ) ----------
+        (function () {
+            const _b = renderGmChatBtn;
+            renderGmChatBtn = function () {
+                _b.apply(this, arguments);
+                let on = onlineActive(), d = document.getElementById('gm-chat');
+                document.body.classList.toggle('gm-docked', on);
+                if (d) d.classList.toggle('open', on);
+            };
+        })();
+        // ---------- 🎲 Bộ bài ngẫu nhiên cân bằng ----------
+        function randomBalancedDeck(N) {
+            let pool = ROLES_DB.filter(r => !r.disabled && !r.step && r.id !== 'villager' && r.id !== 'wolf');
+            let W = pool.filter(r => r.faction === 'wolf'), V = pool.filter(r => r.faction === 'villager'), I = pool.filter(r => r.faction === 'independent');
+            let pick = (arr, k) => { let a = arr.slice(), out = []; while (a.length && out.length < k) out.push(a.splice(Math.floor(Math.random() * a.length), 1)[0]); return out; };
+            let best = null, bestS = 1e9;
+            for (let it = 0; it < 4000; it++) {
+                let deck = {}, used = 0, add = (id, c) => { deck[id] = (deck[id] || 0) + c; used += c; };
+                let wolvesN = Math.max(1, Math.round(N / 4.2) + (Math.random() < .3 ? -1 : Math.random() < .3 ? 1 : 0)); wolvesN = Math.max(1, Math.min(wolvesN, Math.floor((N - 1) / 2)));
+                let sp = pick(W, Math.floor(Math.random() * (Math.min(3, wolvesN) + 1)));
+                sp.forEach(r => add(r.id, 1)); if (wolvesN - sp.length > 0) add('wolf', wolvesN - sp.length);
+                if (N >= 8 && Math.random() < .55) pick(I, 1).forEach(r => add(r.id, 1));
+                let k = Math.round(N * (0.35 + Math.random() * 0.3));
+                pick(V, k).forEach(r => { let c = r.id === 'twins' ? 2 : 1; if (used + c <= N) add(r.id, c); });
+                if ((deck.apprentice_seer || deck.beholder) && !deck.seer) { if (used < N) add('seer', 1); else { if (deck.apprentice_seer) { used -= deck.apprentice_seer; delete deck.apprentice_seer; } if (deck.beholder) { used -= deck.beholder; delete deck.beholder; } } }
+                if (used > N) continue; if (N - used > 0) add('villager', N - used);
+                let S = Object.entries(deck).reduce((a, [id, c]) => a + c * rolePts(id), 0), score = Math.abs(S) + Math.random() * 0.8;
+                if (score < bestS) { bestS = score; best = deck; }
+            }
+            return best;
+        }
+        function onlineRandomDeck() {
+            let N = state.totalPlayers || 0; if (N < 5) { showPopup('Bộ bài bất ngờ', 'Cần ít nhất 5 người chơi.', 'warning'); return; }
+            let d = randomBalancedDeck(N); if (!d) return;
+            ROLES_DB.forEach(r => state.deck[r.id] = 0); Object.assign(state.deck, d); renderDeck(); saveGame();
+            haptic && haptic([30, 20, 50]);
+            showPopup('🎲 Bộ bài bất ngờ', `Đã tạo bộ ${N} lá, điểm cân bằng ${ptsLabel(deckScore())}. Bấm lần nữa để đổi bộ khác.`, 'info');
+        }
+        (function () {
+            const _p = renderDeckPresetUI;
+            renderDeckPresetUI = function () {
+                _p.apply(this, arguments);
+                let c = document.getElementById('deck-preset-area'); if (!c || c.querySelector('.rand-deck')) return;
+                c.insertAdjacentHTML('afterbegin', '<button type="button" class="rand-deck" onclick="onlineRandomDeck()">🎲 Bộ bài bất ngờ</button>');
+            };
+        })();
+        // ---------- Lá ❓ màu cam (theo logo) ----------
+        try { document.documentElement.style.setProperty('--lxn-logo', `url("${SOI_LOGO_SMALL}")`); } catch (e) {}
 
     </script>
 </body>
