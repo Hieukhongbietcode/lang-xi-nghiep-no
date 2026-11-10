@@ -109,11 +109,75 @@
     #ch-send { width:48px; border:none; border-radius:14px; background:var(--iris); color:#fff; font-size:18px; cursor:pointer; }
     #ch-send:disabled { opacity:.35; }
     .ch-err { min-height:16px; font-size:12px; font-weight:700; color:#f87171; margin-top:4px; }
-    #turn-toast { position:fixed; left:50%; top:calc(env(safe-area-inset-top, 0px) + 58px); transform:translateX(-50%) translateY(-200%); z-index:45; max-width:92vw;
+    #turn-toast { position:fixed; left:50%; top:calc(env(safe-area-inset-top, 0px) + 14px); transform:translateX(-50%) translateY(-12px); opacity:0; visibility:hidden; pointer-events:none; z-index:45; max-width:92vw;
         background:#3b2f8f; color:#fff; font-weight:800; font-size:14px; padding:12px 16px; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.5); transition: transform .35s cubic-bezier(.2,.8,.2,1); text-align:center; }
-    #turn-toast.show { transform:translateX(-50%) translateY(0); }
+    #turn-toast { transition: transform .35s cubic-bezier(.2,.8,.2,1), opacity .25s, visibility 0s linear .35s !important; }
+    #turn-toast.show { transform:translateX(-50%) translateY(0); opacity:1; visibility:visible; transition: transform .35s cubic-bezier(.2,.8,.2,1), opacity .25s !important; }
     details.roster summary { cursor:pointer; list-style:none; } details.roster summary::-webkit-details-marker { display:none; }
     details.roster summary .list-head span:first-child::after { content:' ▾'; } details.roster:not([open]) summary .list-head span:first-child::after { content:' ▸'; }
+    /* ---- Đang chơi: Vai + Vòng làng + Chat ---- */
+    body.ingame .brand, body.ingame .room-head, body.ingame .me, body.ingame #lb-status, body.ingame #card-zone, body.ingame #lb-roster, body.ingame .gm-line { display:none !important; }
+    body.ingame .wrap { padding-top:14px; }
+    body.ingame .card { padding:14px; }
+    body.ingame .chat { margin-top:12px; }
+    .rb { display:none; } body.ingame .rb { display:block; }
+    .rb-top { display:flex; align-items:center; gap:12px; }
+    .rb-ic { width:44px; height:44px; border-radius:12px; background:#0b1222; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; overflow:hidden; }
+    .rb-ic img { width:34px; height:34px; object-fit:contain; filter: grayscale(1) brightness(.95); }
+    .rb-k { font-size:11px; font-weight:800; color:var(--mute); text-transform:uppercase; letter-spacing:.06em; }
+    .rb-n { font-size:18px; font-weight:900; } .rb-n.hid { letter-spacing:.2em; color:#475569; }
+    .rb-btn { margin-left:auto; font:inherit; font-size:13px; font-weight:800; color:#e2e8f0; background:#1e293b; border:1px solid var(--line); border-radius:12px; padding:9px 12px; cursor:pointer; white-space:nowrap; }
+    .rb-more { margin-top:10px; font-size:13px; line-height:1.5; color:#aab4c8; }
+    .rb-pack { margin-top:8px; padding:8px 10px; border-radius:10px; background:#2a0f12; border:1px solid #7f1d1d; color:#fecaca; font-size:13px; font-weight:700; }
+    .rg { display:none; } body.ingame .rg { display:block; margin-top:12px; }
+    .rg-head { display:flex; justify-content:space-between; font-size:12px; font-weight:800; color:var(--mute); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; }
+    .ring { position:relative; width:100%; aspect-ratio:1/1; max-height:min(52vh, 380px); margin:0 auto; }
+    .ring::before { content:''; position:absolute; inset:16%; border-radius:50%; border:1px dashed #26324a; }
+    .seat { position:absolute; transform:translate(-50%,-50%); display:flex; flex-direction:column; align-items:center; gap:2px; width:62px; transition: opacity .4s, filter .4s; }
+    .seat .av { width:var(--sz,38px); height:var(--sz,38px); font-size:calc(var(--sz,38px) * .36); box-shadow:0 0 0 2px #0b1120; }
+    .seat .sn { font-size:11px; font-weight:700; color:#cbd5e1; max-width:62px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .seat.me .av { box-shadow:0 0 0 3px var(--iris); }
+    .seat.dead { opacity:.5; filter:grayscale(1); }
+    .seat .skull { position:absolute; top:-6px; right:6px; font-size:15px; filter:none; }
+    .ring-mid { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); text-align:center; color:var(--mute); font-size:12px; font-weight:700; }
+    .ring-mid b { display:block; font-size:26px; color:#e2e8f0; }
+    /* ---- Chat bản 2 ---- */
+    .g-status { display:none; } body.ingame .g-status { display:block; margin-bottom:10px; padding:10px 12px; border-radius:12px; background:#151f3d; border:1px solid #2c3a66; color:#dbe4ff; font-size:14px; font-weight:800; line-height:1.4; text-align:center; animation: pop .25s ease both; }
+    .g-timer { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding:8px 14px; border-radius:12px; background:#0f1f17; border:1px solid #1f5134; color:#86efac; font-weight:800; font-size:13px; transition: background-color .3s, color .3s; }
+    .g-timer b { font-size:26px; font-variant-numeric: tabular-nums; letter-spacing:.04em; }
+    .g-timer.low { background:#2a0f12; border-color:#7f1d1d; color:#fca5a5; animation: pulse 1s ease-in-out infinite; } .g-timer.paused { opacity:.7; }
+    @keyframes pulse { 50% { transform: scale(1.02) } }
+    .ch-pin { margin-bottom:8px; padding:8px 10px; border-radius:10px; background:#2a2410; border:1px solid #574a16; color:#fde68a; font-size:13px; font-weight:800; }
+    .ch-deck { margin-bottom:8px; border-radius:10px; background:#0f1626; border:1px solid var(--line); padding:7px 10px; }
+    .ch-deck summary { cursor:pointer; font-size:12px; font-weight:800; color:var(--mute); text-transform:uppercase; letter-spacing:.05em; list-style:none; } .ch-deck summary::-webkit-details-marker { display:none; }
+    .ch-deck summary::after { content:' ▸'; } .ch-deck[open] summary::after { content:' ▾'; } #ch-deck-n { color:#cbd5e1; }
+    .dk-list { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; } .dk { font-size:12px; font-weight:800; padding:3px 8px; border-radius:8px; background:#1e293b; }
+    .ch-tabs { display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; scrollbar-width:none; }
+    .ch-tab { position:relative; flex-shrink:0; font:inherit; font-size:12px; font-weight:800; color:var(--mute); background:#111827; border:1px solid var(--line); border-radius:999px; padding:6px 10px; cursor:pointer; }
+    .ch-tab.on { color:#fff; background:#3b2f8f; border-color:var(--iris); } .ch-tab.live:not(.on) { border-color:#4ade80; color:#bbf7d0; }
+    .ub { position:absolute; top:-6px; right:-4px; min-width:18px; height:18px; padding:0 5px; border-radius:99px; background:#ef4444; color:#fff; font-size:11px; display:flex; align-items:center; justify-content:center; }
+    .cm.sys { font-weight:900; font-size:16px; line-height:1.35; padding:8px 10px; margin:4px 0; border-left:4px solid; background:rgba(255,255,255,.04); border-radius:8px; }
+    .cm.pub { cursor:pointer; } .cm.ment { background:rgba(250,204,21,.14); box-shadow: inset 3px 0 0 #facc15; }
+    .at { color:#93c5fd; font-weight:800; }
+    .rr { display:flex; flex-wrap:wrap; gap:4px; margin-top:3px; } .rc { font:inherit; font-size:12px; background:#1e293b; border:1px solid var(--line); border-radius:99px; padding:1px 7px; color:#e2e8f0; cursor:pointer; }
+    .rc.mine { border-color:var(--iris); background:#2a2163; }
+    .rp { display:flex; gap:4px; margin-top:5px; padding:4px; border-radius:12px; background:#111827; border:1px solid var(--line); width:max-content; animation: pop .15s ease both; }
+    .rpe { font-size:20px; background:none; border:none; cursor:pointer; padding:2px 4px; border-radius:8px; } .rpe:active { transform:scale(1.25); }
+    .ch-typing { min-height:16px; font-size:12px; color:#a5b4fc; font-style:italic; margin-top:4px; }
+    .ch-mention { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; } .mn { font:inherit; display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:700; color:#e2e8f0; background:#1e293b; border:1px solid var(--line); border-radius:99px; padding:3px 10px 3px 3px; cursor:pointer; }
+    .mn .av { width:22px; height:22px; font-size:9px; }
+    .ch-emo-pop { display:grid; grid-template-columns:repeat(9, 1fr); gap:2px; margin-top:6px; padding:6px; border-radius:12px; background:#111827; border:1px solid var(--line); max-height:150px; overflow-y:auto; }
+    .ep { font-size:21px; background:none; border:none; cursor:pointer; padding:3px; border-radius:6px; } .ep:active { background:#1e293b; }
+    .ch-emo { width:44px; border:1px solid var(--line); border-radius:14px; background:#111827; font-size:20px; cursor:pointer; } .ch-emo:disabled { opacity:.35; }
+    .ch-slow { font-size:11px; font-weight:700; color:#93c5fd; margin-top:4px; min-height:0; }
+    .ring-hint { font-size:13px; font-weight:800; color:#fde68a; text-align:center; margin-bottom:4px; }
+    .ring.pickable .seat:not(.dead) { cursor:pointer; } .ring.pickable .seat:not(.dead) .av { animation: seatGlow 1.6s ease-in-out infinite; }
+    @keyframes seatGlow { 50% { box-shadow:0 0 0 3px rgba(250,204,21,.5) } }
+    .seat.voted .av { box-shadow:0 0 0 3px #ef4444 !important; animation:none !important; } .seat.voted::after { content:'🗳️'; position:absolute; bottom:12px; left:2px; font-size:14px; }
+    #pick-ov { position:fixed; inset:0; z-index:50; background:rgba(2,6,16,.8); display:flex; align-items:flex-end; justify-content:center; padding:16px; animation: fade .2s ease-out; }
+    .pk-card { width:min(380px, 100%); background:var(--card); border:1px solid var(--line); border-radius:20px; padding:20px; text-align:center; animation: pop .25s cubic-bezier(.2,.8,.2,1.1) both; }
+    .pk-card .av { width:56px; height:56px; font-size:20px; margin:0 auto 10px; } .pk-q { font-size:18px; font-weight:800; } .pk-sub { color:var(--mute); font-size:13px; margin:4px 0 14px; }
+    .pk-row { display:flex; gap:10px; } .pk-row .btn { margin:0; }
     .hidden { display:none !important; }
     @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
 </style>
@@ -122,6 +186,7 @@
 <div id="net"></div>
 <div id="card-ov" class="hidden"></div>
 <div id="turn-toast"></div>
+<div id="pick-ov" class="hidden"></div>
 <div class="wrap">
     <div class="brand">
         <img src="data:image/webp;base64,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" alt="">
@@ -151,16 +216,27 @@
         <div class="me">👤 <span id="lb-me"></span></div>
         <div id="lb-status" class="status"></div>
         <div id="card-zone" class="hidden"></div>
+        <div id="g-status" class="g-status"></div>
+        <div id="g-timer" class="g-timer hidden"></div>
+        <div id="role-bar" class="rb"></div>
+        <div id="ring-box" class="rg"><div class="rg-head"><span>🏘️ Vòng làng</span><span id="rg-count"></span></div><div id="ring-hint" class="ring-hint hidden"></div><div id="ring" class="ring"></div></div>
         <details id="lb-roster" class="roster" open>
             <summary><div class="list-head"><span>Người chơi</span><span id="lb-count"></span></div></summary>
             <div id="lb-list" class="plist"></div>
         </details>
         <div id="chat" class="chat hidden">
             <div class="ch-head"><b>💬 Chat</b><span id="ch-label"></span></div>
+            <div id="ch-pin" class="ch-pin hidden"></div>
+            <details id="ch-deck" class="ch-deck hidden"><summary>📜 Vai trong ván <span id="ch-deck-n"></span></summary><div id="ch-deck-list" class="dk-list"></div></details>
+            <div id="ch-tabs" class="ch-tabs"></div>
             <div id="ch-dead" class="ch-dead hidden">💀 Bạn đã chết — tin của bạn chỉ người chết khác và quản trò thấy.</div>
             <div id="ch-feed" class="ch-feed"><div class="ch-empty">Chưa có tin nhắn</div></div>
-            <div id="ch-chips" class="ch-chips"></div>
-            <div class="ch-row"><input id="ch-in" maxlength="300" autocomplete="off" placeholder="Chưa tới lượt bạn chat" disabled><button id="ch-send" disabled aria-label="Gửi">➤</button></div>
+            <div id="ch-typing" class="ch-typing"></div>
+            <div id="ch-mention" class="ch-mention hidden"></div>
+            <div id="ch-emo-pop" class="ch-emo-pop hidden"></div>
+            <div class="ch-row"><input id="ch-in" maxlength="300" autocomplete="off" placeholder="Chưa tới lượt bạn chat" disabled>
+                <button id="ch-emo" class="ch-emo" aria-label="Chèn emoji" disabled>😊</button><button id="ch-send" disabled aria-label="Gửi">➤</button></div>
+            <div id="ch-slow" class="ch-slow"></div>
             <div id="ch-err" class="ch-err"></div>
         </div>
         <div class="gm-line"><span id="lb-gmdot" class="dot"></span><span id="lb-gm"></span></div>
@@ -234,6 +310,8 @@ function onMsg(m) {
         if (!chatList.length) chatLoad();
         history.replaceState(null, '', location.pathname + '?room=' + m.code + (qs.get('ws') ? '&ws=' + encodeURIComponent(qs.get('ws')) : '') + (qs.get('tab') ? '&tab=1' : ''));
         renderLobby(); show('scr-lobby');
+    } else if (m.t === 'react') { onReact(m);
+    } else if (m.t === 'typing') { onTyping(m);
     } else if (m.t === 'chat') { chatAdd([m.m], false);
     } else if (m.t === 'chat_hist') { chatAdd(m.list, true);
     } else if (m.t === 'chat_perm') { onPerm(m);
@@ -266,7 +344,28 @@ function onMsg(m) {
 }
 
 // ---------------- Lá bài (Giai đoạn 2) ----------------
-let card = null, phase = 'waiting';
+let card = null, phase = 'waiting', pack = null, village = null, roleShown = false;
+function renderRoleBar() {
+    const el = $('role-bar'); if (!card || !me) { el.innerHTML = ''; return; }
+    const r = card.role;
+    el.innerHTML = `<div class="rb-top"><div class="rb-ic">${roleShown ? (card.icon ? `<img src="${esc(card.icon)}" alt="">` : '🃏') : '🂠'}</div>
+        <div><div class="rb-k">${esc(me.name)} · vai của bạn</div><div class="rb-n${roleShown ? '' : ' hid'}">${roleShown ? esc(r.name) : '••••••'}</div></div>
+        <button class="rb-btn" id="rb-btn">${roleShown ? '🙈 Ẩn' : '👁 Hiện'}</button></div>
+        ${roleShown ? `<div class="rb-more">${esc(r.desc)}</div>${pack && pack.length ? `<div class="rb-pack">🐺 Bầy Sói: ${pack.map(esc).join(', ')}</div>` : ''}` : ''}`;
+    $('rb-btn').onclick = () => { roleShown = !roleShown; renderRoleBar(); };
+}
+function renderRing() {
+    const box = $('ring'); if (!village || !village.length) { box.innerHTML = '<div class="ring-mid">Đang chờ quản trò…</div>'; $('rg-count').textContent = ''; return; }
+    const n = village.length, alive = village.filter(s => s.a).length, R = 41, sz = n <= 8 ? 46 : n <= 12 ? 40 : n <= 20 ? 32 : 24;
+    box.style.setProperty('--sz', sz + 'px');
+    box.innerHTML = village.map((s, i) => {
+        const ang = -Math.PI / 2 + i * 2 * Math.PI / n, x = 50 + R * Math.cos(ang), y = 50 + R * Math.sin(ang);
+        return `<div class="seat${s.a ? '' : ' dead'}${me && s.n === me.name ? ' me' : ''}" data-n="${esc(s.n)}" style="left:${x}%;top:${y}%">${avatar(s.n)}${s.a ? '' : '<span class="skull">💀</span>'}${n <= 20 ? `<span class="sn">${esc(s.n)}</span>` : ''}</div>`;
+    }).join('') + `<div class="ring-mid"><b>${alive}</b>còn sống</div>`;
+    $('rg-count').textContent = `${alive} sống · ${n - alive} chết`;
+    box.querySelectorAll('.seat').forEach(el => el.onclick = () => onSeatTap(el.dataset.n));
+    renderRingMode();
+}
 const viewedKey = id => 'lxn_viewed_' + id;
 const isViewed = id => { try { return IDS.getItem(viewedKey(id)) === '1'; } catch (e) { return false; } };
 const setViewed = id => { try { IDS.setItem(viewedKey(id), '1'); } catch (e) {} };
@@ -278,6 +377,18 @@ function onGm(d) {
         if (isNew && navigator.vibrate) { try { navigator.vibrate([40, 30, 60]); } catch (e) {} }
     } else if (d.kind === 'card_cancel') { card = null; closeCard(true); }
     else if (d.kind === 'dealing' || d.kind === 'started' || d.kind === 'waiting') phase = d.kind;
+    else if (d.kind === 'pack') pack = d.names || [];
+    else if (d.kind === 'turn') { onTurn(d); return; }
+    else if (d.kind === 'status') {
+        const prev = gstatus && gstatus.phase; gstatus = d; if (d.phase !== 'vote') myVote = '';
+        if (d.phase === 'end' && prev !== 'end') tab = 'public';                     // hết ván: mọi người về chat chung ở kênh Làng
+        if (d.phase === 'day' && (prev === 'night' || prev === 'deal')) tab = 'public'; // trời sáng: về tab Làng để thấy tin báo tử
+    }
+    else if (d.kind === 'timer') { timer = d.off ? { off: true } : Object.assign({}, d, { endAt: Date.now() + d.remain * 1000 }); renderTimer(); }
+    else if (d.kind === 'deck') deck = d.roles || [];
+    else if (d.kind === 'pin') pin = d.text || '';
+    else if (d.kind === 'vote_ack') myVote = d.target || '';
+    else if (d.kind === 'village') village = d.seats || [];
     renderLobby();
 }
 function renderCardZone() {
@@ -331,57 +442,191 @@ function closeCard(instant) {
     }, was ? 520 : 0);
 }
 
-// ---------------- Chat (Giai đoạn 3) ----------------
-const CH = { public: { ic: '💬', name: 'Làng' }, wolves: { ic: '🐺', name: 'Sói' }, couple: { ic: '💞', name: 'Cặp Đôi' }, dead: { ic: '👻', name: 'Người chết' }, dm: { ic: '💌', name: 'Quản trò' } };
-let chatList = [], chatSeen = new Set(), can = {}, label = '', chatCh = null;
+// ---------------- Chat (Giai đoạn 3 — bản 2) ----------------
+const CH = { public: { ic: '💬', name: 'Làng' }, dm: { ic: '✉️', name: 'Quản trò' }, wolves: { ic: '🐺', name: 'Sói' }, couple: { ic: '💞', name: 'Cặp Đôi' }, dead: { ic: '👻', name: 'Người chết' }, muted: { ic: '🤐', name: 'Bị cấm nói' } };
+const TAB_ORDER = ['public', 'dm', 'wolves', 'couple', 'dead', 'muted'];
+const EMO_REACT = ['👍', '❤️', '👎', '🤔', '😂', '😭', '😠'];
+const EMO_PICK = '😀😂🤣😅😊😍😎🤔🤨😐😏😒🙄😬😳🥺😭😡🤬😱🤫🤐😴🤯🥶👍👎👏🙏💪👀🫡❤️💔🔥💯✅❌❓❗🐺🧛👻💀🔪🛡️🔮🧪🌙☀️'.match(/\p{Extended_Pictographic}(\uFE0F)?/gu);
+let chatList = [], chatSeen = new Set(), can = {}, label = '', slow = 0, tab = 'public', unread = {}, typing = {}, gstatus = null, timer = null, deck = null, pin = '', myVote = '', reactOpen = null, slowUntil = 0;
 const chatKey = () => 'lxn_chat_' + (me ? me.code + '_' + me.id : '');
 function chatLoad() { try { const d = JSON.parse(IDS.getItem(chatKey()) || '[]'); d.forEach(m => { if (!chatSeen.has(m.id)) { chatSeen.add(m.id); chatList.push(m); } }); } catch (e) {} }
-function chatSave() { try { IDS.setItem(chatKey(), JSON.stringify(chatList.slice(-300))); } catch (e) {} }
-function chatAdd(list, fromHist) {
-    let n = 0;
-    (list || []).forEach(m => { if (!m || chatSeen.has(m.id)) return; chatSeen.add(m.id); chatList.push(m); n++; });
-    if (!n) return; chatList.sort((a, b) => a.ts - b.ts); chatSave(); renderChat();
-}
+function chatSave() { try { IDS.setItem(chatKey(), JSON.stringify(chatList.slice(-400))); } catch (e) {} }
 const nameCol = name => { let h = 0; for (const ch of String(name)) h = (h * 31 + ch.codePointAt(0)) >>> 0; return ['#f87171','#fb923c','#facc15','#4ade80','#2dd4bf','#38bdf8','#818cf8','#c084fc','#f472b6','#a3e635'][h % 10]; };
-function turnToast(t) { const el = $('turn-toast'); el.textContent = t; el.classList.add('show'); clearTimeout(el._h); el._h = setTimeout(() => el.classList.remove('show'), 4000); if (navigator.vibrate) { try { navigator.vibrate([60, 40, 60]); } catch (e) {} } }
-function onPerm(m) {
-    const before = can; can = m.can || {}; label = m.label || '';
-    // vừa tới lượt -> báo cho người chơi
-    if (can.wolves && !before.wolves) turnToast('🐺 Bầy Sói đã thức dậy — nhắn với đồng đội');
-    else if (can.couple && !before.couple) turnToast('💞 Cặp Đôi thức dậy — nhắn với người ấy');
-    else if (can.dm && !before.dm) turnToast('💌 Tới lượt bạn — có thể nhắn riêng quản trò');
-    else if (can.public && !before.public) turnToast('☀️ Làng đang thảo luận — bạn có thể chat');
-    const w = writable(); if (!w.includes(chatCh)) chatCh = w[0] || null;
-    renderChat();
+const mentionsMe = t => me && new RegExp('@' + me.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?![\\p{L}\\p{N}])', 'iu').test(t);
+// ---- Tiếng "Ting" (tự tạo, không cần file âm thanh) ----
+let actx = null;
+function unlockAudio() { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); } catch (e) {} }
+document.addEventListener('pointerdown', unlockAudio, { passive: true });
+function ting() {
+    try {
+        unlockAudio(); if (!actx) return;
+        const t0 = actx.currentTime;
+        [[1318.5, 0], [1760, 0.12]].forEach(([f, d]) => {
+            const o = actx.createOscillator(), g = actx.createGain(); o.type = 'sine'; o.frequency.value = f;
+            g.gain.setValueAtTime(0.0001, t0 + d); g.gain.exponentialRampToValueAtTime(0.35, t0 + d + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t0 + d + 0.45);
+            o.connect(g).connect(actx.destination); o.start(t0 + d); o.stop(t0 + d + 0.5);
+        });
+    } catch (e) {}
+    if (navigator.vibrate) { try { navigator.vibrate([60, 40, 90]); } catch (e) {} }
 }
-function writable() { return ['wolves', 'couple', 'dm', 'public', 'dead'].filter(c => can[c]); }
+let titleT = null; const baseTitle = document.title;
+function flashTitle(t) { clearInterval(titleT); let on = false; titleT = setInterval(() => { document.title = (on = !on) ? t : baseTitle; }, 900); }
+function stopFlash() { clearInterval(titleT); document.title = baseTitle; }
+['pointerdown', 'keydown', 'focus'].forEach(e => addEventListener(e, stopFlash, { passive: true }));
+function turnToast(t) { const el = $('turn-toast'); el.textContent = t; el.classList.add('show'); clearTimeout(el._h); el._h = setTimeout(() => el.classList.remove('show'), 4500); }
+// ---- Nhận dữ liệu ----
+function chatAdd(list, fromHist) {
+    let n = 0, ping = false;
+    (list || []).forEach(m => {
+        if (!m || chatSeen.has(m.id)) return; chatSeen.add(m.id); chatList.push(m); n++;
+        if (!fromHist && me && m.from !== me.id) {
+            if (m.ch !== tab) unread[m.ch] = (unread[m.ch] || 0) + 1;
+            if (m.from !== 'gm' && mentionsMe(m.text)) { ping = true; turnToast('🔔 ' + m.name + ' nhắc tới bạn'); }
+            if (m.from === 'gm' && m.ch === 'dm') ping = true;
+        }
+    });
+    if (!n) return; if (ping) ting();
+    chatList.sort((a, b) => a.ts - b.ts); chatSave(); renderChat();
+}
+function onReact(m) { const x = chatList.find(y => y.id === m.id); if (x) { x.r = m.r; chatSave(); renderChat(); } }
+function onTyping(m) { typing[m.from + m.ch] = { name: m.name, ch: m.ch, until: Date.now() + 3500 }; renderTyping(); }
+setInterval(() => renderTyping(), 800);
+function onPerm(m) {
+    can = m.can || {}; label = m.label || ''; slow = m.slow || 0;
+    // Kênh đang xem bị đóng mà có kênh khác vừa mở (vd trời sáng -> Làng) -> tự chuyển sang
+    if (!can[tab]) { const w = ['wolves', 'couple', 'dm', 'public', 'muted', 'dead'].find(c => can[c]); if (w) tab = w; else if (!chatList.some(x => x.ch === tab)) tab = 'public'; }
+    renderChat(); renderRingMode();
+}
+function onTurn(d) {
+    const key = 'turn:' + d.key, seenKey = 'lxn_turn_' + (me ? me.id : '') + '_' + d.key;
+    let fresh = true; try { fresh = IDS.getItem(seenKey) !== '1'; IDS.setItem(seenKey, '1'); } catch (e) {}
+    if (!chatSeen.has(key)) { chatSeen.add(key); chatList.push({ id: key, ch: d.ch, sys: true, text: d.text, color: d.color, ts: Date.now() }); chatSave(); }
+    if (fresh) { ting(); flashTitle('🔔 Tới lượt bạn'); turnToast('🔔 ' + d.text); tab = d.ch; unread[d.ch] = 0; }
+    renderChat(); renderRingMode();
+}
+// ---- Vẽ khung chat ----
+function tabsShown() { return TAB_ORDER.filter(c => c === 'public' || can[c] || chatList.some(m => m.ch === c)); }
 function renderChat() {
     const box = $('chat'); if (!me) return;
     const show = !!(roster && roster.locked) || chatList.length > 0;
     box.classList.toggle('hidden', !show); if (!show) return;
     $('ch-label').textContent = label; $('ch-label').classList.toggle('hidden', !label);
-    $('ch-dead').classList.toggle('hidden', !can.dead);
-    const feed = $('ch-feed'), atBottom = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 60;
-    feed.innerHTML = chatList.length ? chatList.slice(-300).map(m => {
-        const gm = m.from === 'gm', mine = me && m.from === me.id;
-        const tag = m.ch !== 'public' ? `<span class="tag ${m.ch}">${CH[m.ch].ic} ${m.ch === 'dm' ? (gm ? 'Quản trò → bạn' : 'Bạn → Quản trò') : CH[m.ch].name}</span>` : '';
-        return `<div class="cm${mine ? ' mine' : ''}${gm ? ' gm' : ''}">${tag}<b style="color:${gm ? '#fbbf24' : nameCol(m.name)}">${esc(gm ? 'Quản trò' : m.name)}</b>: ${esc(m.text)}</div>`;
-    }).join('') : '<div class="ch-empty">Chưa có tin nhắn</div>';
-    if (atBottom) feed.scrollTop = feed.scrollHeight;
-    const w = writable();
-    $('ch-chips').innerHTML = w.length > 1 ? w.map(c => `<button class="ch-chip${c === chatCh ? ' on' : ''}" data-c="${c}">${CH[c].ic} ${c === 'dm' ? 'Nhắn quản trò' : CH[c].name}</button>`).join('') : '';
-    $('ch-chips').querySelectorAll('.ch-chip').forEach(b => b.onclick = () => { chatCh = b.dataset.c; renderChat(); $('ch-in').focus(); });
-    const inp = $('ch-in'), on = !!chatCh;
-    inp.disabled = !on; $('ch-send').disabled = !on;
-    inp.placeholder = !on ? (label.startsWith('🌙') ? '🌙 Ban đêm — chỉ chat khi tới lượt bạn' : '🔒 Chưa tới lượt bạn chat')
-        : chatCh === 'dm' ? '💌 Nhắn riêng quản trò…' : chatCh === 'wolves' ? '🐺 Nhắn với bầy Sói…' : chatCh === 'couple' ? '💞 Nhắn với người ấy…' : chatCh === 'dead' ? '👻 Nhắn với người chết…' : '💬 Nhắn với cả làng…';
+    // ghim + danh sách vai
+    $('ch-pin').classList.toggle('hidden', !pin); $('ch-pin').innerHTML = pin ? '📌 ' + esc(pin) : '';
+    renderDeck();
+    // tab
+    const tabs = tabsShown(); if (!tabs.includes(tab)) tab = 'public';
+    unread[tab] = 0;
+    $('ch-tabs').innerHTML = tabs.map(c => `<button class="ch-tab${c === tab ? ' on' : ''}${can[c] ? ' live' : ''}" data-c="${c}">${CH[c].ic} ${CH[c].name}${unread[c] ? `<span class="ub">${unread[c]}</span>` : ''}</button>`).join('');
+    $('ch-tabs').querySelectorAll('.ch-tab').forEach(b => b.onclick = () => { tab = b.dataset.c; reactOpen = null; renderChat(); });
+    $('ch-dead').classList.toggle('hidden', !(can.dead && tab === 'dead'));
+    // tin nhắn của tab
+    const feed = $('ch-feed'), atBottom = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 70;
+    const list = chatList.filter(m => m.ch === tab).slice(-300);
+    feed.innerHTML = list.length ? list.map(m => {
+        if (m.sys) return `<div class="cm sys" style="color:${m.color};border-color:${m.color}">🔔 ${esc(m.text)}</div>`;
+        const gm = m.from === 'gm', mine = m.from === me.id, ment = !mine && mentionsMe(m.text);
+        const txt = esc(m.text).replace(/@([\p{L}\p{N}_]+(?: [\p{L}\p{N}_]+)?)/gu, '<span class="at">@$1</span>');
+        const r = m.r ? Object.entries(m.r).map(([e, u]) => `<button class="rc${u.includes(me.id) ? ' mine' : ''}" data-id="${m.id}" data-e="${e}">${e} ${u.length}</button>`).join('') : '';
+        const picker = reactOpen === m.id ? `<div class="rp">${EMO_REACT.map(e => `<button class="rpe" data-id="${m.id}" data-e="${e}">${e}</button>`).join('')}</div>` : '';
+        return `<div class="cm${mine ? ' mine' : ''}${gm ? ' gm' : ''}${ment ? ' ment' : ''}${m.ch === 'public' ? ' pub' : ''}" data-id="${m.id}"><b style="color:${gm ? '#fbbf24' : nameCol(m.name)}">${esc(gm ? 'Quản trò' : m.name)}</b>: ${txt}${r ? `<div class="rr">${r}</div>` : ''}${picker}</div>`;
+    }).join('') : `<div class="ch-empty">${tab === 'dm' ? 'Tin nhắn riêng giữa bạn và quản trò sẽ hiện ở đây' : 'Chưa có tin nhắn'}</div>`;
+    feed.querySelectorAll('.cm.pub').forEach(el => el.onclick = e => { if (e.target.closest('.rc,.rpe')) return; if (!can.public) return; reactOpen = reactOpen === el.dataset.id ? null : el.dataset.id; renderChat(); });
+    feed.querySelectorAll('.rc,.rpe').forEach(b => b.onclick = e => { e.stopPropagation(); if (!can.public) { chErr('Chỉ thả biểu cảm được khi làng đang thảo luận'); return; } sendJ({ t: 'react', id: b.dataset.id, emo: b.dataset.e }); reactOpen = null; });
+    if (atBottom || !feed._init) { feed.scrollTop = feed.scrollHeight; feed._init = true; }
+    renderTyping();
+    // ô nhập
+    const inp = $('ch-in'), on = !!can[tab], cool = tab === 'public' && slowUntil > Date.now();
+    inp.disabled = !on; $('ch-send').disabled = !on || cool; $('ch-emo').disabled = !on;
+    inp.placeholder = !on ? (tab === 'public' ? (label.startsWith('🌙') ? '🌙 Ban đêm — chỉ chat khi tới lượt bạn' : can.muted ? '🤐 Bạn bị cấm nói hôm nay — nhắn ở tab Bị cấm nói' : '🔒 Chưa tới lượt bạn chat') : '🔒 Kênh này đang đóng')
+        : { public: '💬 Nhắn với cả làng… (@ để nhắc tên)', dm: '✉️ Nhắn riêng quản trò…', wolves: '🐺 Nhắn với bầy Sói…', couple: '💞 Nhắn với người ấy…', dead: '👻 Nhắn với người chết…', muted: '🤐 Chỉ quản trò và người chết đọc được…' }[tab];
+    $('ch-slow').textContent = slow && tab === 'public' && on ? `🐢 Chế độ chậm: mỗi người 1 tin / ${slow} giây` + (cool ? ` — chờ ${Math.ceil((slowUntil - Date.now()) / 1000)}s` : '') : '';
 }
+function renderTyping() {
+    const el = $('ch-typing'); if (!el) return; const now = Date.now();
+    const l = Object.values(typing).filter(t => t.until > now && t.ch === tab);
+    el.textContent = l.length ? l.map(t => t.name).join(', ') + ' đang gõ…' : '';
+}
+function renderDeck() {
+    const el = $('ch-deck'); if (!deck || !deck.length) { el.classList.add('hidden'); return; }
+    el.classList.remove('hidden');
+    const total = deck.reduce((a, r) => a + r.c, 0), col = { villager: '#86efac', wolf: '#fca5a5', independent: '#fde68a' };
+    $('ch-deck-n').textContent = total + ' lá';
+    $('ch-deck-list').innerHTML = deck.map(r => `<span class="dk" style="color:${col[r.f] || '#e2e8f0'}">${esc(r.n)}${r.c > 1 ? ' ×' + r.c : ''}</span>`).join('');
+}
+function chErr(t) { $('ch-err').textContent = t; clearTimeout(window._ceT); window._ceT = setTimeout(() => $('ch-err').textContent = '', 3500); }
+// ---- Gửi ----
 function chatSend() {
-    const inp = $('ch-in'), text = inp.value.trim(); if (!text || !chatCh) return;
-    sendJ({ t: 'chat', ch: chatCh, text }); inp.value = ''; inp.focus();
+    const inp = $('ch-in'), text = inp.value.trim(); if (!text || !can[tab]) return;
+    if (tab === 'public' && slowUntil > Date.now()) return;
+    sendJ({ t: 'chat', ch: tab, text }); inp.value = ''; inp.focus(); hideMention(); hideEmo();
+    if (tab === 'public' && slow) { slowUntil = Date.now() + slow * 1000; const iv = setInterval(() => { renderChat(); if (slowUntil <= Date.now()) clearInterval(iv); }, 500); }
 }
 $('ch-send').onclick = chatSend;
 $('ch-in').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); chatSend(); } });
+let lastTypingSent = 0;
+$('ch-in').addEventListener('input', () => {
+    if (['dm', 'wolves', 'couple', 'dead', 'muted'].includes(tab) && can[tab] && Date.now() - lastTypingSent > 2000) { lastTypingSent = Date.now(); sendJ({ t: 'typing', ch: tab }); }
+    updateMention();
+});
+// ---- @ nhắc tên ----
+function allNames() { return (village && village.length ? village.map(s => s.n) : (roster ? roster.players.map(p => p.name) : [])).filter(n => !me || n !== me.name); }
+function updateMention() {
+    const inp = $('ch-in'), pos = inp.selectionStart, before = inp.value.slice(0, pos), m = /@([\p{L}\p{N}_ ]{0,20})$/u.exec(before);
+    if (!m || tab === 'dm') return hideMention();
+    const q = m[1].toLowerCase(), list = allNames().filter(n => n.toLowerCase().startsWith(q)).slice(0, 8);
+    if (!list.length) return hideMention();
+    const box = $('ch-mention'); box.classList.remove('hidden');
+    box.innerHTML = list.map(n => `<button class="mn" data-n="${esc(n)}">${avatar(n)}${esc(n)}</button>`).join('');
+    box.querySelectorAll('.mn').forEach(b => b.onmousedown = b.ontouchstart = e => { e.preventDefault(); const v = inp.value; inp.value = v.slice(0, pos - m[0].length) + '@' + b.dataset.n + ' ' + v.slice(pos); inp.focus(); hideMention(); });
+}
+function hideMention() { $('ch-mention').classList.add('hidden'); }
+// ---- Bảng emoji ----
+function hideEmo() { $('ch-emo-pop').classList.add('hidden'); }
+$('ch-emo').onclick = () => { const p = $('ch-emo-pop'); p.classList.toggle('hidden'); };
+$('ch-emo-pop').innerHTML = EMO_PICK.map(e => `<button class="ep">${e}</button>`).join('');
+$('ch-emo-pop').querySelectorAll('.ep').forEach(b => b.onmousedown = b.ontouchstart = e => {
+    e.preventDefault(); const inp = $('ch-in'); if (inp.disabled) return;
+    const s = inp.selectionStart ?? inp.value.length, en = inp.selectionEnd ?? s;
+    inp.value = inp.value.slice(0, s) + b.textContent + inp.value.slice(en); const p = s + b.textContent.length; inp.setSelectionRange(p, p); inp.focus();
+});
+// ---- Chạm vòng làng: chọn mục tiêu (tới lượt) / bỏ phiếu (biểu quyết) ----
+function myTurnCh() { return ['wolves', 'couple', 'dm'].find(c => can[c]) || null; }
+function canVote() { return gstatus && gstatus.phase === 'vote' && me && (gstatus.voters || []).includes(me.name); }
+function renderRingMode() {
+    const hint = $('ring-hint'); if (!hint) return;
+    const turn = myTurnCh();
+    if (canVote()) hint.innerHTML = myVote ? `🗳️ Bạn đã bầu <b>${esc(myVote)}</b> — chạm lại để rút, chạm người khác để đổi` : '🗳️ Chạm vào một người để bỏ phiếu treo cổ';
+    else if (turn) hint.innerHTML = turn === 'wolves' ? '👉 Chạm vào một người để đề xuất cắn' : turn === 'couple' ? '' : '👉 Chạm vào một người để gửi lựa chọn cho quản trò';
+    else hint.innerHTML = '';
+    hint.classList.toggle('hidden', !hint.innerHTML);
+    $('ring').classList.toggle('pickable', !!(canVote() || (turn && turn !== 'couple')));
+    document.querySelectorAll('#ring .seat').forEach(s => s.classList.toggle('voted', canVote() && s.dataset.n === myVote));
+}
+function onSeatTap(name) {
+    if (canVote()) {
+        if (name === me.name) { chErr('Không tự bầu cho mình'); return; }
+        const t = myVote === name ? '' : name; myVote = t; sendJ({ t: 'to_gm', data: { kind: 'vote', target: t } }); renderRingMode(); return;
+    }
+    const turn = myTurnCh(); if (!turn || turn === 'couple') return;
+    const roleName = card && card.role ? card.role.name : '';
+    const text = turn === 'wolves' ? `👉 Đề xuất cắn: ${name}` : `👉 ${roleName || 'Tôi'} chọn: ${name}`;
+    const ov = $('pick-ov'); ov.innerHTML = `<div class="pk-card">${avatar(name)}<div class="pk-q">${turn === 'wolves' ? 'Đề xuất cắn' : 'Chọn'} <b>${esc(name)}</b>?</div>
+        <div class="pk-sub">Gửi ${turn === 'wolves' ? 'cho bầy Sói và quản trò' : 'riêng cho quản trò'}</div>
+        <div class="pk-row"><button class="btn btn-ghost" id="pk-no">Huỷ</button><button class="btn btn-main" id="pk-yes">Gửi</button></div></div>`;
+    ov.classList.remove('hidden');
+    $('pk-no').onclick = () => ov.classList.add('hidden');
+    $('pk-yes').onclick = () => { sendJ({ t: 'chat', ch: turn, text }); ov.classList.add('hidden'); tab = turn; renderChat(); };
+}
+// ---- Đồng hồ ----
+function renderTimer() {
+    const el = $('g-timer'); if (!el) return;
+    if (!timer || timer.off) { el.classList.add('hidden'); return; }
+    const left = timer.running ? Math.max(0, Math.ceil((timer.endAt - Date.now()) / 1000)) : timer.remain;
+    el.classList.remove('hidden'); el.classList.toggle('low', left <= 10); el.classList.toggle('paused', !timer.running);
+    el.innerHTML = `<span>${timer.type === 'defense' ? '🗣️ Biện minh' : '☀️ Thảo luận'}${timer.running ? '' : ' (tạm dừng)'}</span><b>${String(Math.floor(left / 60)).padStart(2, '0')}:${String(left % 60).padStart(2, '0')}</b>`;
+}
+setInterval(renderTimer, 250);
 
 // ---------------- Giao diện ----------------
 function showJoin(msg) {
@@ -411,6 +656,9 @@ function renderLobby() {
         : '<span class="dots">Đang chờ quản trò bắt đầu</span>';
     renderCardZone();
     if (phase === 'started' && !window._rosterFolded) { window._rosterFolded = true; $('lb-roster').open = false; }
+    document.body.classList.toggle('ingame', phase === 'started' && !!card);
+    renderRoleBar(); renderRing();
+    $('g-status').textContent = gstatus ? gstatus.text : ''; $('g-status').classList.toggle('hidden', !gstatus);
     renderChat();
     $('lb-count').textContent = r.players.length + ' người';
     $('lb-list').innerHTML = r.players.map(p => `<div class="pl${p.id === me.id ? ' mine' : ''}">${avatar(p.name)}<span class="nm">${esc(p.name)}${p.id === me.id ? ' (bạn)' : ''}</span><span class="dot${p.online ? ' on' : ''}"></span></div>`).join('');
@@ -433,7 +681,7 @@ $('btn-join').onclick = doJoin;
 ['in-name', 'in-code'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') doJoin(); }));
 $('btn-leave').onclick = () => {
     if (!confirm('Rời phòng ' + me.code + '?')) return;
-    sendJ({ t: 'leave' }); me = null; save(null); roster = null; card = null; phase = 'waiting'; chatList = []; chatSeen = new Set(); can = {}; showJoin('');
+    sendJ({ t: 'leave' }); me = null; save(null); roster = null; card = null; phase = 'waiting'; chatList = []; chatSeen = new Set(); can = {}; pack = null; village = null; document.body.classList.remove('ingame'); showJoin('');
 };
 $('btn-wait-cancel').onclick = () => { me = null; save(null); showJoin(''); };
 

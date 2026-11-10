@@ -1615,6 +1615,21 @@
         #gc-in { flex:1; font-size:15px; color:#f1f5f9; background:#0b1222; border:1.5px solid #334155; border-radius:12px; padding:10px 12px; outline:none; }
         #gc-in:focus { border-color:#6366f1; }
         #gc-send { width:46px; border-radius:12px; border:none; background:#4f46e5; color:#fff; font-size:16px; cursor:pointer; }
+        /* ===== Biểu quyết / công cụ chat của quản trò ===== */
+        #vote-tally { margin:0 auto 14px; max-width:560px; padding:12px 14px; border-radius:16px; background:#111a33; border:1px solid #2c3a66; }
+        .vt-head { display:flex; justify-content:space-between; color:#f1f5f9; font-weight:900; font-size:15px; margin-bottom:8px; } .vt-head span { color:#94a3b8; font-size:12px; font-weight:700; }
+        .vt-row { display:grid; grid-template-columns:auto auto 1fr auto; align-items:center; gap:8px; padding:6px 0; border-top:1px solid #1e293b; color:#e2e8f0; font-size:14px; }
+        .vt-row.top b { color:#fca5a5; } .vt-bar { height:8px; border-radius:99px; background:#1e293b; overflow:hidden; } .vt-bar i { display:block; height:100%; background:#ef4444; transition: width .3s; }
+        .vt-n { font-weight:900; min-width:18px; text-align:right; } .vt-who { grid-column:2 / -1; color:#94a3b8; font-size:12px; margin-top:-4px; }
+        .vt-empty, .vt-hint { color:#64748b; font-size:12px; font-weight:600; padding-top:6px; }
+        .gc-tools { display:flex; gap:8px; align-items:center; justify-content:space-between; padding:0 14px 8px; }
+        .gc-slow { font-size:12px; font-weight:700; color:#cbd5e1; display:flex; align-items:center; gap:6px; }
+        .gc-slow select { font-size:12px; color:#e2e8f0; background:#111827; border:1px solid #334155; border-radius:8px; padding:3px 6px; }
+        .gc-pinbtn { font-size:12px; font-weight:700; color:#fde68a; background:#2a2410; border:1px solid #574a16; border-radius:8px; padding:5px 8px; cursor:pointer; }
+        .gc-pin { margin:0 14px 8px; padding:7px 10px; border-radius:10px; background:#2a2410; color:#fde68a; font-size:13px; font-weight:700; display:flex; justify-content:space-between; gap:8px; }
+        .gc-pin button { color:#fca5a5; background:none; border:none; cursor:pointer; font-weight:900; }
+        .gc-typing { min-height:18px; padding:2px 14px; font-size:12px; color:#a5b4fc; font-style:italic; }
+        .gc-react { display:flex; gap:4px; margin:2px 0 0 22px; } .gc-react span { font-size:12px; background:#1e293b; border-radius:99px; padding:1px 7px; color:#cbd5e1; }
 </style>
 </head>
 <body>
@@ -9011,6 +9026,316 @@
             onlineClose = function () { _close.apply(this, arguments); if (!onlineActive()) { window._gmChat = []; window._gmChatSeen = new Set(); try { localStorage.removeItem(GM_CHAT_KEY); } catch (e) {} renderGmChatBtn(); } };
         })();
         setTimeout(() => { gmChatLoad(); renderGmChatBtn(); }, 600);
+
+    
+        // =====================================================================
+        //  CHƠI ONLINE — Giai đoạn 3b: ô gửi theo vai đang gọi, danh sách bầy Sói, vòng làng + báo tử cho người chơi
+        // =====================================================================
+        function roleNameOf(name) {
+            let p = (state.players || []).find(x => x.name === name);
+            let rid = p ? p.roleId : (state.dealAssignment || {})[name];
+            let r = ROLES_DB.find(x => x.id === rid); return r ? r.name : '';
+        }
+        function gameHasCouple() { return !!((state.history && (state.history.coupledIds || []).length) || (state.deck && state.deck.cupid > 0)); }
+        // Danh sách nơi gửi: vai đang gọi lên đầu; chỉ hiện kênh có ý nghĩa với ván này
+        function gmTargets() {
+            let n = window._gmPermNames || { public: [], wolves: [], couple: [], dead: [], dm: [] }, out = [];
+            let st = state.currentView === 'view-night' && state.nightSequence ? state.nightSequence[state.currentStepIndex] : null;
+            let stepName = st ? (st.role ? st.role.name : st.type === 'group_action' ? 'Bầy Sói' : '') : '';
+            n.dm.forEach(nm => { let id = onlineIdOf(nm); if (id) out.push({ v: 'dm:' + id, t: `🎯 ${stepName || roleNameOf(nm) || 'Vai đang gọi'} — ${nm}`, now: true }); });
+            if (n.wolves.length) out.push({ v: 'wolves', t: `🎯 🐺 Bầy Sói đang thức (${n.wolves.join(', ')})`, now: true });
+            if (n.couple.length) out.push({ v: 'couple', t: `🎯 💞 Cặp Đôi (${n.couple.join(', ')})`, now: true });
+            out.push({ v: 'public', t: '💬 Cả làng' });
+            if (!n.wolves.length) out.push({ v: 'wolves', t: '🐺 Bầy Sói' });
+            if (!n.couple.length && gameHasCouple()) out.push({ v: 'couple', t: '💞 Cặp Đôi' });
+            if (n.dead.length) out.push({ v: 'dead', t: `👻 Người chết (${n.dead.length})` });
+            ((state.online && state.online.players) || []).forEach(p => {
+                if (out.some(o => o.v === 'dm:' + p.id)) return;
+                let rn = roleNameOf(p.name); out.push({ v: 'dm:' + p.id, t: `💌 Nhắn riêng: ${p.name}${rn ? ' — ' + rn : ''}` });
+            });
+            return out;
+        }
+        // Ghi đè: 1 ô chọn duy nhất, có ghi rõ vai
+        gmChatFillSelectors = function () {
+            let ch = document.getElementById('gc-ch'); if (!ch) return;
+            let dm = document.getElementById('gc-dm'); if (dm) dm.classList.add('hidden');
+            let cur = ch.value, list = gmTargets();
+            ch.innerHTML = list.map(o => `<option value="${o.v}">${escapeHtml(o.t)}</option>`).join('');
+            ch.value = list.some(o => o.v === cur) ? cur : (list[0] || {}).v;
+        };
+        gmChatChannelChanged = function () {};
+        // Mặc định = vai đang được gọi. Chỉ tự đổi khi ô nhập đang trống (tin đang gõ dở không bị bắn nhầm người)
+        gmChatSuggestChannel = function (force) {
+            let ch = document.getElementById('gc-ch'), inp = document.getElementById('gc-in'); if (!ch) return;
+            gmChatFillSelectors();
+            if (!force && inp && inp.value.trim()) return;
+            let list = gmTargets(), now = list.find(o => o.now);
+            ch.value = now ? now.v : 'public';
+        };
+        gmChatSend = function () {
+            let inp = document.getElementById('gc-in'), text = inp.value.trim(); if (!text) return;
+            let v = document.getElementById('gc-ch').value || 'public', night = /^view-night/.test(state.currentView);
+            if (v === 'public' && night && !confirm('Đang là BAN ĐÊM. Gửi tin này cho CẢ LÀNG?\n\n"' + text + '"')) return;
+            let msg = v.startsWith('dm:') ? { t: 'chat', ch: 'dm', to: v.slice(3), text } : { t: 'chat', ch: v, text };
+            if (!gmSend(msg)) { onlineToast('📶 Mất kết nối server, thử lại sau'); return; }
+            inp.value = ''; inp.focus();
+        };
+        // Bước đổi -> ô gửi tự chuyển sang vai mới
+        (function () {
+            const _sync = onlineSyncPerm;
+            let lastKey = '';
+            onlineSyncPerm = function (force) {
+                _sync.apply(this, arguments);
+                let n = window._gmPermNames; if (!n) return;
+                let key = JSON.stringify([n.dm, n.wolves, n.couple, state.currentView]);
+                if (key !== lastKey) { lastKey = key; gmChatSuggestChannel(false); onlineSendPack(n); }
+                onlineSendVillage(); onlineAnnounce();
+            };
+        })();
+        // ---------- Bầy Sói biết nhau (gửi riêng cho những con Sói đang thức) ----------
+        let _packKey = '';
+        function onlineSendPack(n) {
+            if (!n.wolves.length) return;
+            let key = n.wolves.slice().sort().join('|'); if (key === _packKey) return; _packKey = key;
+            n.wolves.forEach(nm => { let id = onlineIdOf(nm); if (id) gmSend({ t: 'to', to: id, keep: 'pack', data: { kind: 'pack', names: n.wolves } }); });
+        }
+        // ---------- Vòng làng cho người chơi: ai còn sống / đã chết ----------
+        let _villageKey = '';
+        function onlineSendVillage() {
+            if (!onlineActive() || !state.online.locked || !(state.online.deal && state.online.deal.started)) return;
+            let order = (state.seatOrder && state.seatOrder.length ? state.seatOrder : (state.online.players || []).map(p => p.name));
+            let gp = state.players && state.players.length ? state.players : null;
+            let seats = order.map(nm => { let p = gp && gp.find(x => x.name === nm); return { n: nm, a: p ? (p.isAlive ? 1 : 0) : 1 }; });
+            let key = JSON.stringify(seats); if (key === _villageKey) return; _villageKey = key;
+            gmSend({ t: 'all', keep: 'village', data: { kind: 'village', seats } });
+        }
+        // ---------- Báo tử: trời sáng / sau khi treo cổ, tự nhắn cho cả làng (không nói nguyên nhân, không lộ vai) ----------
+        function onlineAnnounce() {
+            if (!onlineActive() || !state.online.locked || !gmWs || gmWs.readyState !== 1) return;
+            let gp = state.players && state.players.length ? state.players : null; if (!gp) return;
+            let a = state.online.ann || (state.online.ann = { dead: [], day: 0 });
+            let dead = gp.filter(p => !p.isAlive).map(p => p.name), fresh = dead.filter(nm => !a.dead.includes(nm)), v = state.currentView, d = state.dayCount || 1;
+            let text = '';
+            if (v === 'view-night-result' && a.day !== d) {
+                text = fresh.length ? `🌅 Trời sáng — Ngày ${d}. Đêm qua có người chết: ${fresh.join(', ')} 💀` : `🌅 Trời sáng — Ngày ${d}. Đêm qua không ai chết.`;
+                a.day = d;
+            } else if ((/^view-day/.test(v) || v === 'view-end') && fresh.length) text = `💀 ${fresh.join(', ')} đã chết.`;
+            if (!text) return;
+            a.dead = dead; onlineSave();
+            gmSend({ t: 'chat', ch: 'public', text });
+        }
+        // Khung chat đang mở mà đổi bước -> làm mới danh sách nơi gửi
+        setInterval(() => { if (gmChatOpen()) gmChatFillSelectors(); }, 1500);
+
+    
+        // =====================================================================
+        //  CHƠI ONLINE — Giai đoạn 3c: trạng thái ván, lượt riêng, danh sách vai, đồng hồ, biểu quyết,
+        //  ghim tin, chế độ chậm, "đang gõ", biểu cảm, kênh người bị cấm nói, chat tự do khi hết ván
+        // =====================================================================
+        CH_INFO.dm.ic = '✉️';
+        CH_INFO.muted = { ic: '🤐', name: 'Bị cấm nói', col: '#fdba74' };
+        const FAC_COL = { villager: '#4ade80', wolf: '#f87171', independent: '#facc15' };
+        // "đang ..." / "Tới lượt bạn, vui lòng ..." cho từng vai
+        const ROLE_ACT = {
+            guard: 'chọn người được bảo vệ đêm nay', seer: 'chọn một người để soi xem có phải Sói không', apprentice_seer: 'chọn một người để soi xem có phải Sói không',
+            aura_seer: 'chọn một người để soi xem có chức năng không', mystic_seer: 'chọn một người để soi vai trò', wolf_sorcerer: 'chọn một người để soi xem có phải Tiên Tri không',
+            witch: 'quyết định dùng bình cứu hoặc bình độc', hunter: 'chọn người sẽ bị kéo theo nếu mình chết', huntress: 'chọn người để bắn',
+            spirit_medium: 'chọn 2 người để so xem có cùng phe không', explorer: 'chọn một người để khám phá', pi: 'chọn một người để điều tra',
+            spellcaster: 'chọn một người để phù phép cấm nói ngày mai', old_hag: 'chọn một người để cấm túc ngày mai', priest: 'chọn một người để ban phước',
+            cult_leader: 'chọn một người để kết nạp vào giáo phái', zombie: 'chọn một người để ăn não', cupid: 'chọn hai người để ghép đôi',
+            doppelganger: 'chọn một người làm hình mẫu để sao chép vai', dire_wolf: 'chọn một người làm bạn đồng hành', friendly_vampire: 'chọn hướng để hỏi một nhóm người',
+            beholder: 'xem ai là Tiên Tri', insomniac: 'xem hàng xóm có ai thức dậy không', frankenstein: 'chọn người đã chết để thừa hưởng chức năng',
+            blob: 'lây lan sang người bên cạnh', ghost: 'viết một chữ cái gợi ý cho làng', big_bad_wolf: 'chọn thêm một người để cắn'
+        };
+        function mutedNamesToday() {
+            let gp = state.players || [];
+            let br = ((state.history && state.history.brainlessIds) || []).map(id => gp.find(p => p.id === id)).filter(p => p && p.isAlive).map(p => p.name);
+            return [...new Set([...(typeof getBanishedAliveNames === 'function' ? getBanishedAliveNames() : []), ...(typeof getSilencedAliveNames === 'function' ? getSilencedAliveNames() : []), ...br])];
+        }
+        // Ghi đè: thêm kênh bị cấm nói + chat tự do khi hết ván
+        onlineComputePerm = function () {
+            let P = (state.online && state.online.players) || [];
+            let gp = (state.players && state.players.length) ? state.players : null;
+            let aliveNames = gp ? gp.filter(p => p.isAlive).map(p => p.name) : P.map(p => p.name);
+            let deadNames = gp ? gp.filter(p => !p.isAlive).map(p => p.name) : [];
+            let perm = { public: [], wolves: [], couple: [], dead: deadNames, dm: [], muted: [] }, label = '', v = state.currentView, d = state.dayCount || 1;
+            if (/^view-day/.test(v)) {
+                let muted = mutedNamesToday();
+                perm.muted = aliveNames.filter(n => muted.includes(n));
+                if (v !== 'view-day-execute') perm.public = aliveNames.filter(n => !muted.includes(n));
+                label = v === 'view-day-discuss' ? `☀️ Ngày ${d} — Thảo luận` : v === 'view-day-defense' ? `☀️ Ngày ${d} — Biện minh` : `⚖️ Ngày ${d} — Biểu quyết`;
+            } else if (v === 'view-night' || v === 'view-night-transition') {
+                label = `🌙 Đêm ${d}`;
+                if (v === 'view-night') {
+                    let st = state.nightSequence && state.nightSequence[state.currentStepIndex], called = (st ? namesCalledInStep(st) : []).filter(n => !deadNames.includes(n));
+                    if (st && (st.type === 'group_action' || st.type === 'bigbad_action')) perm.wolves = called;
+                    else if (st && st.type === 'couple') perm.couple = called;
+                    else perm.dm = called;
+                }
+            } else if (v === 'view-night-result') label = '🌅 Trời sáng';
+            else if (v === 'view-end') { label = '🏁 Hết ván — chat tự do'; perm.public = P.map(p => p.name); }
+            else if (v === 'view-deal') label = '🃏 Đang chia bài';
+            else label = state.online && state.online.locked ? '🔒 Chờ quản trò' : '⏳ Sảnh chờ';
+            let ids = {}; Object.keys(perm).forEach(k => ids[k] = [...new Set(perm[k])].map(onlineIdOf).filter(Boolean));
+            return { names: perm, ids, label };
+        };
+        // ---------- Trạng thái cho cả làng + lượt riêng cho người đang được gọi ----------
+        function stepInfo(st) {
+            if (!st) return null;
+            if (st.type === 'group_action') return { who: 'Bầy Sói', act: 'chọn mục tiêu để cắn đêm nay', fac: 'wolf', turn: 'Tới lượt bầy Sói — hãy cùng chọn người để cắn đêm nay' };
+            if (st.type === 'couple') return { who: 'Cặp Đôi', act: 'thức dậy trò chuyện', fac: 'independent', turn: 'Tới lượt Cặp Đôi — hãy trò chuyện với người ấy' };
+            if (st.type === 'wolf_remind_all') return { who: 'Quản trò', act: 'dặn dò phe Sói', fac: 'wolf', turn: 'Quản trò đang dặn dò bạn — hãy đọc kỹ tin nhắn' };
+            if (st.type === 'wake_notice') return { who: 'Quản trò', act: 'đánh thức thêm người', fac: 'wolf', turn: 'Bạn được đánh thức — hãy chờ quản trò hướng dẫn' };
+            let r = st.role || {}, act = ROLE_ACT[r.id] || 'thực hiện chức năng';
+            if (st.type === 'bigbad_action') act = ROLE_ACT.big_bad_wolf;
+            return { who: r.name || 'Quản trò', act, fac: r.faction || 'villager', turn: 'Tới lượt bạn, vui lòng ' + act };
+        }
+        function statusNow() {
+            let v = state.currentView, d = state.dayCount || 1;
+            if (v === 'view-deal') return { text: '🃏 Quản trò đang chia bài, vui lòng chờ', phase: 'deal' };
+            if (v === 'view-night-transition') return { text: `🌙 Đêm ${d} bắt đầu — mọi người nhắm mắt`, phase: 'night' };
+            if (v === 'view-night') {
+                let i = stepInfo(state.nightSequence && state.nightSequence[state.currentStepIndex]);
+                return { text: i ? `🌙 ${i.who} đang ${i.act}, vui lòng chờ` : `🌙 Đêm ${d}`, phase: 'night' };
+            }
+            if (v === 'view-night-result') return { text: '🌅 Trời sáng — quản trò đang công bố kết quả đêm qua', phase: 'day' };
+            if (v === 'view-day-discuss') return { text: '☀️ Làng đang thảo luận', phase: 'day' };
+            if (v === 'view-day-defense') return { text: '🗣️ Đang biện minh', phase: 'day' };
+            if (v === 'view-day-execute') {
+                let muted = mutedNamesToday();
+                return { text: '⚖️ Làng đang biểu quyết — chạm vào một người trên vòng làng để bỏ phiếu', phase: 'vote', voters: (state.players || []).filter(p => p.isAlive && !muted.includes(p.name)).map(p => p.name) };
+            }
+            if (v === 'view-end') return { text: '🏁 Ván đã kết thúc — mọi người có thể chat tự do', phase: 'end' };
+            return null;
+        }
+        let _statusKey = '', _turnKey = '', _deckKey = '', _timerSent = null;
+        function onlineBroadcastGame() {
+            if (!onlineActive() || !state.online.locked || !gmWs || gmWs.readyState !== 1) return;
+            let started = state.online.deal && state.online.deal.started;
+            let st = statusNow();
+            if (st) { let k = JSON.stringify(st); if (k !== _statusKey) { _statusKey = k; gmSend({ t: 'all', keep: 'status', data: Object.assign({ kind: 'status' }, st) }); } }
+            // lượt riêng
+            if (state.currentView === 'view-night') {
+                let step = state.nightSequence && state.nightSequence[state.currentStepIndex], info = stepInfo(step);
+                let key = `${state.dayCount}|${state.currentStepIndex}|${step && step.type}`;
+                if (info && key !== _turnKey) {
+                    _turnKey = key;
+                    let n = window._gmPermNames || {}, ch = (n.wolves || []).length ? 'wolves' : (n.couple || []).length ? 'couple' : 'dm';
+                    let who = ch === 'wolves' ? n.wolves : ch === 'couple' ? n.couple : (n.dm || []);
+                    who.forEach(nm => { let id = onlineIdOf(nm); if (id) gmSend({ t: 'to', to: id, keep: 'turn', data: { kind: 'turn', key, text: info.turn, color: FAC_COL[info.fac] || '#4ade80', ch } }); });
+                }
+            }
+            // danh sách vai trong ván (công khai)
+            if (started) {
+                let deck = state.online.deal.deck || state.deck || {};
+                let roles = ROLES_DB.filter(r => deck[r.id] > 0).map(r => ({ n: r.name, c: deck[r.id], f: r.faction }));
+                let k = JSON.stringify(roles); if (k !== _deckKey) { _deckKey = k; gmSend({ t: 'all', keep: 'deck', data: { kind: 'deck', roles } }); }
+            }
+            // đồng hồ thảo luận / biện minh
+            let v = state.currentView, type = v === 'view-day-discuss' ? 'discuss' : v === 'view-day-defense' ? 'defense' : null;
+            let now = Date.now(), T = type && state.timers && state.timers[type];
+            let cur = T ? { type, running: !!T.running, remain: T.m * 60 + T.s, total: T.total || (T.m * 60 + T.s) } : { off: true };
+            let send = false;
+            if (!_timerSent) send = true;
+            else if (!!cur.off !== !!_timerSent.d.off || cur.type !== _timerSent.d.type || cur.running !== _timerSent.d.running) send = true;
+            else if (!cur.off) { let pred = _timerSent.d.running ? _timerSent.d.remain - (now - _timerSent.at) / 1000 : _timerSent.d.remain; if (Math.abs(pred - cur.remain) > 1.5) send = true; }
+            if (send) { _timerSent = { d: cur, at: now }; gmSend({ t: 'all', keep: 'timer', data: Object.assign({ kind: 'timer' }, cur) }); }
+            renderVoteTally();
+        }
+        setInterval(() => { try { onlineBroadcastGame(); } catch (e) { console.error(e); } }, 600);
+        // ---------- Biểu quyết bằng chạm ----------
+        function onlineVotes() {
+            let o = state.online; if (!o) return {};
+            if (!o.votes || o.votes.day !== state.dayCount) o.votes = { day: state.dayCount, map: {} };
+            return o.votes.map;
+        }
+        function onlineOnVote(voterName, target) {
+            if (state.currentView !== 'view-day-execute') return;
+            let st = statusNow(); if (!st || !st.voters.includes(voterName)) return;
+            let alive = (state.players || []).filter(p => p.isAlive).map(p => p.name);
+            let map = onlineVotes();
+            if (!target) delete map[voterName]; else if (alive.includes(target)) map[voterName] = target; else return;
+            onlineSave(); renderVoteTally();
+            let id = onlineIdOf(voterName); if (id) gmSend({ t: 'to', to: id, data: { kind: 'vote_ack', target: map[voterName] || '' } });
+        }
+        function renderVoteTally() {
+            let host = document.querySelector('#view-day-execute .flex-1') || document.getElementById('view-day-execute');
+            let box = document.getElementById('vote-tally');
+            let show = onlineActive() && state.online.locked && state.currentView === 'view-day-execute';
+            if (!show) { if (box) box.remove(); return; }
+            if (!box && host) { box = document.createElement('div'); box.id = 'vote-tally'; host.insertBefore(box, host.firstChild); }
+            if (!box) return;
+            let map = onlineVotes(), st = statusNow() || { voters: [] }, tally = {};
+            Object.entries(map).forEach(([v, t]) => (tally[t] = tally[t] || []).push(v));
+            let rows = Object.entries(tally).sort((a, b) => b[1].length - a[1].length), max = rows.length ? rows[0][1].length : 0;
+            let html = `<div class="vt-head">🗳️ Phiếu bầu <span>${Object.keys(map).length}/${st.voters.length} người đã bầu</span></div>` +
+                (rows.length ? rows.map(([t, vs]) => `<div class="vt-row${vs.length === max ? ' top' : ''}">${avatarHtml(t, 26)}<b>${escapeHtml(t)}</b><span class="vt-bar"><i style="width:${Math.round(vs.length / Math.max(1, st.voters.length) * 100)}%"></i></span><span class="vt-n">${vs.length}</span><div class="vt-who">${vs.map(escapeHtml).join(', ')}</div></div>`).join('')
+                    : '<div class="vt-empty">Chưa có ai bỏ phiếu</div>') + '<div class="vt-hint">Chạm vào người bị treo trên vòng làng để xác nhận như bình thường.</div>';
+            if (box._h !== html) { box._h = html; box.innerHTML = html; }
+        }
+        // ---------- "đang gõ…", biểu cảm, chế độ chậm, ghim tin trong khung chat của quản trò ----------
+        window._gmTyping = {};
+        function renderGmTyping() {
+            let el = document.getElementById('gc-typing'); if (!el) return;
+            let now = Date.now(), list = Object.values(window._gmTyping).filter(t => t.until > now);
+            el.innerHTML = list.length ? list.map(t => `${(CH_INFO[t.ch] || {}).ic || ''} <b>${escapeHtml(t.name)}</b> đang gõ…`).join(' · ') : '';
+        }
+        setInterval(renderGmTyping, 700);
+        function ensureGmTools() {
+            let d = document.getElementById('gm-chat'); if (!d || document.getElementById('gc-tools')) return;
+            let tools = document.createElement('div'); tools.id = 'gc-tools'; tools.className = 'gc-tools';
+            tools.innerHTML = `<label class="gc-slow">🐢 Chế độ chậm <select id="gc-slow" onchange="gmSend({t:'slow',sec:+this.value})"><option value="0">Tắt</option><option value="5">5 giây</option><option value="10">10 giây</option><option value="20">20 giây</option></select></label>
+                <button type="button" class="gc-pinbtn" onclick="gmPinFromInput()">📌 Ghim chữ đang gõ</button>`;
+            d.insertBefore(tools, document.getElementById('gc-filters'));
+            let pin = document.createElement('div'); pin.id = 'gc-pin'; pin.className = 'gc-pin hidden'; d.insertBefore(pin, document.getElementById('gc-filters'));
+            let ty = document.createElement('div'); ty.id = 'gc-typing'; ty.className = 'gc-typing'; d.insertBefore(ty, d.querySelector('.gc-compose'));
+            renderGmPin();
+        }
+        function gmPinFromInput() {
+            let inp = document.getElementById('gc-in'), text = inp.value.trim();
+            if (!text) { onlineToast('Gõ nội dung cần ghim vào ô nhập trước'); return; }
+            state.online.pin = text; onlineSave(); gmSend({ t: 'all', keep: 'pin', data: { kind: 'pin', text } }); inp.value = ''; renderGmPin();
+        }
+        function gmUnpin() { state.online.pin = ''; onlineSave(); gmSend({ t: 'all', keep: 'pin', data: { kind: 'pin', text: '' } }); renderGmPin(); }
+        function renderGmPin() {
+            let el = document.getElementById('gc-pin'); if (!el) return;
+            let t = state.online && state.online.pin;
+            el.classList.toggle('hidden', !t); el.innerHTML = t ? `📌 ${escapeHtml(t)} <button type="button" onclick="gmUnpin()" title="Bỏ ghim">✕</button>` : '';
+        }
+        (function () {
+            const _ensure = ensureGmChat; ensureGmChat = function () { _ensure.apply(this, arguments); ensureGmTools(); };
+            const _render = renderGmChat;
+            renderGmChat = function () {
+                _render.apply(this, arguments);
+                // biểu cảm dưới tin kênh Làng (quản trò chỉ xem)
+                let feed = document.getElementById('gc-feed'); if (!feed) return;
+                let f = window._gmChatFilter, shown = window._gmChat.filter(m => f === 'all' || m.ch === f).slice(-300);
+                [...feed.querySelectorAll('.gc-m')].forEach((el, i) => { let m = shown[i]; if (m && m.r) el.insertAdjacentHTML('beforeend', '<div class="gc-react">' + Object.entries(m.r).map(([e, u]) => `<span>${e} ${u.length}</span>`).join('') + '</div>'); });
+            };
+            const _gm = gmOnMsg;
+            gmOnMsg = function (m) {
+                _gm(m);
+                if (m.t === 'typing') { window._gmTyping[m.from + m.ch] = { name: m.name, ch: m.ch, until: Date.now() + 3500 }; renderGmTyping(); }
+                else if (m.t === 'react') { let x = window._gmChat.find(y => y.id === m.id); if (x) { x.r = m.r; gmChatSave(); renderGmChat(); } }
+                else if (m.t === 'slow_ok') { let s = document.getElementById('gc-slow'); if (s) s.value = String(m.sec); }
+                else if (m.t === 'msg' && m.data && m.data.kind === 'vote') onlineOnVote(onlineNameOf(m.from), m.data.target || '');
+                else if (m.t === 'gm_ok') { _statusKey = _turnKey = _deckKey = ''; _timerSent = null; }
+            };
+            // ✉️ thay 💌 + kênh bị cấm nói trong danh sách nơi gửi
+            const _targets = gmTargets;
+            gmTargets = function () {
+                let list = _targets.apply(this, arguments).map(o => Object.assign({}, o, { t: o.t.replace(/💌/g, '✉️') }));
+                let n = window._gmPermNames || {};
+                if ((n.muted || []).length) list.splice(list.findIndex(o => o.v === 'public') + 1, 0, { v: 'muted', t: `🤐 Người bị cấm nói (${n.muted.join(', ')})` });
+                return list;
+            };
+            const _status = renderGmChatStatus;
+            renderGmChatStatus = function () {
+                _status.apply(this, arguments);
+                let el = document.getElementById('gc-status'), n = window._gmPermNames; if (!el || !n) return;
+                el.innerHTML = el.innerHTML.replace(/💌/g, '✉️') + ((n.muted || []).length ? ` · 🤐 Bị cấm nói: ${n.muted.map(escapeHtml).join(', ')}` : '');
+            };
+        })();
 
     </script>
 </body>
