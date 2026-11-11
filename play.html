@@ -260,6 +260,25 @@
     .mini-card, .dl-back-card, .rc-back { position:relative; overflow:hidden; color:#fff !important; border-color:#fdba74 !important; background:linear-gradient(145deg,#fb923c,#ea580c 60%,#c2410c) !important; text-shadow:0 2px 6px rgba(124,45,18,.6); }
     .mini-card::before, .dl-back-card::before, .rc-back::before { content:''; position:absolute; inset:14%; background:var(--lxn-logo) center/contain no-repeat; opacity:.22; filter:brightness(2.2) grayscale(1); pointer-events:none; }
     @keyframes glow { 0%,100% { box-shadow:0 0 0 0 rgba(251,146,60,.55) } 50% { box-shadow:0 0 0 10px rgba(251,146,60,0) } }
+    /* ---- Ảnh đại diện ---- */
+    .av-pick { display:flex; align-items:center; gap:14px; margin-bottom:16px; }
+    .av-btn { position:relative; width:72px; height:72px; border-radius:50%; cursor:pointer; flex-shrink:0; margin:0; }
+    .av-prev { width:72px; height:72px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px; background:#0b1222; border:2px dashed #475569; overflow:hidden; }
+    .av-prev img { width:100%; height:100%; object-fit:cover; }
+    .av-cam { position:absolute; right:-2px; bottom:-2px; width:24px; height:24px; border-radius:50%; background:var(--iris); color:#fff; font-size:13px; display:flex; align-items:center; justify-content:center; border:2px solid var(--card); }
+    .av-hint { color:var(--mute); font-size:13px; font-weight:700; line-height:1.4; } .av-hint small { font-weight:600; opacity:.8; }
+    img.av.av-img { object-fit:cover; padding:0; background:#0b1222; }
+    /* ---- Mũi tên giống quản trò ---- */
+    .ring-svg path.arr { fill:none; stroke-width:.75; stroke-linecap:round; animation: arrDash 1.1s linear infinite; filter: drop-shadow(0 0 1.2px currentColor); }
+    .ring-svg polygon { filter: drop-shadow(0 0 1.2px currentColor); }
+    .ring-svg .arr-badge { fill:#0C1324; stroke-width:.45; }
+    .ring-svg .arr-ico { font-size:2.9px; dominant-baseline:central; alignment-baseline:central; }
+    .ring-svg g.arr-prev { opacity:.45; } .ring-svg g.arr-prev path.arr { animation:none; }
+    @keyframes arrDash { to { stroke-dashoffset:-8; } }
+    /* ---- Chat: giờ gửi, nút tin mới ---- */
+    .cm .ct { font-size:10px; color:#64748b; font-weight:700; margin-right:5px; font-variant-numeric:tabular-nums; }
+    .cm.sys .ct { display:none; }
+    .ch-jump { display:block; margin:-38px auto 6px; position:relative; z-index:2; font:inherit; font-size:12px; font-weight:800; color:#fff; background:var(--iris); border:none; border-radius:99px; padding:6px 14px; cursor:pointer; box-shadow:0 6px 18px rgba(0,0,0,.45); }
     .hidden { display:none !important; }
     @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
 </style>
@@ -278,6 +297,8 @@
 
     <!-- VÀO PHÒNG -->
     <div id="scr-join" class="card hidden">
+        <div class="av-pick"><label class="av-btn" for="in-av" title="Chọn ảnh đại diện"><span id="av-prev" class="av-prev">📷</span><span class="av-cam">✎</span></label>
+            <input id="in-av" type="file" accept="image/*" hidden><div class="av-hint">Chạm để chọn ảnh đại diện<br><small>(không bắt buộc)</small></div></div>
         <div class="field"><label for="in-name">Tên hiển thị</label>
             <input id="in-name" maxlength="20" autocomplete="nickname" placeholder="Tên của bạn"></div>
         <div class="field"><label for="in-code">Mã phòng</label>
@@ -317,6 +338,7 @@
             <div id="ch-tabs" class="ch-tabs"></div>
             <div id="ch-dead" class="ch-dead hidden">💀 Bạn đã chết — tin của bạn chỉ người chết khác và quản trò thấy.</div>
             <div id="ch-feed" class="ch-feed"><div class="ch-empty">Chưa có tin nhắn</div></div>
+            <button id="ch-jump" class="ch-jump hidden" type="button"></button>
             <div id="ch-typing" class="ch-typing"></div>
             <div id="ch-mention" class="ch-mention hidden"></div>
             <div id="ch-emo-pop" class="ch-emo-pop hidden"></div>
@@ -349,7 +371,9 @@ const IDS = qs.get('tab') ? sessionStorage : localStorage; // ?tab=1: mỗi tab 
 const load = () => { try { return JSON.parse(IDS.getItem(STORE) || 'null'); } catch (e) { return null; } };
 const save = v => { try { v ? IDS.setItem(STORE, JSON.stringify(v)) : IDS.removeItem(STORE); } catch (e) {} };
 const COLORS = ['#ef4444','#f97316','#eab308','#22c55e','#14b8a6','#0ea5e9','#6366f1','#a855f7','#ec4899','#84cc16'];
+const AVATARS = {};
 function avatar(name) {
+    if (AVATARS[name]) return `<img class="av av-img" src="${AVATARS[name]}" alt="">`;
     let h = 0; for (const ch of name) h = (h * 31 + ch.codePointAt(0)) >>> 0;
     const ini = name.trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase() || '?';
     return `<span class="av" style="background:${COLORS[h % COLORS.length]}">${esc(ini)}</span>`;
@@ -368,7 +392,7 @@ function connect() {
     try { ws = new WebSocket(SERVER); } catch (e) { scheduleRetry(); return; }
     ws.onopen = () => {
         clearTimeout(wakeTimer); retry = 0; netMsg('');
-        if (me && me.token) sendJ({ t: 'resume', code: me.code, token: me.token });
+        if (me && me.token) sendJ({ t: 'resume', code: me.code, token: me.token, avatar: myAvatar || undefined });
         else if (pending) sendJ(pending);
     };
     ws.onmessage = e => { let m; try { m = JSON.parse(e.data); } catch (x) { return; } onMsg(m); };
@@ -397,6 +421,8 @@ function onMsg(m) {
         if (!chatList.length) chatLoad();
         history.replaceState(null, '', location.pathname + '?room=' + m.code + (qs.get('ws') ? '&ws=' + encodeURIComponent(qs.get('ws')) : '') + (qs.get('tab') ? '&tab=1' : ''));
         renderLobby(); show('scr-lobby');
+    } else if (m.t === 'avatar') { AVATARS[m.name] = m.data; renderLobby();
+    } else if (m.t === 'avatars') { (m.list || []).forEach(x => AVATARS[x.name] = x.data); renderLobby();
     } else if (m.t === 'react') { onReact(m);
     } else if (m.t === 'typing') { onTyping(m);
     } else if (m.t === 'chat') { chatAdd([m.m], false);
@@ -413,7 +439,7 @@ function onMsg(m) {
             resumeMiss++;
             show('scr-wait'); $('wait-title').textContent = 'Đang chờ quản trò';
             $('wait-sub').textContent = 'Server vừa khởi động lại. Khi quản trò mở lại app, bạn sẽ tự vào lại phòng ' + me.code + '.';
-            clearTimeout(retryTimer); retryTimer = setTimeout(() => sendJ({ t: 'resume', code: me.code, token: me.token }), Math.min(3000 + resumeMiss * 1000, 8000));
+            clearTimeout(retryTimer); retryTimer = setTimeout(() => sendJ({ t: 'resume', code: me.code, token: me.token, avatar: myAvatar || undefined }), Math.min(3000 + resumeMiss * 1000, 8000));
             return;
         }
         if (m.code === 'NOT_MEMBER') { me = null; save(null); showJoin('Bạn không còn trong phòng này. Hãy vào lại.'); return; }
@@ -510,7 +536,7 @@ function onGm(d) {
     else if (d.kind === 'status') {
         const prev = gstatus && gstatus.phase; gstatus = d; if (d.phase !== 'vote') myVote = '';
         if (d.phase === 'end' && prev !== 'end') tab = 'public';                     // hết ván: mọi người về chat chung ở kênh Làng
-        if (d.phase === 'day' && (prev === 'night' || prev === 'deal') && Date.now() - (window._rcAt || 0) > 15000) tab = 'public'; // trời sáng: về tab Làng (trừ khi vừa nhận tin đổi vai)
+        if (d.phase === 'day' && (prev === 'night' || prev === 'deal') && Date.now() - (window._rcAt || 0) > 15000) tab = can.dead ? 'dead' : 'public'; // trời sáng: người sống về Làng, người chết về phòng Người chết
     }
     else if (d.kind === 'timer') { timer = d.off ? { off: true } : Object.assign({}, d, { endAt: Date.now() + d.remain * 1000 }); renderTimer(); }
     else if (d.kind === 'deck') deck = d.roles || [];
@@ -576,6 +602,7 @@ const CH = { public: { ic: '💬', name: 'Làng' }, dm: { ic: '✉️', name: 'Q
 const TAB_ORDER = ['public', 'dm', 'wolves', 'couple', 'dead', 'muted'];
 const EMO_REACT = ['👍', '❤️', '👎', '🤔', '😂', '😭', '😠'];
 const EMO_PICK = '😀😂🤣😅😊😍😎🤔🤨😐😏😒🙄😬😳🥺😭😡🤬😱🤫🤐😴🤯🥶👍👎👏🙏💪👀🫡❤️💔🔥💯✅❌❓❗🐺🧛👻💀🔪🛡️🔮🧪🌙☀️'.match(/\p{Extended_Pictographic}(\uFE0F)?/gu);
+let wasDead = false, newBelow = 0;
 let chatList = [], chatSeen = new Set(), can = {}, label = '', slow = 0, tab = 'public', unread = {}, typing = {}, gstatus = null, timer = null, deck = null, pin = '', myVote = '', reactOpen = null, slowUntil = 0;
 const chatKey = () => 'lxn_chat_' + (me ? me.code + '_' + me.id : '');
 function chatLoad() { try { const d = JSON.parse(IDS.getItem(chatKey()) || '[]'); d.forEach(m => { if (!chatSeen.has(m.id)) { chatSeen.add(m.id); chatList.push(m); } }); } catch (e) {} }
@@ -623,7 +650,12 @@ setInterval(() => renderTyping(), 800);
 function onPerm(m) {
     can = m.can || {}; label = m.label || ''; slow = m.slow || 0;
     // Kênh đang xem bị đóng mà có kênh khác vừa mở (vd trời sáng -> Làng) -> tự chuyển sang
-    if (!can[tab]) { const w = ['wolves', 'couple', 'dm', 'public', 'muted', 'dead'].find(c => can[c]); if (w) tab = w; else if (!chatList.some(x => x.ch === tab)) tab = 'public'; }
+    // vừa chết -> tự sang phòng Người chết (1 lần)
+    if (can.dead && !wasDead) { wasDead = true; tab = 'dead'; turnToast('💀 Bạn đã chết — đã chuyển sang phòng Người chết'); }
+    else if (!can[tab] || (tab === 'dm' && !can.turn && !chatList.some(x => x.ch === 'dm'))) {
+        const w = [can.wolves && 'wolves', can.couple && 'couple', can.turn && 'dm', can.public && 'public', can.muted && 'muted', can.dead && 'dead'].find(Boolean);
+        if (w) tab = w; else if (!chatList.some(x => x.ch === tab)) tab = 'public';
+    }
     renderChat(); renderRingMode();
 }
 function onResult(d) {
@@ -671,12 +703,17 @@ function renderChat() {
         const txt = esc(m.text).replace(/@([\p{L}\p{N}_]+(?: [\p{L}\p{N}_]+)?)/gu, '<span class="at">@$1</span>');
         const r = m.r ? Object.entries(m.r).map(([e, u]) => `<button class="rc${u.includes(me.id) ? ' mine' : ''}" data-id="${m.id}" data-e="${e}">${e} ${u.length}</button>`).join('') : '';
         const picker = reactOpen === m.id ? `<div class="rp">${EMO_REACT.map(e => `<button class="rpe" data-id="${m.id}" data-e="${e}">${e}</button>`).join('')}</div>` : '';
-        return `<div class="cm${mine ? ' mine' : ''}${gm ? ' gm' : ''}${ment ? ' ment' : ''}${m.ch === 'public' ? ' pub' : ''}" data-id="${m.id}"><b style="color:${gm ? '#fbbf24' : nameCol(m.name)}">${esc(gm ? 'Quản trò' : m.name)}</b>: ${txt}${r ? `<div class="rr">${r}</div>` : ''}${picker}</div>`;
+        const tt = new Date(m.ts), hh = String(tt.getHours()).padStart(2, '0') + ':' + String(tt.getMinutes()).padStart(2, '0');
+        return `<div class="cm${mine ? ' mine' : ''}${gm ? ' gm' : ''}${ment ? ' ment' : ''}${m.ch === 'public' ? ' pub' : ''}" data-id="${m.id}"><span class="ct">${hh}</span><b style="color:${gm ? '#fbbf24' : nameCol(m.name)}">${esc(gm ? 'Quản trò' : m.name)}</b>: ${txt}${r ? `<div class="rr">${r}</div>` : ''}${picker}</div>`;
     }).join('') : `<div class="ch-empty">${tab === 'dm' ? 'Tin nhắn riêng giữa bạn và quản trò sẽ hiện ở đây' : 'Chưa có tin nhắn'}</div>`;
     feed.querySelectorAll('.rescard:not(.open)').forEach(el => el.onclick = () => revealRes(el.dataset.id));
     feed.querySelectorAll('.cm.pub').forEach(el => el.onclick = e => { if (e.target.closest('.rc,.rpe')) return; if (!can.public) return; reactOpen = reactOpen === el.dataset.id ? null : el.dataset.id; renderChat(); });
     feed.querySelectorAll('.rc,.rpe').forEach(b => b.onclick = e => { e.stopPropagation(); if (!can.public) { chErr('Chỉ thả biểu cảm được khi làng đang thảo luận'); return; } sendJ({ t: 'react', id: b.dataset.id, emo: b.dataset.e }); reactOpen = null; });
-    if (atBottom || !feed._init) { feed.scrollTop = feed.scrollHeight; feed._init = true; }
+    if (atBottom || !feed._init || feed._tab !== tab) { feed.scrollTop = feed.scrollHeight; feed._init = true; feed._tab = tab; newBelow = 0; }
+    else if (list.length > (feed._n || 0) && feed._n) newBelow += list.length - feed._n;
+    feed._n = list.length;
+    $('ch-jump').classList.toggle('hidden', !newBelow); $('ch-jump').textContent = `⬇ ${newBelow} tin mới`;
+    if (!feed._hook) { feed._hook = true; feed.addEventListener('scroll', () => { if (feed.scrollHeight - feed.scrollTop - feed.clientHeight < 40 && newBelow) { newBelow = 0; $('ch-jump').classList.add('hidden'); } }); }
     renderTyping();
     // ô nhập
     const inp = $('ch-in'), on = !!can[tab], cool = tab === 'public' && slowUntil > Date.now();
@@ -707,6 +744,7 @@ function chatSend() {
     if (tab === 'public' && slow) { slowUntil = Date.now() + slow * 1000; const iv = setInterval(() => { renderChat(); if (slowUntil <= Date.now()) clearInterval(iv); }, 500); }
 }
 $('ch-send').onclick = chatSend;
+$('ch-jump').onclick = () => { const f = $('ch-feed'); f.scrollTop = f.scrollHeight; newBelow = 0; $('ch-jump').classList.add('hidden'); };
 $('ch-in').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); chatSend(); } });
 let lastTypingSent = 0;
 $('ch-in').addEventListener('input', () => {
@@ -735,7 +773,7 @@ $('ch-emo-pop').querySelectorAll('.ep').forEach(b => b.onmousedown = b.ontouchst
     inp.value = inp.value.slice(0, s) + b.textContent + inp.value.slice(en); const p = s + b.textContent.length; inp.setSelectionRange(p, p); inp.focus();
 });
 // ---- Chạm vòng làng: chọn mục tiêu (tới lượt) / bỏ phiếu (biểu quyết) ----
-function myTurnCh() { return ['wolves', 'couple', 'dm'].find(c => can[c]) || null; }
+function myTurnCh() { return can.wolves ? 'wolves' : can.couple ? 'couple' : can.turn ? 'dm' : null; }
 function canVote() { return gstatus && gstatus.phase === 'vote' && me && (gstatus.voters || []).includes(me.name); }
 function renderRingMode() {
     const hint = $('ring-hint'); if (!hint) return;
@@ -854,19 +892,25 @@ function renderPickBar() {
 // Mũi tên trên vòng làng (từ ghế của mình / của các Sói khác tới mục tiêu)
 function ringArrows(pos) {
     if (!fieldsMsg) return '';
-    const P = n => pos[n]; let out = '';
-    const arrow = (a, b, col, dash, op) => {
-        if (!a || !b || a === b) return '';
-        const dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1, r = 6.5, x1 = a.x + dx / L * r, y1 = a.y + dy / L * r, x2 = b.x - dx / L * (r + 1.5), y2 = b.y - dy / L * (r + 1.5);
-        const id = 'ah' + col.replace(/[^a-z0-9]/gi, '');
-        return `<defs><marker id="${id}" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${col}"/></marker></defs>
-            <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="1.1" stroke-dasharray="${dash || ''}" stroke-linecap="round" opacity="${op}" marker-end="url(#${id})"/>`;
+    const box = $('ring'), W = box.clientWidth || 340, sz = parseFloat(getComputedStyle(box).getPropertyValue('--sz')) || 38;
+    const rr = (sz / 2) / W * 100 + 1.2; let out = '';
+    const arrow = (A, B, col, dash, icon, faded) => {
+        if (!A || !B || A === B) return '';
+        const mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2, cx = mx + (50 - mx) * 0.38, cy = my + (50 - my) * 0.38;
+        const d1 = Math.hypot(cx - A.x, cy - A.y) || 1, d2 = Math.hypot(B.x - cx, B.y - cy) || 1;
+        const sx = A.x + (cx - A.x) / d1 * rr, sy = A.y + (cy - A.y) / d1 * rr, ex = B.x - (B.x - cx) / d2 * rr, ey = B.y - (B.y - cy) / d2 * rr;
+        const ux = (B.x - cx) / d2, uy = (B.y - cy) / d2, hl = 2.6, hw = 1.5;
+        const p1 = `${ex},${ey}`, p2 = `${ex - ux * hl - uy * hw},${ey - uy * hl + ux * hw}`, p3 = `${ex - ux * hl + uy * hw},${ey - uy * hl - ux * hw}`;
+        const ix = 0.04 * sx + 0.32 * cx + 0.64 * ex, iy = 0.04 * sy + 0.32 * cy + 0.64 * ey;
+        return `<g class="${faded ? 'arr-prev' : ''}"><path class="arr" d="M${sx.toFixed(2)} ${sy.toFixed(2)} Q${cx.toFixed(2)} ${cy.toFixed(2)} ${ex.toFixed(2)} ${ey.toFixed(2)}" stroke="${col}" style="color:${col}" stroke-dasharray="${dash || ''}"/>
+            <polygon points="${p1} ${p2} ${p3}" fill="${col}" style="color:${col}"/>${icon ? `<circle cx="${ix.toFixed(2)}" cy="${iy.toFixed(2)}" r="2.6" class="arr-badge" stroke="${col}"/><text x="${ix.toFixed(2)}" y="${iy.toFixed(2)}" class="arr-ico" text-anchor="middle" dominant-baseline="central">${icon}</text>` : ''}</g>`;
     };
+    const fByFi = {}; fieldsMsg.fields.forEach(f => fByFi[f.fi] = f);
     if (wpicks && fieldsMsg.ch === 'wolves') Object.entries(wpicks.picks || {}).forEach(([w, pk]) => {
-        if (w === me.name) return; const obj = typeof pk === 'string' ? { x: pk } : (pk || {});
-        Object.values(obj).forEach(t => { if (t) out += arrow(P(w), P(t), '#f87171', '2 1.2', .55); });
+        if (w === me.name) return; const obj = typeof pk === 'string' ? { [fieldsMsg.fields[0].fi]: pk } : (pk || {});
+        Object.entries(obj).forEach(([fi, t]) => { const f = fByFi[fi] || fieldsMsg.fields[0]; if (t) out += arrow(pos[w], pos[t], f.color, f.dash, f.icon, true); });
     });
-    fieldsMsg.fields.forEach(f => (picks[f.fi] || []).forEach(t => { out += arrow(P(me.name), P(t), f.color, '', 1); }));
+    fieldsMsg.fields.forEach(f => (picks[f.fi] || []).forEach(t => { out += arrow(pos[me.name], pos[t], f.color, f.dash, f.icon, false); }));
     return out;
 }
 
@@ -919,7 +963,8 @@ function doJoin(mode) {
     if (!name) { $('join-err').textContent = 'Hãy nhập tên hiển thị'; return; }
     if (code.length !== 5) { $('join-err').textContent = 'Mã phòng gồm 5 ký tự'; return; }
     $('join-err').textContent = ''; $('btn-join').disabled = true;
-    pending = { t: 'join', code, name }; if (mode === 'knock') pending.knock = true; if (mode === 'spectate') pending.spectate = true;
+    pending = { t: 'join', code, name, avatar: myAvatar || undefined }; if (mode === 'knock') pending.knock = true; if (mode === 'spectate') pending.spectate = true;
+    saveProfile(name);
     $('btn-spec').disabled = true; $('btn-knock').disabled = true;
     if (ws && ws.readyState === 1) sendJ(pending); else connect();
 }
@@ -933,9 +978,37 @@ $('btn-leave').onclick = () => {
 };
 $('btn-wait-cancel').onclick = () => { me = null; save(null); showJoin(''); };
 
+// ---------------- Ảnh đại diện + hồ sơ lưu trên máy ----------------
+const PROFILE = 'lxn_profile_v1';
+let myAvatar = (() => { try { return (JSON.parse(IDS.getItem(PROFILE) || localStorage.getItem(PROFILE) || '{}').avatar) || ''; } catch (e) { return ''; } })();
+function saveProfile(name) { try { const v = JSON.stringify({ name: name || $('in-name').value.trim(), avatar: myAvatar }); IDS.setItem(PROFILE, v); if (IDS !== localStorage) {} else localStorage.setItem(PROFILE, v); } catch (e) {} }
+function paintAvPrev() { $('av-prev').innerHTML = myAvatar ? `<img src="${myAvatar}" alt="">` : '📷'; }
+// cắt vuông giữa ảnh, thu nhỏ 128px -> vài KB
+function shrinkImage(file) {
+    return new Promise((res, rej) => {
+        const url = URL.createObjectURL(file), img = new Image();
+        img.onload = () => {
+            const S = 128, c = document.createElement('canvas'); c.width = c.height = S; const x = c.getContext('2d');
+            const m = Math.min(img.width, img.height); x.drawImage(img, (img.width - m) / 2, (img.height - m) / 2, m, m, 0, 0, S, S);
+            URL.revokeObjectURL(url);
+            let q = .82, out = c.toDataURL('image/jpeg', q); while (out.length > 22000 && q > .3) { q -= .12; out = c.toDataURL('image/jpeg', q); }
+            res(out);
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('Ảnh không đọc được')); };
+        img.src = url;
+    });
+}
+$('in-av').onchange = async e => {
+    const f = e.target.files && e.target.files[0]; if (!f) return;
+    try { myAvatar = await shrinkImage(f); paintAvPrev(); saveProfile(); if (me && ws && ws.readyState === 1) sendJ({ t: 'set_avatar', data: myAvatar }); }
+    catch (x) { $('join-err').textContent = 'Không đọc được ảnh, thử ảnh khác'; }
+    e.target.value = '';
+};
+paintAvPrev();
+
 // ---------------- Khởi động ----------------
 try { document.documentElement.style.setProperty('--lxn-logo', `url("${document.querySelector('.brand img').src}")`); } catch (e) {}
-$('in-name').value = (() => { try { return localStorage.getItem('lxn_last_name') || ''; } catch (e) { return ''; } })();
+$('in-name').value = (() => { try { const p = JSON.parse(IDS.getItem(PROFILE) || localStorage.getItem(PROFILE) || '{}'); return p.name || localStorage.getItem('lxn_last_name') || ''; } catch (e) { return ''; } })();
 const roomQ = (qs.get('room') || '').toUpperCase();
 if (me && me.token && (!roomQ || roomQ === me.code)) {
     show('scr-wait'); $('wait-title').textContent = 'Đang vào lại phòng ' + me.code; $('wait-sub').textContent = '';

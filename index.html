@@ -1669,6 +1669,29 @@
         /* ===== Lá ❓ màu cam ===== */
         .res-cover .rc-card, .dl-back-card { position:relative; overflow:hidden; color:#fff !important; border-color:#fdba74 !important; background:linear-gradient(145deg,#fb923c,#ea580c 60%,#c2410c) !important; text-shadow:0 2px 6px rgba(124,45,18,.6); }
         .res-cover .rc-card::before, .dl-back-card::before { content:''; position:absolute; inset:12%; background:var(--lxn-logo) center/contain no-repeat; opacity:.22; filter:brightness(2.2) grayscale(1); }
+
+        /* ===== Chuyển quyền quản trò ===== */
+        .tk-ov { position:fixed; inset:0; z-index:9900; background:rgba(2,6,16,.9); display:flex; align-items:center; justify-content:center; padding:18px; animation: ovFade .2s ease-out; }
+        .tk-card { width:min(420px, 96vw); background:#0f172a; border:1px solid #334155; border-radius:22px; padding:20px; text-align:center; animation: popIn .25s ease both; }
+        .tk-h { color:#f1f5f9; font-weight:900; font-size:18px; } .tk-sub { color:#94a3b8; font-size:13px; margin:6px 0 12px; line-height:1.5; }
+        .tk-qr { background:#fff; border-radius:14px; padding:10px; display:inline-block; line-height:0; } .tk-qr svg { width:min(64vw, 260px); height:auto; }
+        .tk-st { min-height:18px; color:#86efac; font-size:13px; font-weight:700; margin-top:8px; }
+        .tk-warn { margin-top:8px; padding:8px 10px; border-radius:10px; background:#2a0f12; border:1px solid #7f1d1d; color:#fecaca; font-size:12px; line-height:1.45; }
+        .tk-row { display:flex; gap:8px; margin-top:12px; } .tk-row button { flex:1; padding:11px; border-radius:12px; font-weight:800; cursor:pointer; border:1px solid #334155; background:#1e293b; color:#e2e8f0; }
+        .tk-row .tk-close { background:#4f46e5; border-color:#4f46e5; color:#fff; }
+        .gc-tk { font-size:12px; font-weight:700; color:#c7d2fe; background:#1e1b4b; border:1px solid #4338ca; border-radius:8px; padding:5px 8px; cursor:pointer; }
+
+        /* ===== Chat quản trò: huy hiệu chưa đọc, trả lời nhanh, tin mới ===== */
+        .gc-f { position:relative; }
+        .gc-f.has-u:not(.on) { border-color:#ef4444 !important; color:#fecaca !important; }
+        .gc-ub { position:absolute; top:-7px; right:-6px; min-width:19px; height:19px; padding:0 5px; border-radius:99px; background:#ef4444; color:#fff; font-size:11px; font-weight:900; font-style:normal;
+            display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 2px #0b1120, 0 0 10px rgba(239,68,68,.7); animation: ubPulse 1.6s ease-in-out infinite; }
+        @keyframes ubPulse { 50% { transform:scale(1.15) } }
+        .gc-filters { padding-top:8px !important; overflow:visible !important; flex-wrap:wrap; }
+        .gc-quick { display:flex; gap:6px; overflow-x:auto; padding:6px 14px 0; scrollbar-width:none; }
+        .gc-quick button { flex-shrink:0; font-size:12px; font-weight:700; color:#cbd5e1; background:#111827; border:1px solid #334155; border-radius:99px; padding:5px 10px; cursor:pointer; }
+        .gc-jump { position:relative; margin:-40px auto 8px; display:block; z-index:2; font-size:12px; font-weight:800; color:#fff; background:#4f46e5; border:none; border-radius:99px; padding:6px 14px; cursor:pointer; box-shadow:0 6px 18px rgba(0,0,0,.45); }
+        .gc-jump.hidden { display:none; }
 </style>
 </head>
 <body>
@@ -2437,7 +2460,7 @@
             { id: 'aura_seer', name: 'Tiên Tri Hào Quang', faction: 'villager', n1Order: 14.6, n2Order: 42, max: 1, icon: 'fa-ic-aura_seer', bg: 'bg-amber-900/50', text: 'text-amber-300', desc: 'Phe Dân Làng. Mỗi đêm chỉ 1 người: Quản trò LIKE nếu người đó có CHỨC NĂNG đặc biệt, DISLIKE nếu chỉ là Dân thường hoặc Sói thường.' },
             { id: 'spirit_medium', name: 'Nhà Tinh Thần Học', faction: 'villager', n1Order: 14.7, n2Order: 43, max: 1, icon: 'fa-ic-spirit_medium', bg: 'bg-teal-900/50', text: 'text-teal-300', desc: 'Phe Dân Làng. Mỗi đêm chỉ 2 người: Quản trò LIKE nếu 2 người CÙNG PHE, DISLIKE nếu KHÁC PHE (so theo phe thắng, không phải vai). Phe thứ 3 khác phe với cả Dân lẫn Sói.' },
             { id: 'frankenstein', name: 'Frankenstein', faction: 'villager', n1Order: 15.9, n2Order: 15.9, max: 1, icon: 'fa-ic-frankenstein', bg: 'bg-green-900/50', text: 'text-green-400', desc: 'Phe Dân Làng. Đêm 1 chỉ điền tên. Từ đêm 2, khi một người phe DÂN có CHỨC NĂNG chết (không tính Dân thường, không tính phe thứ 3 như Cupid/Thằng Ngốc), Frankenstein HƯỞNG chức năng đó và dùng được ngay đêm sau. Nếu hưởng Già Làng thì làng coi như vẫn còn Già Làng (chức năng dân không mất tới khi Frankenstein-Già-Làng chết).' },
-            { id: 'hunter', name: 'Thợ Săn', faction: 'villager', n1Order: 15, n2Order: 50, max: 3, icon: 'fa-crosshairs', bg: 'bg-orange-900/50', text: 'text-orange-400', desc: 'Mỗi đêm BẮT BUỘC chọn 1 mục tiêu nhắm tới. Khi chết (ban đêm hoặc bị treo cổ), sẽ lập tức bắn kéo theo người được nhắm cuối cùng chết cùng.' },
+            { id: 'hunter', name: 'Thợ Săn', faction: 'villager', n1Order: 15, n2Order: 50, max: 3, icon: 'fa-crosshairs', bg: 'bg-orange-900/50', text: 'text-orange-400', desc: 'Mỗi đêm BẮT BUỘC chọn 1 mục tiêu nhắm tới. Khi chết BAN ĐÊM, sẽ lập tức bắn kéo theo người được nhắm cuối cùng chết cùng. Chết ban ngày (bị treo cổ) thì KHÔNG bắn.' },
             { id: 'explorer', name: 'Người Khám Phá', faction: 'villager', n1Order: 15.5, n2Order: 51, max: 2, icon: 'fa-ic-explorer', bg: 'bg-teal-900/50', text: 'text-teal-400', desc: 'Dùng 1 lần duy nhất: Chọn 1 mục tiêu. Nếu là Sói, Sói chết. Nếu không phải Sói, bản thân tự chết.' },
             { id: 'spellcaster', name: 'Người Phù Phép', faction: 'villager', n1Order: 16, n2Order: 45, max: 1, icon: 'fa-ic-spellcaster', bg: 'bg-fuchsia-900/50', text: 'text-fuchsia-400', desc: 'Mỗi đêm (kể cả Đêm 1) được gọi dậy chọn 1 người. Người đó bị phù phép, KHÔNG được nói trong suốt ngày hôm sau.' },
             { id: 'idiot', name: 'The Fool', faction: 'independent', disabled: true, n1Order: 23.1, n2Order: null, max: 1, icon: 'fa-ic-idiot', bg: 'bg-lime-900/50', text: 'text-lime-400', desc: 'Luôn phải bỏ phiếu "Chết" cho tất cả mọi người ban ngày. Nếu bị treo cổ sẽ lật bài và sống tiếp.' },
@@ -2860,12 +2883,27 @@
         // ===== ĐIỂM CÂN BẰNG (kiểu lá bài Ultimate Werewolf): + có lợi cho Làng, − có lợi cho Sói =====
         // Vai có trong Ultimate Werewolf dùng đúng điểm in trên lá; vai riêng / biến thể (~) ước lượng theo sức mạnh tương đương.
         const ROLE_POINTS = {
-            villager: 1, seer: 7, apprentice_seer: 4, aura_seer: 3, mystic_seer: 9, beholder: 2, guard: 3, witch: 4, hunter: 3, huntress: 3,
-            spellcaster: 1, old_hag: 1, cursed: -3, lycan: -1, mayor: 2, tough_guy: 3, prince: 3, diseased: 3, doppelganger: -2, cupid: -3, tanner: -2,
-            mad_bomber: -2, twins: 2, priest: 3, insomniac: 3, pi: 3, ghost: 2, hoodlum: 0, blob: -1, cult_leader: 1, zombie: -1,
-            wolf: -6, wolf_cub: -8, big_bad_wolf: -9, dire_wolf: -4, dream_wolf: -5, fang_face: -5, fruit_brute: -3, wolf_sorcerer: -3, wolf_silver: -9,
-            // ~ ước lượng
-            spirit_medium: 3, explorer: 3, frankenstein: 2, elder: 1, virginia: -2, friendly_vampire: 4, wolf_alpha: -9, teen_wolf: -4, idiot: 2
+            // Điểm cân bằng: + có lợi cho Làng, − có lợi cho Sói.
+            // Gốc = bảng điểm Ultimate Werewolf (bảng tham chiếu cộng đồng tổng hợp). ✱ = đã chỉnh theo LUẬT NHÀ của nhóm.
+            villager: 1, seer: 7, apprentice_seer: 4, aura_seer: 3, beholder: 2, guard: 3, witch: 4, huntress: 3,
+            mystic_seer: 9,     // không có trong bảng tham chiếu — giữ +9 (mạnh hơn Tiên Tri vì biết đúng vai)
+            hunter: 1,          // ✱ gốc +3: luật nhà phải nhắm trước mỗi đêm và CHỈ bắn khi chết ban đêm (bị treo cổ không bắn)
+            spellcaster: 0,     // ✱ gốc +1: luật nhà BẮT BUỘC phù phép mỗi đêm -> dễ bịt miệng chính Dân làng
+            old_hag: 1, cursed: -3, lycan: -1, mayor: 2, tough_guy: 3, prince: 3, diseased: 3, insomniac: 3, pi: 3, ghost: 2,
+            priest: 4,          // ✱ gốc +3 (che chở 1 đêm/ván): luật nhà người được ban phước BẤT TỬ trước Sói tới khi Thầy Tu chết
+            twins: 2,           // như Mason (+2 mỗi lá)
+            mad_bomber: -2,     // như Dr. Boom (−2)
+            virginia: -2, doppelganger: -2, cupid: -3, tanner: -2, hoodlum: 0, blob: -1, cult_leader: 1,
+            zombie: -4,         // ✱ gốc −3 (nạn nhân mất quyền bỏ phiếu): luật nhà nạn nhân còn KHÔNG được nói
+            frankenstein: 2,    // như Frankenstein's Monster (+2)
+            spirit_medium: 6,   // như Mentalist (+6): mỗi đêm so 2 người cùng phe hay khác phe
+            explorer: 2,        // ✱ như Revealer (+4) nhưng luật nhà chỉ dùng 1 lần/ván
+            friendly_vampire: 5, // như The Count (+5): biết số Sói trong một nửa làng (bộ bài công khai nên suy ra được nửa còn lại)
+            elder: 0,           // không có trong bảng tham chiếu: 2 mạng trước Sói (+) nhưng chết vì lý do khác là cả làng mất chức năng (−)
+            wolf: -6, wolf_cub: -8, big_bad_wolf: -9, wolf_silver: -9, wolf_alpha: -9, dire_wolf: -4, dream_wolf: -5, fang_face: -5,
+            fruit_brute: -3, teen_wolf: -4,
+            wolf_sorcerer: -3,  // gốc −3 (Sorceress). Việc dậy riêng, không biết bầy là luật GỐC của vai này nên không giảm thêm
+            idiot: 2
         };
         function rolePts(id) { return ROLE_POINTS[id] || 0; }
         function ptsLabel(v) { return (v > 0 ? '+' : v < 0 ? '−' : '±') + Math.abs(v); }
@@ -3264,7 +3302,7 @@
             let currentRole = ROLES_DB.find(r => r.id === p.roleId);
             let isConverted = p.initialRoleId && p.roleId === 'wolf' && p.initialRoleId !== 'wolf' && initialRole;
             if (isConverted) {
-                return `${initialRole.name} ➡ Sói`;
+                return `${initialRole.name} ➡ ${currentRole ? currentRole.name : 'Ma Sói'}`;
             }
             if (p.wasFrankenstein && p.frankenInherited) {
                 let inh = ROLES_DB.find(r => r.id === p.frankenInherited);
@@ -6176,7 +6214,8 @@
                 }
             }
             
-            if (p.roleId === 'hunter' && p.hunterTargetId && !state.villagerPowersDisabled) {
+            // Luật nhà: Thợ Săn CHỈ kéo theo khi chết BAN ĐÊM (bị treo cổ / chết ban ngày thì không có tác dụng)
+            if (p.roleId === 'hunter' && p.hunterTargetId && !state.villagerPowersDisabled && reason !== 'execution' && window._killPhase !== 'Ngày') {
                 let hTarget = getP(p.hunterTargetId);
                 if(hTarget && hTarget.isAlive) {
                     logArr.push(`${hTarget.name} ➡ Bị Thợ Săn (${p.name}) bắn chết cùng`);
@@ -12032,7 +12071,7 @@ var qrcode = function() {
             beholder: ['Đêm 1 quản trò cho bạn biết ai là Tiên Tri (Tiên Tri thường, không phải Tiên Tri Bí Ẩn). Hãy âm thầm bảo vệ và ủng hộ Tiên Tri.', 'Chỉ Đêm 1.'],
             guard: ['Mỗi đêm bạn chọn 1 người để bảo vệ khỏi bị Sói cắn. Không được bảo vệ cùng 1 người 2 đêm liên tiếp.', 'Mỗi đêm.'],
             witch: ['Bạn có 1 bình cứu và 1 bình độc, mỗi bình chỉ dùng được 1 lần trong cả ván. Khi được gọi, bạn biết ai vừa bị Sói cắn (nếu còn bình cứu) và quyết định có cứu không, có đầu độc ai không.', 'Mỗi đêm, sau bầy Sói.'],
-            hunter: ['Mỗi đêm bạn BẮT BUỘC nhắm vào 1 người. Khi bạn chết, người bạn đang nhắm sẽ chết theo ngay lập tức.', 'Mỗi đêm.'],
+            hunter: ['Mỗi đêm bạn BẮT BUỘC nhắm vào 1 người. Nếu bạn chết vào BAN ĐÊM, người bạn đang nhắm sẽ chết theo ngay lập tức. Chết ban ngày (bị treo cổ) thì không bắn được.', 'Mỗi đêm.'],
             huntress: ['Bạn có 1 mũi tên dùng 1 lần trong cả ván: đêm nào muốn thì bắn 1 người, người đó chết vào sáng hôm sau — kể cả khi bạn bị cắn chết cùng đêm.', 'Mỗi đêm cho tới khi đã bắn.'],
             explorer: ['Dùng 1 lần trong cả ván: chọn 1 người. Nếu người đó là Sói, Sói chết. Nếu không phải Sói, chính bạn chết.', 'Mỗi đêm cho tới khi dùng chức năng.'],
             spellcaster: ['Mỗi đêm bạn chọn 1 người để phù phép: người đó KHÔNG được nói suốt ngày hôm sau.', 'Mỗi đêm.'],
@@ -12101,7 +12140,6 @@ var qrcode = function() {
                 gmSend({ t: 'to', to: id, keep: 'card', data: card });
                 gmSend({ t: 'to', to: id, keep: 'rolechg', data: { kind: 'rolechg', key: dealId, text, card } });
                 cr[p.name] = p.roleId; onlineSave();
-                state.eventLog.push({ title: 'Online', content: `${p.name}: vai đổi ${ro.name || old} → ${rn.name || p.roleId} (đã báo riêng cho người chơi)` });
             });
         }
         // ---------- Đã chia bài -> khoá hẳn phòng; nhật ký chia bài; công khai bộ bài; tiến độ ----------
@@ -12116,11 +12154,6 @@ var qrcode = function() {
             const _force = dealForceStart;
             dealForceStart = function () {
                 let a = state.dealAssignment || {};
-                if (Object.keys(a).length) {
-                    let rows = Object.keys(a).map(n => { let r = ROLES_DB.find(x => x.id === a[n]) || {}; return `${escapeHtml(n)}: <b>${escapeHtml(r.name || a[n])}</b>`; });
-                    state.eventLog = state.eventLog || [];
-                    state.eventLog.push({ title: onlineDeal() ? 'Chia bài online' : 'Chia bài bằng app', content: rows.join(', ') });
-                }
                 if (onlineDeal()) { state.online.cardRole = Object.assign({}, a); onlineSave(); }
                 return _force.apply(this, arguments);
             };
@@ -12262,22 +12295,34 @@ var qrcode = function() {
         function randomBalancedDeck(N) {
             let pool = ROLES_DB.filter(r => !r.disabled && !r.step && r.id !== 'villager' && r.id !== 'wolf');
             let W = pool.filter(r => r.faction === 'wolf'), V = pool.filter(r => r.faction === 'villager'), I = pool.filter(r => r.faction === 'independent');
+            let recent = []; try { recent = JSON.parse(localStorage.getItem('lxn_recent_rand_decks') || '[]'); } catch (e) {}
+            let recentSet = new Set(recent.flat());
             let pick = (arr, k) => { let a = arr.slice(), out = []; while (a.length && out.length < k) out.push(a.splice(Math.floor(Math.random() * a.length), 1)[0]); return out; };
-            let best = null, bestS = 1e9;
-            for (let it = 0; it < 4000; it++) {
+            let cands = [];
+            for (let it = 0; it < 6000; it++) {
                 let deck = {}, used = 0, add = (id, c) => { deck[id] = (deck[id] || 0) + c; used += c; };
-                let wolvesN = Math.max(1, Math.round(N / 4.2) + (Math.random() < .3 ? -1 : Math.random() < .3 ? 1 : 0)); wolvesN = Math.max(1, Math.min(wolvesN, Math.floor((N - 1) / 2)));
-                let sp = pick(W, Math.floor(Math.random() * (Math.min(3, wolvesN) + 1)));
+                let wolvesN = Math.max(1, Math.min(Math.round(N / 4.2) + (Math.random() < .25 ? -1 : Math.random() < .25 ? 1 : 0), Math.floor((N - 1) / 2)));
+                // ưu tiên Sói đặc biệt (đa dạng) thay vì Ma Sói thường
+                let sp = pick(W, Math.min(wolvesN, Math.ceil(wolvesN * (0.5 + Math.random() * 0.5))));
                 sp.forEach(r => add(r.id, 1)); if (wolvesN - sp.length > 0) add('wolf', wolvesN - sp.length);
-                if (N >= 8 && Math.random() < .55) pick(I, 1).forEach(r => add(r.id, 1));
-                let k = Math.round(N * (0.35 + Math.random() * 0.3));
+                if (N >= 8 && Math.random() < .6) pick(I, N >= 14 && Math.random() < .5 ? 2 : 1).forEach(r => add(r.id, 1));
+                let k = Math.round((N - used) * (0.55 + Math.random() * 0.35));      // phần lớn dân là vai đặc biệt
                 pick(V, k).forEach(r => { let c = r.id === 'twins' ? 2 : 1; if (used + c <= N) add(r.id, c); });
-                if ((deck.apprentice_seer || deck.beholder) && !deck.seer) { if (used < N) add('seer', 1); else { if (deck.apprentice_seer) { used -= deck.apprentice_seer; delete deck.apprentice_seer; } if (deck.beholder) { used -= deck.beholder; delete deck.beholder; } } }
+                if ((deck.apprentice_seer || deck.beholder) && !deck.seer) { if (used < N) add('seer', 1); else { ['apprentice_seer', 'beholder'].forEach(x => { if (deck[x]) { used -= deck[x]; delete deck[x]; } }); } }
                 if (used > N) continue; if (N - used > 0) add('villager', N - used);
-                let S = Object.entries(deck).reduce((a, [id, c]) => a + c * rolePts(id), 0), score = Math.abs(S) + Math.random() * 0.8;
-                if (score < bestS) { bestS = score; best = deck; }
+                let S = Object.entries(deck).reduce((a, [id, c]) => a + c * rolePts(id), 0);
+                let ids = Object.keys(deck).filter(x => x !== 'villager' && x !== 'wolf');
+                let fresh = ids.filter(x => !recentSet.has(x)).length;
+                cands.push({ deck, S, distinct: ids.length, fresh, ids });
             }
-            return best;
+            // Chỉ lấy bộ cân bằng (|điểm| ≤ 2, không có thì nới dần), rồi chọn bộ nhiều vai khác nhau + nhiều vai "mới" so với các lần trước
+            let good = []; for (let tol = 2; tol <= 8 && !good.length; tol += 2) good = cands.filter(c => Math.abs(c.S) <= tol);
+            good.forEach(c => c.score = c.distinct * 1.0 + c.fresh * 0.8 - Math.abs(c.S) * 0.6 + Math.random() * 1.2);
+            good.sort((x, y) => y.score - x.score);
+            let best = good[0]; if (!best) return null;
+            recent.unshift(best.ids); recent = recent.slice(0, 3);
+            try { localStorage.setItem('lxn_recent_rand_decks', JSON.stringify(recent)); } catch (e) {}
+            return best.deck;
         }
         function onlineRandomDeck() {
             let N = state.totalPlayers || 0; if (N < 5) { showPopup('Bộ bài bất ngờ', 'Cần ít nhất 5 người chơi.', 'warning'); return; }
@@ -12296,6 +12341,236 @@ var qrcode = function() {
         })();
         // ---------- Lá ❓ màu cam (theo logo) ----------
         try { document.documentElement.style.setProperty('--lxn-logo', `url("${SOI_LOGO_SMALL}")`); } catch (e) {}
+
+    
+        // =====================================================================
+        //  ẢNH ĐẠI DIỆN người chơi tự chọn + CHUYỂN QUYỀN QUẢN TRÒ (bản sao ván mã hoá, chìa khoá chỉ nằm trong mã QR)
+        // =====================================================================
+        // ---------- Ảnh đại diện: ghi đè lên bảng ảnh của app -> mọi nơi (vòng làng, danh sách, chat) đều hiện ----------
+        window._onlineAvatars = {};
+        function onlineSetAvatar(name, data) {
+            if (!name || !data) return;
+            window._onlineAvatars[name] = data; STAFF_AVATARS[name] = data;
+            clearTimeout(window._avT); window._avT = setTimeout(() => {
+                try { if (state.currentView === 'view-online') renderOnlineLobby(); if (state.currentView === 'view-deal') renderDealView(); renderVillageBoards(); renderGmChat(); } catch (e) {}
+            }, 120);
+        }
+        // ---------- Chuyển quyền quản trò ----------
+        const b64 = buf => { let s = '', a = new Uint8Array(buf); for (let i = 0; i < a.length; i += 0x8000) s += String.fromCharCode.apply(null, a.subarray(i, i + 0x8000)); return btoa(s); };
+        const unb64 = str => Uint8Array.from(atob(str), c => c.charCodeAt(0));
+        const b64url = buf => b64(buf).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        const unb64url = s => unb64(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4));
+        async function snapKey() {
+            if (!state.online.snapKey) { let raw = crypto.getRandomValues(new Uint8Array(32)); state.online.snapKey = b64url(raw); onlineSave(); }
+            return crypto.subtle.importKey('raw', unb64url(state.online.snapKey), 'AES-GCM', false, ['encrypt', 'decrypt']);
+        }
+        async function gzipBytes(bytes, on) {
+            if (typeof CompressionStream === 'undefined') return { bytes, z: false };
+            let s = new Blob([bytes]).stream().pipeThrough(on ? new CompressionStream('gzip') : new DecompressionStream('gzip'));
+            return { bytes: new Uint8Array(await new Response(s).arrayBuffer()), z: true };
+        }
+        function snapPayload() {
+            let st = JSON.parse(JSON.stringify(state));
+            return JSON.stringify({ v: 1, state: st, chat: (window._gmChat || []).slice(-400), at: Date.now() });
+        }
+        let _snapBusy = false, _snapDirty = false, _snapLast = 0;
+        async function onlineUploadSnap(force) {
+            if (!onlineActive() || !state.online.locked || !gmWs || gmWs.readyState !== 1 || !window.crypto || !crypto.subtle) return false;
+            if (_snapBusy) { _snapDirty = true; return false; }
+            _snapBusy = true;
+            try {
+                let key = await snapKey(), raw = new TextEncoder().encode(snapPayload());
+                let z = await gzipBytes(raw, true), iv = crypto.getRandomValues(new Uint8Array(12));
+                let enc = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, z.bytes);
+                let label = `${state.currentView} · Đêm/Ngày ${state.dayCount || 0}`;
+                gmSend({ t: 'snap_put', data: b64(enc), iv: b64(iv), z: z.z, label, force: !!force });
+                _snapLast = Date.now(); return true;
+            } catch (e) { console.error('snap', e); return false; }
+            finally { _snapBusy = false; if (_snapDirty) { _snapDirty = false; setTimeout(() => onlineUploadSnap(), 1500); } }
+        }
+        // tự gửi bản sao mỗi khi ván thay đổi (gộp trong 2.5 giây)
+        (function () {
+            const _save = saveGame;
+            saveGame = function () {
+                let r = _save.apply(this, arguments);
+                if (onlineActive() && state.online.locked) { clearTimeout(window._snapT); window._snapT = setTimeout(() => onlineUploadSnap(), 2500); }
+                return r;
+            };
+        })();
+        // ván đổi (bước / ngày / lựa chọn / nhật ký) mà chưa gửi -> gửi ngay; ngoài ra 30 giây gửi 1 lần cho chắc
+        let _snapSig = '';
+        setInterval(() => {
+            if (!onlineActive() || !state.online.locked) return;
+            let sig = [state.currentView, state.currentStepIndex, state.dayCount, (state.eventLog || []).length, JSON.stringify(state.currentNightActions || {}).length, (state.players || []).filter(p => p.isAlive).length].join('|');
+            if (sig !== _snapSig || Date.now() - _snapLast > 30000) { _snapSig = sig; onlineUploadSnap(); }
+        }, 4000);
+        function takeoverLink() {
+            let base = location.href.split('#')[0].split('?')[0], ws = new URLSearchParams(location.search).get('ws');
+            return base + (ws ? '?ws=' + encodeURIComponent(ws) : '') + `#takeover=${state.online.code}.${state.online.gmToken}.${state.online.snapKey}`;
+        }
+        async function onlineShowTakeover(handover) {
+            if (!onlineActive() || !state.online.locked) { showPopup('Chuyển quyền quản trò', 'Chỉ dùng được khi phòng đã khoá (ván đã bắt đầu).', 'warning'); return; }
+            await snapKey();
+            let ov = document.createElement('div'); ov.className = 'tk-ov';
+            ov.innerHTML = `<div class="tk-card"><div class="tk-h">${handover ? '📲 Chuyển quyền quản trò' : '🛟 Mã dự phòng quản trò'}</div>
+                <div class="tk-sub">${handover ? 'Máy MỚI: mở camera quét mã này (hoặc mở link) để nhận quyền và tiếp tục đúng bước đang chơi.' : 'Hãy <b>chụp màn hình</b> mã này và cất kỹ. Nếu máy quản trò hỏng, máy khác quét ảnh này để tiếp tục ván.'}</div>
+                <div class="tk-qr">${onlineQrSvg(takeoverLink(), 4)}</div>
+                <div class="tk-st" id="tk-st">${handover ? '⏳ Đang lưu bản mới nhất…' : ''}</div>
+                <div class="tk-warn">⚠️ Ai có mã này sẽ làm được quản trò và xem được vai của mọi người. <b>Không gửi cho người chơi.</b></div>
+                <div class="tk-row"><button type="button" class="tk-copy">Chép link</button><button type="button" class="tk-close">${handover ? 'Đóng' : 'Đã chụp xong'}</button></div></div>`;
+            document.body.appendChild(ov);
+            ov.querySelector('.tk-close').onclick = () => ov.remove();
+            ov.querySelector('.tk-copy').onclick = () => { (navigator.clipboard ? navigator.clipboard.writeText(takeoverLink()) : Promise.reject()).then(() => onlineToast('Đã chép link chuyển quyền')).catch(() => prompt('Chép link này:', takeoverLink())); };
+            if (handover) { window._snapOkCb = () => { let el = document.getElementById('tk-st'); if (el) el.innerHTML = '✅ Đã lưu bản mới nhất — máy mới quét mã là tiếp tục được'; }; onlineUploadSnap(true); }
+        }
+        // ---------- Máy MỚI nhận quyền ----------
+        async function onlineRestoreSnap(m) {
+            if (m.none) { showPopup('Nhận quyền quản trò', 'Server chưa có bản lưu của ván này (có thể server vừa khởi động lại). Hãy bấm "Chuyển quyền" trên máy cũ nếu máy đó còn dùng được.', 'warning'); window._takeover = false; return; }
+            try {
+                let key = await snapKey();
+                let dec = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(m.iv) }, key, unb64(m.data)));
+                let bytes = m.z ? (await gzipBytes(dec, false)).bytes : dec;
+                let snap = JSON.parse(new TextDecoder().decode(bytes));
+                let keep = { code: state.online.code, gmToken: state.online.gmToken, snapKey: state.online.snapKey };
+                state = snap.state; state.online = Object.assign(state.online || {}, keep, { locked: true });
+                window._gmChat = snap.chat || []; window._gmChatSeen = new Set(window._gmChat.map(x => x.id)); try { gmChatSave(); } catch (e) {}
+                window.appHistory = [];
+                try { localStorage.setItem(ONLINE_ROOM_KEY, JSON.stringify(state.online)); } catch (e) {}
+                restoreStateView(); saveGame();
+                _statusKey = _turnKey = _deckKey = _villageKey = _endKey = _ghostKey = _mutedKey = _packKey = _progKey = ''; _timerSent = null; _fieldsSent = {}; _resultSent = {}; _lastPermKey = '';
+                window._takeover = false; renderGmChatBtn(); renderGmChat();
+                showPopup('✅ Đã nhận quyền quản trò', `Tiếp tục ván ở phòng ${state.online.code} (bản lưu lúc ${new Date(snap.at).toLocaleTimeString('vi-VN')}).`, 'success');
+            } catch (e) { console.error(e); showPopup('Nhận quyền quản trò', 'Không mở được bản lưu (mã QR sai hoặc đã cũ).', 'warning'); window._takeover = false; }
+        }
+        (function () {
+            let h = /^#takeover=([A-Z0-9]{5})\.([0-9a-f]{32})\.([A-Za-z0-9_-]{43})$/.exec(location.hash);
+            if (!h) return;
+            history.replaceState(null, '', location.href.split('#')[0]);
+            setTimeout(() => {
+                if (!confirm(`Nhận quyền quản trò phòng ${h[1]}?\n\nVán đang mở trên máy này (nếu có) sẽ được thay bằng ván của phòng ${h[1]}.`)) return;
+                state.online = { code: h[1], gmToken: h[2], snapKey: h[3], locked: true, players: [] };
+                try { localStorage.setItem(ONLINE_ROOM_KEY, JSON.stringify(state.online)); } catch (e) {}
+                window._takeover = true; gmStopped = false;
+                try { gmWs && gmWs.close(); } catch (e) {} gmWs = null; gmConnect();
+            }, 700);
+        })();
+        // ---------- Máy CŨ bị chuyển quyền ----------
+        function onlineReplacedNotice() {
+            if (document.getElementById('tk-gone')) return;
+            let ov = document.createElement('div'); ov.id = 'tk-gone'; ov.className = 'tk-ov';
+            ov.innerHTML = `<div class="tk-card"><div class="tk-h">📲 Quyền quản trò đã chuyển sang máy khác</div><div class="tk-sub">Máy này không còn điều khiển phòng ${escapeHtml(state.online ? state.online.code : '')}. Mọi thao tác ở đây sẽ không gửi tới người chơi.</div>
+                <div class="tk-row"><button type="button" class="tk-close" onclick="this.closest('.tk-ov').remove()">Đã hiểu</button></div></div>`;
+            document.body.appendChild(ov);
+        }
+        (function () {
+            const _gm = gmOnMsg;
+            gmOnMsg = function (m) {
+                _gm(m);
+                if (m.t === 'avatar') onlineSetAvatar(m.name, m.data);
+                else if (m.t === 'avatars') (m.list || []).forEach(x => onlineSetAvatar(x.name, x.data));
+                else if (m.t === 'gm_ok' && window._takeover) gmSend({ t: 'snap_get' });
+                else if (m.t === 'snap') onlineRestoreSnap(m);
+                else if (m.t === 'snap_ok') { if (window._snapOkCb) { window._snapOkCb(); window._snapOkCb = null; } }
+                else if (m.t === 'gm_replaced') onlineReplacedNotice();
+            };
+            // bắt đầu ván online -> nhắc chụp mã dự phòng
+            const _force = dealForceStart;
+            dealForceStart = function () { let on = onlineDeal(); let r = _force.apply(this, arguments); if (on) setTimeout(() => onlineShowTakeover(false), 900); return r; };
+            // nút trong khung chat quản trò
+            const _tools = ensureGmTools;
+            ensureGmTools = function () {
+                _tools.apply(this, arguments);
+                let t = document.getElementById('gc-tools'); if (!t || t.querySelector('.gc-tk')) return;
+                t.insertAdjacentHTML('beforeend', '<button type="button" class="gc-tk" onclick="onlineShowTakeover(true)" title="Chuyển quyền quản trò sang máy khác">📲 Chuyển quyền</button>');
+            };
+        })();
+
+    
+        // =====================================================================
+        //  Nâng cấp chat (GĐ5): huy hiệu tin chưa đọc từng kênh, câu trả lời nhanh, nút "tin mới",
+        //  mũi tên người chơi giống quản trò, hết ván chỉ còn kênh Làng, dọn nhật ký cũ
+        // =====================================================================
+        // Dọn các dòng nhật ký chia bài đã ghi ở bản trước (không cần trong dòng thời gian)
+        function cleanDealLog() {
+            if (!Array.isArray(state.eventLog)) return;
+            let n = state.eventLog.length;
+            state.eventLog = state.eventLog.filter(e => !['Chia bài online', 'Chia bài bằng app'].includes(e.title) && !(e.title === 'Online' && /vai đổi/.test(e.content || '')));
+            if (state.eventLog.length !== n) saveGame();
+        }
+        setTimeout(cleanDealLog, 500);
+        // ---------- Mũi tên: gửi kèm biểu tượng + nét của vai (giống quản trò) ----------
+        (function () {
+            const _f = onlineStepFields;
+            onlineStepFields = function () {
+                let out = _f.apply(this, arguments), F = seatFields();
+                out.forEach(x => { if (typeof x.fi !== 'number') return; let sf = F[x.fi]; if (!sf) return; let st = ARROW_STYLE[sf.theme] || ARROW_STYLE.link; x.icon = ARROW_ICON[sf.theme] || ARROW_ICON.link || ''; x.dash = st[1] || ''; x.color = st[0]; });
+                return out;
+            };
+        })();
+        // ---------- Hết ván: chỉ còn kênh Làng (đóng cả nhắn riêng quản trò, kênh người chết) ----------
+        (function () {
+            const _p = onlineComputePerm;
+            onlineComputePerm = function () {
+                let r = _p.apply(this, arguments);
+                if (state.currentView === 'view-end') { ['wolves', 'couple', 'dead', 'dm', 'muted'].forEach(c => { r.names[c] = []; r.ids[c] = []; }); }
+                return r;
+            };
+            const _gs = gmSend;
+            gmSend = function (o) { if (o && o.t === 'perm') o.dmAll = state.currentView !== 'view-end'; return _gs.apply(this, arguments); };
+        })();
+        // ---------- Huy hiệu tin chưa đọc theo từng kênh + từng người nhắn riêng ----------
+        window._gmUnreadCh = {}; window._gmUnreadDm = {};
+        function gmFilter(k) {
+            window._gmChatFilter = k; window._gmUnreadCh[k] = 0;
+            if (k === 'dm') window._gmUnreadDm = {};
+            renderGmChat(); gmFeedBottom();
+        }
+        function gmFeedBottom() { let f = document.getElementById('gc-feed'); if (f) { f.scrollTop = f.scrollHeight; } let b = document.getElementById('gc-jump'); if (b) b.classList.add('hidden'); window._gmNewBelow = 0; }
+        (function () {
+            const _gm = gmOnMsg;
+            gmOnMsg = function (m) {
+                let feed = document.getElementById('gc-feed'), wasBottom = !feed || feed.scrollHeight - feed.scrollTop - feed.clientHeight < 60;
+                _gm(m);
+                if (m.t === 'chat' && m.m && m.m.from !== 'gm') {
+                    let c = m.m.ch; if (window._gmChatFilter !== c) window._gmUnreadCh[c] = (window._gmUnreadCh[c] || 0) + 1;
+                    if (c === 'dm' && window._gmChatFilter !== 'dm') window._gmUnreadDm[m.m.from] = (window._gmUnreadDm[m.m.from] || 0) + 1;
+                    let shown = window._gmChatFilter === 'all' || window._gmChatFilter === c;
+                    if (shown && !wasBottom) { window._gmNewBelow = (window._gmNewBelow || 0) + 1; let b = document.getElementById('gc-jump'); if (b) { b.classList.remove('hidden'); b.textContent = `⬇ ${window._gmNewBelow} tin mới`; } }
+                    renderGmChat();
+                }
+            };
+            const _render = renderGmChat;
+            renderGmChat = function () {
+                _render.apply(this, arguments);
+                let fl = document.getElementById('gc-filters'); if (!fl) return;
+                let f = window._gmChatFilter, list = window._gmChat, U = window._gmUnreadCh;
+                let totalU = Object.values(U).reduce((a, b) => a + (b || 0), 0);
+                let chips = [['all', 'Tất cả', totalU]].concat(Object.keys(CH_INFO).filter(c => c === 'public' || c === 'dm' || list.some(m => m.ch === c) || ((window._gmPermNames || {})[c] || []).length).map(c => [c, CH_INFO[c].ic + ' ' + CH_INFO[c].name, U[c] || 0]));
+                fl.innerHTML = chips.map(([k, t, u]) => `<button type="button" class="gc-f${f === k ? ' on' : ''}${u ? ' has-u' : ''}" onclick="gmFilter('${k}')">${t}${u && k !== 'all' ? `<em class="gc-ub">${u > 99 ? '99+' : u}</em>` : ''}</button>`).join('');
+                let feed = document.getElementById('gc-feed');
+                if (feed && !feed._jumpHook) { feed._jumpHook = true; feed.addEventListener('scroll', () => { if (feed.scrollHeight - feed.scrollTop - feed.clientHeight < 40) { let b = document.getElementById('gc-jump'); if (b) b.classList.add('hidden'); window._gmNewBelow = 0; } }); }
+            };
+            // số tin chưa đọc của từng người trong danh sách nơi gửi
+            const _t = gmTargets;
+            gmTargets = function () {
+                return _t.apply(this, arguments).map(o => { let id = o.v.startsWith('dm:') ? o.v.slice(3) : null, u = id && window._gmUnreadDm[id]; return u ? Object.assign({}, o, { t: `${o.t}  🔴 ${u} tin mới` }) : o; });
+            };
+            // trả lời quản trò cho ai -> coi như đã đọc tin của người đó
+            const _send = gmChatSend;
+            gmChatSend = function () { let v = (document.getElementById('gc-ch') || {}).value || ''; let r = _send.apply(this, arguments); if (v.startsWith('dm:') && window._gmUnreadDm[v.slice(3)]) { delete window._gmUnreadDm[v.slice(3)]; gmChatFillSelectors(); } return r; };
+            // Câu trả lời nhanh + nút "tin mới"
+            const _tools = ensureGmTools;
+            ensureGmTools = function () {
+                _tools.apply(this, arguments);
+                let d = document.getElementById('gm-chat'); if (!d || document.getElementById('gc-quick')) return;
+                const Q = ['Bạn chọn ai?', 'Đã nhận 👍', 'Nhanh lên nhé, hết giờ rồi ⏰', 'Mọi người nhắm mắt 🌙', 'Trời sáng rồi ☀️', 'Đề nghị giữ trật tự 🙏'];
+                let q = document.createElement('div'); q.id = 'gc-quick'; q.className = 'gc-quick';
+                q.innerHTML = Q.map(t => `<button type="button" onclick="let i=document.getElementById('gc-in'); i.value=this.textContent; i.focus();">${t}</button>`).join('');
+                d.insertBefore(q, d.querySelector('.gc-compose'));
+                let j = document.createElement('button'); j.id = 'gc-jump'; j.type = 'button'; j.className = 'gc-jump hidden'; j.onclick = gmFeedBottom;
+                document.getElementById('gc-feed').insertAdjacentElement('afterend', j);
+            };
+        })();
 
     </script>
 </body>
