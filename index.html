@@ -3117,7 +3117,7 @@
                 let inGame = ROLES_DB.filter(r => !r.disabled && r.faction === fac && (state.deck[r.id] || 0) > 0).sort(byName);
                 let rest = ROLES_DB.filter(r => !r.disabled && r.faction === fac && (state.deck[r.id] || 0) === 0).sort(byName);
                 let sub = inGame.reduce((x, r) => x + (state.deck[r.id] || 0), 0);
-                html += `<details class="deck-fac deck-fac-${fac}" ${window._deckClosed[fac] ? '' : 'open'} ontoggle="window._deckClosed['${fac}'] = !this.open">
+                html += `<details class="deck-fac deck-fac-${fac}" ${window._deckClosed[fac] ? '' : 'open'} ontoggle="(window._deckClosed = window._deckClosed || {})['${fac}'] = !this.open">
                     <summary class="deck-fac-sum ${color}"><span><i class="fa-solid ${ic} mr-1.5"></i>${label}</span><span class="deck-fac-count">${sub} lá</span></summary>
                     <div class="deck-fac-body">
                         <div class="deck-sub">Đang có trong ván</div>
@@ -13152,6 +13152,48 @@ document.addEventListener('click', e => {
                 try { return _save.apply(this, arguments); } finally { window._gmChat = full; }
             };
         })();
+
+    
+        // =====================================================================
+        //  Hết ván: gửi PDF tổng hợp (đúng bố cục của quản trò) cho mọi người chơi
+        // =====================================================================
+        // Dựng lại đúng file PDF của quản trò nhưng nhẹ hơn: ảnh trang JPEG, độ phân giải 1.5x (biểu tượng vai vẫn PNG)
+        function buildPlayersPdf() {
+            return new Promise(resolve => {
+                if (!window.html2canvas || !(window.jspdf && window.jspdf.jsPDF)) return resolve(null);
+                const Orig = window.jspdf.jsPDF, oTo = HTMLCanvasElement.prototype.toDataURL, oH2C = window.html2canvas;
+                let finished = false;
+                const restore = () => { window.jspdf.jsPDF = Orig; HTMLCanvasElement.prototype.toDataURL = oTo; window.html2canvas = oH2C; };
+                const finish = v => { if (finished) return; finished = true; restore(); resolve(v); };
+                HTMLCanvasElement.prototype.toDataURL = function (type) { return (type === 'image/png' && this.width > 900) ? oTo.call(this, 'image/jpeg', 0.82) : oTo.apply(this, arguments); };
+                window.html2canvas = (el, o) => oH2C(el, Object.assign({}, o, { scale: 1.5 }));
+                // bọc ngay lúc tạo file PDF: jsPDF gắn save/addImage lên từng file, không phải khuôn mẫu chung
+                window.jspdf.jsPDF = function () {
+                    const doc = new Orig(...arguments), oAdd = doc.addImage.bind(doc);
+                    doc.addImage = function (data) { let a = [...arguments]; if (typeof data === 'string' && data.startsWith('data:image/jpeg')) a[1] = 'JPEG'; return oAdd(...a); };
+                    doc.save = function () { let uri; try { uri = doc.output('datauristring'); } catch (e) {} finish(uri || null); return doc; };
+                    return doc;
+                };
+                setTimeout(() => finish(null), 25000);
+                try { downloadInfoPDF(); } catch (e) { finish(null); }
+            });
+        }
+        let _pdfKey = '', _pdfBusy = false;
+        async function onlineSendEndPdf() {
+            if (!onlineActive() || !state.online.locked || !gmWs || gmWs.readyState !== 1) return;
+            if (state.currentView !== 'view-end' || !state.gameResult) { if (_pdfKey) { _pdfKey = ''; gmSend({ t: 'all', keep: 'pdf', data: { kind: 'pdf', off: true } }); } return; }
+            let key = state.gameResult + '|' + (state.eventLog || []).length + '|' + (state.players || []).length;
+            if (key === _pdfKey || _pdfBusy) return; _pdfBusy = true;
+            try {
+                let uri = await buildPlayersPdf();
+                if (!uri) { onlineToast('Không tạo được PDF để gửi người chơi (cần có mạng để tải thư viện PDF)'); _pdfKey = key; return; }
+                let b64 = uri.slice(uri.indexOf('base64,') + 7), kb = Math.round(b64.length * 3 / 4 / 1024);
+                if (b64.length > 1300 * 1024) { onlineToast(`PDF quá nặng (${kb} KB) — chưa gửi được cho người chơi`); _pdfKey = key; return; }
+                gmSend({ t: 'all', keep: 'pdf', data: { kind: 'pdf', name: 'lang-xi-nghiep-no-tong-hop.pdf', kb, data: 'data:application/pdf;base64,' + b64 } });
+                _pdfKey = key; onlineToast(`📄 Đã gửi PDF ván đấu cho người chơi (${kb} KB)`);
+            } finally { _pdfBusy = false; }
+        }
+        setInterval(() => { try { onlineSendEndPdf(); } catch (e) {} }, 1500);
 
     </script>
 </body>

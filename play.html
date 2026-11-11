@@ -428,6 +428,10 @@
     .vn-bar { flex: 1; height: 4px; border-radius: 99px; background: #334155; overflow: hidden; } .vn-bar i { display: block; height: 100%; width: 0; background: #a5b4fc; }
     .vn-d { font-size: 12px; font-weight: 700; color: #94a3b8; font-variant-numeric: tabular-nums; }
     @media (prefers-reduced-motion: reduce) { .vc-sheet, .vc-rec { transition: none; } .vc-dot { animation: none; } }
+
+    .ge-pdf { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 48px; margin: 4px 0 10px; border-radius: 12px; border: 1px solid #574a16; background: #2a2410; color: #fde68a; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; }
+    .ge-pdf small { font-size: 12px; font-weight: 700; opacity: .75; font-variant-numeric: tabular-nums; }
+    .ge-pdf.wait { cursor: default; opacity: .7; font-weight: 700; font-size: 13px; }
 </style>
 </head>
 <body>
@@ -684,6 +688,7 @@ function onGm(d) {
     else if (d.kind === 'dealprog') dealProg = d;
     else if (d.kind === 'rolechg') { onRoleChg(d); return; }
     else if (d.kind === 'end') { const was = !!endInfo; endInfo = d.off ? null : d; if (!d.off) { tab = 'public'; ting(); if (!was) setTimeout(() => { if (iWon(d.result)) confetti(); }, 300); } }
+    else if (d.kind === 'pdf') endPdf = d.off ? null : d;
     else if (d.kind === 'ghost') ghostL = d.letters || [];
     else if (d.kind === 'muted') mutedL = d.list || [];
     else if (d.kind === 'prince') princeL = d.names || [];
@@ -1013,7 +1018,7 @@ function renderEnd() {
     el.classList.remove('hidden');
     const grp = { wolf: [], villager: [], independent: [] }; endInfo.roles.forEach(r => (grp[r.f] || grp.villager).push(r));
     const col = { villager: '#4ade80', wolf: '#f87171', independent: '#facc15' }, nm = { villager: '🛡️ Phe Dân Làng', wolf: '🐺 Phe Sói', independent: '⭐ Phe Thứ 3' };
-    el.innerHTML = `<div class="ge-title">🏆 ${esc(endInfo.result)}</div>` + ['wolf', 'villager', 'independent'].filter(k => grp[k].length).map(k =>
+    el.innerHTML = `<div class="ge-title">🏆 ${esc(endInfo.result)}</div>` + (endPdf ? `<button type="button" class="ge-pdf" onclick="downloadEndPdf()">📄 Tải PDF ván đấu <small>${endPdf.kb || ''} KB</small></button>` : `<div class="ge-pdf wait">📄 Quản trò đang tạo file PDF…</div>`) + ['wolf', 'villager', 'independent'].filter(k => grp[k].length).map(k =>
         `<div class="ge-grp"><div class="ge-h" style="color:${col[k]}">${nm[k]}</div>${grp[k].map(r => `<div class="ge-r${r.a ? '' : ' dead'}${me && r.n === me.name ? ' me' : ''}">${avatar(r.n)}<b>${esc(r.n)}</b><span style="color:${col[k]}">${esc(r.r)}</span>${r.a ? '' : '💀'}</div>`).join('')}</div>`).join('');
 }
 function renderTimer() {
@@ -1026,7 +1031,14 @@ function renderTimer() {
 setInterval(renderTimer, 250);
 
 // ---------------- Tự chọn mục tiêu (Giai đoạn 3d) ----------------
-let ringMode = 'auto', dealProg = null; const RM2 = matchMedia('(prefers-reduced-motion: reduce)').matches; let ringEntered = false;
+let ringMode = 'auto', dealProg = null, endPdf = null;
+function downloadEndPdf() {
+    if (!endPdf) return;
+    try { const b = atob(endPdf.data.split(',')[1]), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i);
+        const url = URL.createObjectURL(new Blob([u], { type: 'application/pdf' })), a = document.createElement('a');
+        a.href = url; a.download = endPdf.name || 'lang-xi-nghiep-no-tong-hop.pdf'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch (e) { chErr('Không tải được PDF, thử lại nhé'); }
+} const RM2 = matchMedia('(prefers-reduced-motion: reduce)').matches; let ringEntered = false;
 const FAC_HEX = { villager: '#4ade80', wolf: '#f87171', independent: '#facc15' };
 function onRoleChg(d) {
     card = d.card;
