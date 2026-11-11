@@ -126,8 +126,6 @@ Người chơi ngoài danh sách có thể thêm ngay trong ứng dụng (ô **N
 - **Cần mạng ở lần mở đầu tiên** để tải giao diện (Tailwind CSS, Font Awesome, phông chữ) và thư viện xuất PDF.
 - **Nên mở trên trình duyệt mới** (Chrome, Safari, Edge bản gần đây). Rung khi thao tác / hết giờ không hoạt động trên iPhone (giới hạn của Safari).
 - **Không để người chơi nhìn màn hình** khi Quản trò đang thao tác ban đêm — chỉ đưa máy khi đã phóng to kết quả cần cho người chơi xem.
-- **Danh sách tên người chơi** trong file là tên thành viên của nhóm. Hãy cân nhắc trước khi để kho mã ở chế độ công khai (Public).
-
 ## 📢 Miễn trừ trách nhiệm
 
 - *Ma Sói* / *Ultimate Werewolf* là trò chơi do **Bézier Games** phát hành. Làng Xí Nghiệp Nợ là **công cụ hỗ trợ Quản trò do cộng đồng tự làm**, **không** liên kết, **không** được tài trợ hay chứng nhận bởi nhà phát hành.
