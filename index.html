@@ -1763,6 +1763,36 @@
         /* Shared element: ô kết quả ❓ -> phóng to */
         ::view-transition-group(rz-card) { animation-duration: .4s; animation-timing-function: cubic-bezier(.2,.8,.2,1); }
         @media (prefers-reduced-motion: reduce) { .in-new, .cbx-pop { animation: none !important; transition: none !important; } ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; } }
+    /* ===== Micro: tin nhắn thoại / nói để nhập chữ ===== */
+    .vc-mic { position: relative; min-width: 44px; min-height: 44px; border-radius: 14px; border: 1px solid #334155; background: #111827; font-size: 19px; cursor: pointer; }
+    .vc-mic:disabled { opacity: .35; cursor: not-allowed; }
+    .vc-sheet { position: fixed; z-index: 9990; display: flex; flex-direction: column; gap: 6px; padding: 8px; border-radius: 16px; background: #111827; border: 1px solid #334155; box-shadow: 0 18px 50px rgba(0,0,0,.55);
+        opacity: 0; transform: scale(.9); transition: opacity .16s cubic-bezier(.2,.8,.2,1), transform .2s cubic-bezier(.2,.8,.2,1); }
+    .vc-sheet.open { opacity: 1; transform: none; }
+    .vc-opt { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; min-height: 56px; padding: 10px 12px; border-radius: 12px; border: 1px solid #1f2937; background: #0b1120; color: #e2e8f0; font: inherit; cursor: pointer; }
+    .vc-opt b { font-size: 15px; } .vc-opt small { font-size: 12px; color: #94a3b8; line-height: 1.35; text-wrap: pretty; }
+    .vc-opt:disabled { opacity: .5; cursor: not-allowed; } .vc-opt:not(:disabled):active { transform: scale(.98); }
+    .vc-rec { display: flex; align-items: center; gap: 10px; margin-top: 8px; padding: 8px 10px; border-radius: 14px; background: #2a0f12; border: 1px solid #7f1d1d; color: #fecaca;
+        opacity: 0; transform: translateY(6px); transition: opacity .18s, transform .2s cubic-bezier(.2,.8,.2,1); }
+    .vc-rec.open { opacity: 1; transform: none; } .vc-rec.stt { background: #1e1b4b; border-color: #4338ca; color: #c7d2fe; }
+    .vc-dot { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; animation: vcBlink 1s ease-in-out infinite; } .vc-rec.stt .vc-dot { background: #818cf8; }
+    @keyframes vcBlink { 50% { opacity: .25; } }
+    .vc-t { font-variant-numeric: tabular-nums; font-size: 16px; } .vc-hint { flex: 1; font-size: 13px; font-weight: 600; }
+    .vc-rec button { min-height: 40px; padding: 0 12px; border-radius: 10px; border: none; font: inherit; font-weight: 800; font-size: 13px; cursor: pointer; }
+    .vc-cancel { background: #334155; color: #e2e8f0; } .vc-send { background: #4f46e5; color: #fff; }
+    .vn { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; min-width: 170px; padding: 4px 12px 4px 6px; border-radius: 99px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; font: inherit; cursor: pointer; vertical-align: middle; }
+    .vn-i { width: 30px; height: 30px; border-radius: 50%; background: #4f46e5; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; padding-left: 2px; }
+    .vn-bar { flex: 1; height: 4px; border-radius: 99px; background: #334155; overflow: hidden; } .vn-bar i { display: block; height: 100%; width: 0; background: #a5b4fc; }
+    .vn-d { font-size: 12px; font-weight: 700; color: #94a3b8; font-variant-numeric: tabular-nums; }
+    @media (prefers-reduced-motion: reduce) { .vc-sheet, .vc-rec { transition: none; } .vc-dot { animation: none; } }
+
+        .art-sub { font-size: 12px; color: #94a3b8; margin: -2px 0 4px 26px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; text-wrap: pretty; }
+        .art-sub button, .art-sub select { font-size: 12px; font-weight: 700; color: #e2e8f0; background: #111827; border: 1px solid #334155; border-radius: 8px; padding: 4px 8px; min-height: 32px; }
+        #auto-adv { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 92px); transform: translate(-50%, 12px); opacity: 0; z-index: 9800; display: flex; align-items: center; gap: 8px;
+            padding: 10px 12px; border-radius: 14px; background: #1e1b4b; border: 1px solid #6366f1; color: #e0e7ff; font-size: 14px; box-shadow: 0 14px 40px rgba(0,0,0,.5); transition: opacity .2s, transform .25s cubic-bezier(.2,.8,.2,1); max-width: calc(100vw - 24px); }
+        #auto-adv.show { opacity: 1; transform: translate(-50%, 0); } #auto-adv b { font-variant-numeric: tabular-nums; font-size: 16px; }
+        #auto-adv button { min-height: 40px; padding: 0 12px; border-radius: 10px; border: none; font-weight: 800; cursor: pointer; } #auto-now { background: #4f46e5; color: #fff; } #auto-no { background: #334155; color: #e2e8f0; }
+        #gm-chat .gc-compose { gap: 6px; }
 </style>
 </head>
 <body>
@@ -12929,6 +12959,197 @@ var qrcode = function() {
             renderVoteTally = function () {
                 _vt.apply(this, arguments);
                 document.querySelectorAll('#vote-tally .vt-row').forEach(r => { let key = 'v:' + (state.dayCount || 0) + ':' + (r.querySelector('b') || {}).textContent; if (!window._seenRows.has(key)) { window._seenRows.add(key); r.classList.add('in-new'); } });
+            };
+        })();
+
+    
+// ================= Micro dùng chung: tin nhắn thoại + nói để nhập chữ (kiểu Zalo), giữ màn hình sáng =================
+const VC = { rec: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder), stt: !!(window.SpeechRecognition || window.webkitSpeechRecognition) };
+// ---- Giữ màn hình luôn sáng trong lúc chơi ----
+let _wake = null;
+async function keepAwake() { try { if ('wakeLock' in navigator && document.visibilityState === 'visible' && !_wake) { _wake = await navigator.wakeLock.request('screen'); _wake.addEventListener('release', () => { _wake = null; }); } } catch (e) {} }
+document.addEventListener('visibilitychange', keepAwake); addEventListener('pointerdown', keepAwake, { passive: true });
+// ---- Bảng chọn: tin thoại / nói để nhập chữ ----
+function vcCloseSheet() { const s = document.getElementById('vc-sheet'); if (s) { s.classList.remove('open'); setTimeout(() => s.remove(), 180); } }
+function vcOpenSheet(btn, o) {
+    vcCloseSheet(); if (o.disabled && o.disabled()) return;
+    const s = document.createElement('div'); s.id = 'vc-sheet'; s.className = 'vc-sheet'; s.setAttribute('role', 'menu');
+    s.innerHTML = `<button type="button" role="menuitem" class="vc-opt" data-k="rec" ${VC.rec ? '' : 'disabled'}><b>🎙️ Gửi tin nhắn thoại</b><small>${VC.rec ? 'Tối đa 30 giây' : 'Máy/trình duyệt này không ghi âm được'}</small></button>
+        <button type="button" role="menuitem" class="vc-opt" data-k="stt" ${VC.stt ? '' : 'disabled'}><b>📝 Nói để nhập chữ</b><small>${VC.stt ? 'Nói tiếng Việt, chữ hiện vào ô nhập để bạn sửa rồi gửi' : 'Trình duyệt này chưa hỗ trợ (thử Chrome hoặc Safari)'}</small></button>`;
+    document.body.appendChild(s);
+    const b = btn.getBoundingClientRect(), W = Math.min(300, innerWidth - 16), left = Math.min(Math.max(8, b.right - W), innerWidth - W - 8);
+    s.style.left = left + 'px'; s.style.bottom = (innerHeight - b.top + 8) + 'px'; s.style.width = W + 'px';
+    s.style.transformOrigin = `${b.left + b.width / 2 - left}px 100%`;   // mọc ra từ nút 🎤
+    s.querySelectorAll('.vc-opt').forEach(x => x.onclick = () => { vcCloseSheet(); x.dataset.k === 'rec' ? vcRecord(o) : vcListen(o); });
+    requestAnimationFrame(() => s.classList.add('open'));
+    setTimeout(() => addEventListener('pointerdown', function h(e) { if (!s.contains(e.target) && e.target !== btn) { vcCloseSheet(); removeEventListener('pointerdown', h, true); } }, true), 0);
+}
+// ---- Ghi âm ----
+async function vcRecord(o) {
+    let stream; try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); }
+    catch (e) { o.error('Không mở được micro — hãy cho phép trang dùng micro trong cài đặt trình duyệt'); return; }
+    const mime = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/webm'].find(t => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || '';
+    const mr = new MediaRecorder(stream, Object.assign({ audioBitsPerSecond: 24000 }, mime ? { mimeType: mime } : {})), chunks = []; let t0 = Date.now(), cancelled = false;
+    mr.ondataavailable = e => e.data && e.data.size && chunks.push(e.data);
+    const bar = document.createElement('div'); bar.className = 'vc-rec'; bar.setAttribute('role', 'status');
+    bar.innerHTML = `<span class="vc-dot"></span><b class="vc-t">0:00</b><span class="vc-hint">Đang ghi âm…</span><button type="button" class="vc-cancel">Huỷ</button><button type="button" class="vc-send">Gửi ➤</button>`;
+    o.host.appendChild(bar); requestAnimationFrame(() => bar.classList.add('open'));
+    const tick = setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); bar.querySelector('.vc-t').textContent = `0:${String(s).padStart(2, '0')}`; if (s >= 30) stop(); }, 250);
+    const stop = () => { if (mr.state !== 'inactive') mr.stop(); };
+    bar.querySelector('.vc-cancel').onclick = () => { cancelled = true; stop(); };
+    bar.querySelector('.vc-send').onclick = stop;
+    mr.onstop = () => {
+        clearInterval(tick); stream.getTracks().forEach(t => t.stop()); bar.classList.remove('open'); setTimeout(() => bar.remove(), 200);
+        if (cancelled || !chunks.length) return;
+        const dur = Math.max(1, Math.min(30, Math.round((Date.now() - t0) / 1000)));
+        const blob = new Blob(chunks, { type: (mr.mimeType || mime || 'audio/webm').split(';')[0] });
+        const fr = new FileReader(); fr.onload = () => { const url = String(fr.result).replace(/^data:audio\/([a-z0-9-]+);[^,]*base64,/i, 'data:audio/$1;base64,');
+            if (url.length > 300 * 1024) { o.error('Tin nhắn thoại quá dài, hãy nói ngắn hơn'); return; } o.onVoice(url, dur); };
+        fr.readAsDataURL(blob);
+    };
+    mr.start(500);
+}
+// ---- Nói để nhập chữ ----
+function vcListen(o) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return;
+    const r = new SR(); r.lang = 'vi-VN'; r.interimResults = true; r.continuous = false;
+    const inp = o.input, base = inp.value ? inp.value.replace(/\s*$/, ' ') : '';
+    const bar = document.createElement('div'); bar.className = 'vc-rec stt'; bar.setAttribute('role', 'status');
+    bar.innerHTML = `<span class="vc-dot"></span><span class="vc-hint">Đang nghe… nói tiếng Việt</span><button type="button" class="vc-send">Xong</button>`;
+    o.host.appendChild(bar); requestAnimationFrame(() => bar.classList.add('open'));
+    r.onresult = e => { let t = ''; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; inp.value = base + t; inp.dispatchEvent(new Event('input', { bubbles: true })); };
+    r.onerror = e => { if (e.error === 'not-allowed') o.error('Hãy cho phép trang dùng micro để nói thành chữ'); else if (e.error !== 'no-speech' && e.error !== 'aborted') o.error('Không nhận được giọng nói, thử lại nhé'); };
+    r.onend = () => { bar.classList.remove('open'); setTimeout(() => bar.remove(), 200); inp.focus(); };
+    bar.querySelector('.vc-send').onclick = () => r.stop();
+    try { r.start(); } catch (e) { r.onend(); }
+}
+// ---- Phát tin nhắn thoại trong khung chat ----
+const _vcAudio = {};
+function vcPlayerHtml(id, dur) { return `<button type="button" class="vn" data-vn="${id}" aria-label="Phát tin nhắn thoại ${dur} giây"><span class="vn-i">▶</span><span class="vn-bar"><i></i></span><span class="vn-d">0:${String(dur || 0).padStart(2, '0')}</span></button>`; }
+document.addEventListener('click', e => {
+    const b = e.target.closest('.vn'); if (!b) return; e.stopPropagation();
+    const id = b.dataset.vn, src = (window.vcSrc && window.vcSrc(id)); if (!src) return;
+    Object.entries(_vcAudio).forEach(([k, a]) => { if (k !== id && !a.paused) a.pause(); });
+    let a = _vcAudio[id]; if (!a) { a = _vcAudio[id] = new Audio(src);
+        a.ontimeupdate = () => document.querySelectorAll(`.vn[data-vn="${id}"] .vn-bar i`).forEach(i => i.style.width = (a.duration ? a.currentTime / a.duration * 100 : 0) + '%');
+        a.onplay = a.onpause = a.onended = () => document.querySelectorAll(`.vn[data-vn="${id}"] .vn-i`).forEach(i => i.textContent = a.paused ? '▶' : '❚❚'); }
+    a.paused ? a.play().catch(() => {}) : a.pause();
+}, true);
+
+        // =====================================================================
+        //  GĐ7: giữ màn hình sáng, giọng đọc lời dẫn, tự chuyển bước, tin nhắn thoại / nói để nhập chữ (quản trò)
+        // =====================================================================
+        const GM_OPTS_KEY = 'lxn_gm_opts_v1';
+        let gmOpts = (() => { try { return Object.assign({ tts: false, auto: false, autoSec: 3 }, JSON.parse(localStorage.getItem(GM_OPTS_KEY) || '{}')); } catch (e) { return { tts: false, auto: false, autoSec: 3 }; } })();
+        function gmOptsSave() { try { localStorage.setItem(GM_OPTS_KEY, JSON.stringify(gmOpts)); } catch (e) {} }
+        // ---------- Giọng đọc lời dẫn (tiếng Việt, dùng giọng có sẵn trong máy) ----------
+        function viVoice() { let v = (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter(x => /^vi/i.test(x.lang)); return v.find(x => /Linh|Google|Microsoft/i.test(x.name)) || v[0] || null; }
+        function gmSpeak(text, force) {
+            if ((!gmOpts.tts && !force) || !window.speechSynthesis || !text) return;
+            try { speechSynthesis.cancel(); let u = new SpeechSynthesisUtterance(text); u.lang = 'vi-VN'; let v = viVoice(); if (v) u.voice = v; u.rate = 0.95; speechSynthesis.speak(u); } catch (e) {}
+        }
+        if (window.speechSynthesis) speechSynthesis.onvoiceschanged = () => { let el = document.getElementById('tts-voice'); if (el) el.textContent = ttsVoiceLabel(); };
+        function ttsVoiceLabel() { if (!window.speechSynthesis) return 'Trình duyệt không hỗ trợ đọc'; let v = viVoice(); return v ? v.name : 'Không có giọng tiếng Việt — máy sẽ đọc bằng giọng mặc định'; }
+        const cap = t => t ? t.charAt(0).toUpperCase() + t.slice(1) : t;
+        let _ttsPrevWho = '', _ttsKey = '';
+        function ttsForStep() {
+            if (state.currentView !== 'view-night') return;
+            let st = state.nightSequence && state.nightSequence[state.currentStepIndex], key = state.dayCount + '|' + state.currentStepIndex;
+            if (!st || key === _ttsKey) return; _ttsKey = key;
+            let i = typeof stepInfo === 'function' ? stepInfo(st) : null; if (!i || i.who === 'Quản trò') return;
+            let say = (_ttsPrevWho && _ttsPrevWho !== i.who ? `${_ttsPrevWho} nhắm mắt lại. ` : '') + `${i.who}, hãy thức dậy. ${cap(i.act)}.`;
+            _ttsPrevWho = i.who; gmSpeak(say);
+        }
+        (function () {
+            const _r = renderNightStep; renderNightStep = function () { let r = _r.apply(this, arguments); try { ttsForStep(); } catch (e) {} return r; };
+            const _sv = switchView;
+            switchView = function (v) {
+                let prev = state.currentView, r = _sv.apply(this, arguments);
+                if (v !== prev) {
+                    if (v === 'view-night-transition') { _ttsPrevWho = ''; _ttsKey = ''; gmSpeak('Màn đêm buông xuống. Mọi người hãy nhắm mắt lại.'); }
+                    else if (v === 'view-night-result') { gmSpeak((_ttsPrevWho ? `${_ttsPrevWho} nhắm mắt lại. ` : '') + 'Trời sáng rồi. Mọi người hãy mở mắt.'); _ttsPrevWho = ''; }
+                    else if (v === 'view-day-discuss') gmSpeak('Bắt đầu thảo luận.');
+                    else if (v === 'view-day-execute') gmSpeak('Đã đến giờ biểu quyết.');
+                    else if (v === 'view-end') gmSpeak('Ván đấu kết thúc.');
+                }
+                return r;
+            };
+        })();
+        // ---------- Tự chuyển bước khi người chơi đã chọn xong (online) ----------
+        let _autoT = null, _autoKey = '';
+        function stepDone() {
+            let F = onlineStepFields(); if (!F.length) return false;
+            return F.every(f => f.optional || (f.kind === 'letter' ? !!(f.values || [])[0] : ((f.values || []).filter(Boolean).length >= f.n)));
+        }
+        function cancelAuto(msg) { clearInterval(_autoT); _autoT = null; let b = document.getElementById('auto-adv'); if (b) { b.classList.remove('show'); setTimeout(() => b.remove(), 250); } if (msg) onlineToast(msg); }
+        function scheduleAuto() {
+            if (!gmOpts.auto || state.currentView !== 'view-night' || !stepDone()) return;
+            let key = seatStepKey(); if (_autoT && _autoKey === key) return; cancelAuto(); _autoKey = key;
+            let left = Math.max(1, +gmOpts.autoSec || 3), bar = document.createElement('div'); bar.id = 'auto-adv'; bar.setAttribute('role', 'status');
+            bar.innerHTML = `<span>⏭️ Người chơi đã chọn xong — tự chuyển bước sau <b id="auto-left">${left}</b> giây</span><button type="button" id="auto-now">Chuyển ngay</button><button type="button" id="auto-no">Huỷ</button>`;
+            document.body.appendChild(bar); requestAnimationFrame(() => bar.classList.add('show'));
+            bar.querySelector('#auto-no').onclick = () => cancelAuto('Đã huỷ tự chuyển bước');
+            const go = () => { if (state.currentView === 'view-night' && seatStepKey() === _autoKey) { cancelAuto(); nextNightStep(); } else cancelAuto(); };
+            bar.querySelector('#auto-now').onclick = go;
+            _autoT = setInterval(() => { if (seatStepKey() !== _autoKey || state.currentView !== 'view-night') return cancelAuto(); left--; let e = document.getElementById('auto-left'); if (e) e.textContent = left; if (left <= 0) go(); }, 1000);
+        }
+        (function () {
+            const _pick = onlineOnPick;
+            onlineOnPick = function () { let r = _pick.apply(this, arguments); setTimeout(scheduleAuto, 250); return r; };
+            const _r = renderNightStep; renderNightStep = function () { if (_autoT && seatStepKey && _autoKey !== seatStepKey()) cancelAuto(); return _r.apply(this, arguments); };
+        })();
+        // ---------- Công tắc trong Admin Actions ----------
+        function mountAssistToggles() {
+            let p = document.getElementById('admin-panel'); if (!p || document.getElementById('adm-assist')) return;
+            let d = document.createElement('div'); d.id = 'adm-assist'; d.className = 'admin-ring-toggles';
+            d.innerHTML = `<div class="art-title">Trợ lý quản trò</div>
+                <label class="art"><input type="checkbox" id="opt-tts"> 🔊 Giọng đọc lời dẫn (tiếng Việt)</label>
+                <div class="art-sub"><span id="tts-voice">${escapeHtml(ttsVoiceLabel())}</span> <button type="button" id="tts-test">▶ Nghe thử</button></div>
+                <label class="art"><input type="checkbox" id="opt-auto"> ⏭️ Tự chuyển bước khi người chơi đã chọn xong (online)</label>
+                <div class="art-sub">Chờ <select id="opt-auto-sec"><option value="3">3</option><option value="5">5</option><option value="8">8</option></select> giây trước khi chuyển — luôn có nút Huỷ</div>`;
+            p.insertBefore(d, p.children[1] || null);
+            let tts = d.querySelector('#opt-tts'), auto = d.querySelector('#opt-auto'), sec = d.querySelector('#opt-auto-sec');
+            tts.checked = !!gmOpts.tts; auto.checked = !!gmOpts.auto; sec.value = String(gmOpts.autoSec || 3);
+            tts.onchange = () => { gmOpts.tts = tts.checked; gmOptsSave(); if (tts.checked) gmSpeak('Đã bật giọng đọc lời dẫn.', true); else window.speechSynthesis && speechSynthesis.cancel(); };
+            auto.onchange = () => { gmOpts.auto = auto.checked; gmOptsSave(); if (!auto.checked) cancelAuto(); };
+            sec.onchange = () => { gmOpts.autoSec = +sec.value; gmOptsSave(); };
+            d.querySelector('#tts-test').onclick = () => gmSpeak('Bảo Vệ, hãy thức dậy. Hãy chọn người được bảo vệ đêm nay.', true);
+        }
+        setTimeout(mountAssistToggles, 400); new MutationObserver(() => mountAssistToggles()).observe(document.body, { childList: true, subtree: false });
+        // ---------- Tin nhắn thoại / nói để nhập chữ trong khung chat quản trò ----------
+        window.vcSrc = id => (window._gmChat.find(m => m.id === id) || {}).audio;
+        function gmSendVoice(audio, dur) {
+            let t = gmRoomTarget(); if (!t) { onlineToast('Chọn 1 phòng để nhắn'); return; }
+            let night = state.currentView === 'view-night' || state.currentView === 'view-night-transition';
+            if (t.ch === 'public' && night && !confirm('Đang là BAN ĐÊM. Gửi tin nhắn thoại cho CẢ LÀNG?')) return;
+            if (!gmSend(Object.assign({ t: 'chat', text: '', audio, dur }, t))) onlineToast('📶 Mất kết nối server, thử lại sau');
+        }
+        (function () {
+            const _tools = ensureGmTools;
+            ensureGmTools = function () {
+                _tools.apply(this, arguments);
+                let send = document.getElementById('gc-send'); if (!send || document.getElementById('gc-mic')) return;
+                let b = document.createElement('button'); b.type = 'button'; b.id = 'gc-mic'; b.className = 'vc-mic'; b.textContent = '🎤';
+                b.setAttribute('aria-label', 'Tin nhắn thoại hoặc nói để nhập chữ'); b.setAttribute('aria-haspopup', 'menu');
+                b.onclick = () => vcOpenSheet(b, { host: document.getElementById('gm-chat'), input: document.getElementById('gc-in'), error: onlineToast, onVoice: gmSendVoice, disabled: () => !gmRoomTarget() });
+                send.insertAdjacentElement('beforebegin', b);
+            };
+            const _render = renderGmChat;
+            renderGmChat = function () {
+                _render.apply(this, arguments);
+                let feed = document.getElementById('gc-feed'); if (!feed) return;
+                let f = window._gmChatFilter, peer = window._gmDmPeer;
+                let shown = window._gmChat.filter(m => (f === 'all' || !f || m.ch === f) && (f !== 'dm' || !peer || m.from === peer || m.dm === peer)).slice(-300).filter(m => m.audio);
+                let els = [...feed.querySelectorAll('.gc-m')].filter(el => /🎤 Tin nhắn thoại$/.test((el.querySelector('.gc-txt') || el).textContent.trim()));
+                els.slice(-shown.length).forEach((el, i) => { let m = shown[shown.length - els.slice(-shown.length).length + i]; let tx = el.querySelector('.gc-txt'); if (m && tx) tx.innerHTML = vcPlayerHtml(m.id, m.dur); });
+                let mic = document.getElementById('gc-mic'); if (mic) mic.disabled = !gmRoomTarget();
+            };
+            // bộ nhớ trình duyệt: chỉ giữ âm thanh 8 tin thoại gần nhất
+            const _save = gmChatSave;
+            gmChatSave = function () {
+                let full = window._gmChat, keep = new Set(full.filter(m => m.audio).slice(-8).map(m => m.id));
+                window._gmChat = full.map(m => m.audio && !keep.has(m.id) ? Object.assign({}, m, { audio: undefined, gone: true }) : m);
+                try { return _save.apply(this, arguments); } finally { window._gmChat = full; }
             };
         })();
 

@@ -406,6 +406,28 @@
     /* Layout shift: dòng trạng thái giữ sẵn chỗ 2 dòng (đổi bước không làm mọi thứ bên dưới nhảy) */
     body.ingame .g-status { min-height: calc(2 * 1.4em + 20px); display: flex !important; align-items: center; justify-content: center; line-height: 1.4; }
     body.ingame .g-status.hidden { visibility: hidden; }
+    /* ===== Micro: tin nhắn thoại / nói để nhập chữ ===== */
+    .vc-mic { position: relative; min-width: 44px; min-height: 44px; border-radius: 14px; border: 1px solid #334155; background: #111827; font-size: 19px; cursor: pointer; }
+    .vc-mic:disabled { opacity: .35; cursor: not-allowed; }
+    .vc-sheet { position: fixed; z-index: 9990; display: flex; flex-direction: column; gap: 6px; padding: 8px; border-radius: 16px; background: #111827; border: 1px solid #334155; box-shadow: 0 18px 50px rgba(0,0,0,.55);
+        opacity: 0; transform: scale(.9); transition: opacity .16s cubic-bezier(.2,.8,.2,1), transform .2s cubic-bezier(.2,.8,.2,1); }
+    .vc-sheet.open { opacity: 1; transform: none; }
+    .vc-opt { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; min-height: 56px; padding: 10px 12px; border-radius: 12px; border: 1px solid #1f2937; background: #0b1120; color: #e2e8f0; font: inherit; cursor: pointer; }
+    .vc-opt b { font-size: 15px; } .vc-opt small { font-size: 12px; color: #94a3b8; line-height: 1.35; text-wrap: pretty; }
+    .vc-opt:disabled { opacity: .5; cursor: not-allowed; } .vc-opt:not(:disabled):active { transform: scale(.98); }
+    .vc-rec { display: flex; align-items: center; gap: 10px; margin-top: 8px; padding: 8px 10px; border-radius: 14px; background: #2a0f12; border: 1px solid #7f1d1d; color: #fecaca;
+        opacity: 0; transform: translateY(6px); transition: opacity .18s, transform .2s cubic-bezier(.2,.8,.2,1); }
+    .vc-rec.open { opacity: 1; transform: none; } .vc-rec.stt { background: #1e1b4b; border-color: #4338ca; color: #c7d2fe; }
+    .vc-dot { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; animation: vcBlink 1s ease-in-out infinite; } .vc-rec.stt .vc-dot { background: #818cf8; }
+    @keyframes vcBlink { 50% { opacity: .25; } }
+    .vc-t { font-variant-numeric: tabular-nums; font-size: 16px; } .vc-hint { flex: 1; font-size: 13px; font-weight: 600; }
+    .vc-rec button { min-height: 40px; padding: 0 12px; border-radius: 10px; border: none; font: inherit; font-weight: 800; font-size: 13px; cursor: pointer; }
+    .vc-cancel { background: #334155; color: #e2e8f0; } .vc-send { background: #4f46e5; color: #fff; }
+    .vn { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; min-width: 170px; padding: 4px 12px 4px 6px; border-radius: 99px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; font: inherit; cursor: pointer; vertical-align: middle; }
+    .vn-i { width: 30px; height: 30px; border-radius: 50%; background: #4f46e5; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; padding-left: 2px; }
+    .vn-bar { flex: 1; height: 4px; border-radius: 99px; background: #334155; overflow: hidden; } .vn-bar i { display: block; height: 100%; width: 0; background: #a5b4fc; }
+    .vn-d { font-size: 12px; font-weight: 700; color: #94a3b8; font-variant-numeric: tabular-nums; }
+    @media (prefers-reduced-motion: reduce) { .vc-sheet, .vc-rec { transition: none; } .vc-dot { animation: none; } }
 </style>
 </head>
 <body>
@@ -467,7 +489,7 @@
             <div id="ch-mention" class="ch-mention hidden"></div>
             <div id="ch-emo-pop" class="ch-emo-pop hidden"></div>
             <div class="ch-row"><input id="ch-in" maxlength="300" autocomplete="off" placeholder="Chưa tới lượt bạn chat" disabled>
-                <button id="ch-emo" class="ch-emo" aria-label="Chèn emoji" disabled>😊</button><button id="ch-send" disabled aria-label="Gửi">➤</button></div>
+                <button id="ch-emo" class="ch-emo" aria-label="Chèn emoji" disabled>😊</button><button id="ch-mic" class="vc-mic" type="button" aria-label="Tin nhắn thoại hoặc nói để nhập chữ" aria-haspopup="menu" disabled>🎤</button><button id="ch-send" disabled aria-label="Gửi">➤</button></div>
             <div id="ch-slow" class="ch-slow"></div>
             <div id="ch-err" class="ch-err"></div>
         </div>
@@ -751,7 +773,10 @@ let wasDead = false, newBelow = 0; const freshIds = new Set();
 let chatList = [], chatSeen = new Set(), can = {}, label = '', slow = 0, tab = 'public', unread = {}, typing = {}, gstatus = null, timer = null, deck = null, pin = '', myVote = '', reactOpen = null, slowUntil = 0;
 const chatKey = () => 'lxn_chat_' + (me ? me.code + '_' + me.id : '');
 function chatLoad() { try { const d = JSON.parse(IDS.getItem(chatKey()) || '[]'); d.forEach(m => { if (!chatSeen.has(m.id)) { chatSeen.add(m.id); chatList.push(m); } }); } catch (e) {} }
-function chatSave() { try { IDS.setItem(chatKey(), JSON.stringify(chatList.filter(m => !m.pending && !m.failed).slice(-400))); } catch (e) {} }
+function chatSave() { try {
+    const list = chatList.filter(m => !m.pending && !m.failed).slice(-400), keep = new Set(list.filter(m => m.audio).slice(-8).map(m => m.id));
+    IDS.setItem(chatKey(), JSON.stringify(list.map(m => m.audio && !keep.has(m.id) ? Object.assign({}, m, { audio: undefined, gone: true, text: '🎤 Tin nhắn thoại (đã xoá khỏi máy)' }) : m)));
+} catch (e) {} }
 const nameCol = name => { let h = 0; for (const ch of String(name)) h = (h * 31 + ch.codePointAt(0)) >>> 0; return ['#f87171','#fb923c','#facc15','#4ade80','#2dd4bf','#38bdf8','#818cf8','#c084fc','#f472b6','#a3e635'][h % 10]; };
 const mentionsMe = t => me && new RegExp('@' + me.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?![\\p{L}\\p{N}])', 'iu').test(t);
 // ---- Tiếng "Ting" (tự tạo, không cần file âm thanh) ----
@@ -848,16 +873,16 @@ function renderChat() {
         }
         if (m.sys) return `<div class="cm sys" style="color:${m.color};border-color:${m.color}">🔔 ${esc(m.text)}</div>`;
         const gm = m.from === 'gm', mine = m.from === me.id, ment = !mine && mentionsMe(m.text);
-        const txt = esc(m.text).replace(/@([\p{L}\p{N}_]+(?: [\p{L}\p{N}_]+)?)/gu, '<span class="at">@$1</span>');
+        const txt = m.audio ? vcPlayerHtml(m.id, m.dur) : esc(m.text).replace(/@([\p{L}\p{N}_]+(?: [\p{L}\p{N}_]+)?)/gu, '<span class="at">@$1</span>');
         const r = m.r ? Object.entries(m.r).map(([e, u]) => `<button class="rc${u.includes(me.id) ? ' mine' : ''}" data-id="${m.id}" data-e="${e}">${e} ${u.length}</button>`).join('') : '';
         const picker = reactOpen === m.id ? `<div class="rp">${EMO_REACT.map(e => `<button class="rpe" data-id="${m.id}" data-e="${e}">${e}</button>`).join('')}</div>` : '';
-        if (m.pending || m.failed) { const t2 = new Date(m.ts); return `<div class="cm mine${m.pending ? ' pending' : ' failed'}" data-cid="${esc(m.cid)}"><span class="ct">${String(t2.getHours()).padStart(2, '0')}:${String(t2.getMinutes()).padStart(2, '0')}</span><b style="color:${nameCol(m.name)}">${esc(m.name)}</b>: ${esc(m.text)}</div>`; }
+        if (m.pending || m.failed) { const t2 = new Date(m.ts); return `<div class="cm mine${m.pending ? ' pending' : ' failed'}" data-cid="${esc(m.cid)}"><span class="ct">${String(t2.getHours()).padStart(2, '0')}:${String(t2.getMinutes()).padStart(2, '0')}</span><b style="color:${nameCol(m.name)}">${esc(m.name)}</b>: ${m.audio ? vcPlayerHtml(m.id, m.dur) : esc(m.text)}</div>`; }
         const tt = new Date(m.ts), hh = String(tt.getHours()).padStart(2, '0') + ':' + String(tt.getMinutes()).padStart(2, '0');
         return `<div class="cm${freshIds.has(m.id) ? ' fresh' : ''}${mine ? ' mine' : ''}${gm ? ' gm' : ''}${ment ? ' ment' : ''}${m.ch === 'public' ? ' pub' : ''}" data-id="${m.id}"><span class="ct">${hh}</span><b style="color:${gm ? '#fbbf24' : nameCol(m.name)}">${esc(gm ? 'Quản trò' : m.name)}</b>: ${txt}${r ? `<div class="rr">${r}</div>` : ''}${picker}</div>`;
     }).join('') : `<div class="ch-empty">${tab === 'dm' ? 'Tin nhắn riêng giữa bạn và quản trò sẽ hiện ở đây' : 'Chưa có tin nhắn'}</div>`;
     feed.querySelectorAll('.rescard:not(.open)').forEach(el => el.onclick = () => revealRes(el.dataset.id));
     feed.querySelectorAll('.cm.failed').forEach(el => el.onclick = () => { const x = chatList.find(y => y.cid === el.dataset.cid); if (!x) return; x.failed = false; x.pending = true; renderChat();
-        sendJ({ t: 'chat', ch: x.ch, text: x.text, cid: x.cid }); setTimeout(() => { if (x.pending) { x.pending = false; x.failed = true; renderChat(); } }, 8000); });
+        sendJ(Object.assign({ t: 'chat', ch: x.ch, text: x.audio ? '' : x.text, cid: x.cid }, x.audio ? { audio: x.audio, dur: x.dur } : {})); setTimeout(() => { if (x.pending) { x.pending = false; x.failed = true; renderChat(); } }, 8000); });
     feed.querySelectorAll('.cm.pub').forEach(el => el.onclick = e => { if (e.target.closest('.rc,.rpe')) return; if (!can.public) return;
         const r = el.getBoundingClientRect(); window._rpOx = Math.max(16, Math.min(r.width - 16, e.clientX - r.left)) + 'px';
         reactOpen = reactOpen === el.dataset.id ? null : el.dataset.id; renderChat(); });
@@ -873,7 +898,7 @@ function renderChat() {
     renderTyping();
     // ô nhập
     const inp = $('ch-in'), on = !!can[tab], cool = tab === 'public' && slowUntil > Date.now();
-    inp.disabled = !on; $('ch-send').disabled = !on || cool; $('ch-emo').disabled = !on;
+    inp.disabled = !on; $('ch-send').disabled = !on || cool; $('ch-emo').disabled = !on; $('ch-mic').disabled = !on || !!(me && me.spec);
     if (me.spec) { inp.placeholder = '👀 Bạn đang xem — khán giả không chat được'; }
     inp.placeholder = !on ? (tab === 'public' ? (label.startsWith('🌙') ? '🌙 Ban đêm — chỉ chat khi tới lượt bạn' : can.muted ? '🤐 Bạn bị cấm nói hôm nay — nhắn ở tab Bị cấm nói' : '🔒 Chưa tới lượt bạn chat') : '🔒 Kênh này đang đóng')
         : { public: '💬 Nhắn với cả làng… (@ để nhắc tên)', dm: '✉️ Nhắn riêng quản trò…', wolves: '🐺 Nhắn với bầy Sói…', couple: '💞 Nhắn với người ấy…', dead: '👻 Nhắn với người chết…', muted: '🤐 Chỉ quản trò và người chết đọc được…' }[tab];
@@ -903,6 +928,15 @@ function chatSend() {
     if (tab === 'public' && slow) { slowUntil = Date.now() + slow * 1000; const iv = setInterval(() => { renderChat(); if (slowUntil <= Date.now()) clearInterval(iv); }, 500); }
 }
 $('ch-send').onclick = chatSend;
+window.vcSrc = id => (chatList.find(m => m.id === id) || {}).audio;
+function sendVoice(audio, dur) {
+    if (!can[tab]) return;
+    const cid = 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    chatList.push({ id: 'p:' + cid, cid, ch: tab, from: me.id, name: me.name, text: '🎤 Tin nhắn thoại', audio, dur, ts: Date.now(), pending: true }); renderChat();
+    sendJ({ t: 'chat', ch: tab, text: '', audio, dur, cid });
+    setTimeout(() => { const x = chatList.find(y => y.cid === cid && y.pending); if (x) { x.pending = false; x.failed = true; renderChat(); } }, 15000);
+}
+$('ch-mic').onclick = () => vcOpenSheet($('ch-mic'), { host: $('chat'), input: $('ch-in'), error: chErr, onVoice: sendVoice, disabled: () => $('ch-mic').disabled });
 $('ch-jump').onclick = () => { const f = $('ch-feed'); f.scrollTop = f.scrollHeight; newBelow = 0; $('ch-jump').classList.add('hidden'); };
 $('ch-in').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); chatSend(); } });
 let lastTypingSent = 0;
@@ -1126,6 +1160,79 @@ function trackDeaths(seats) {
     if (me && now[me.name]) { document.querySelectorAll('.death-ov').forEach(x => x.remove()); wasDead = false; }
     prevAlive = now;
 }
+
+// ================= Micro dùng chung: tin nhắn thoại + nói để nhập chữ (kiểu Zalo), giữ màn hình sáng =================
+const VC = { rec: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder), stt: !!(window.SpeechRecognition || window.webkitSpeechRecognition) };
+// ---- Giữ màn hình luôn sáng trong lúc chơi ----
+let _wake = null;
+async function keepAwake() { try { if ('wakeLock' in navigator && document.visibilityState === 'visible' && !_wake) { _wake = await navigator.wakeLock.request('screen'); _wake.addEventListener('release', () => { _wake = null; }); } } catch (e) {} }
+document.addEventListener('visibilitychange', keepAwake); addEventListener('pointerdown', keepAwake, { passive: true });
+// ---- Bảng chọn: tin thoại / nói để nhập chữ ----
+function vcCloseSheet() { const s = document.getElementById('vc-sheet'); if (s) { s.classList.remove('open'); setTimeout(() => s.remove(), 180); } }
+function vcOpenSheet(btn, o) {
+    vcCloseSheet(); if (o.disabled && o.disabled()) return;
+    const s = document.createElement('div'); s.id = 'vc-sheet'; s.className = 'vc-sheet'; s.setAttribute('role', 'menu');
+    s.innerHTML = `<button type="button" role="menuitem" class="vc-opt" data-k="rec" ${VC.rec ? '' : 'disabled'}><b>🎙️ Gửi tin nhắn thoại</b><small>${VC.rec ? 'Tối đa 30 giây' : 'Máy/trình duyệt này không ghi âm được'}</small></button>
+        <button type="button" role="menuitem" class="vc-opt" data-k="stt" ${VC.stt ? '' : 'disabled'}><b>📝 Nói để nhập chữ</b><small>${VC.stt ? 'Nói tiếng Việt, chữ hiện vào ô nhập để bạn sửa rồi gửi' : 'Trình duyệt này chưa hỗ trợ (thử Chrome hoặc Safari)'}</small></button>`;
+    document.body.appendChild(s);
+    const b = btn.getBoundingClientRect(), W = Math.min(300, innerWidth - 16), left = Math.min(Math.max(8, b.right - W), innerWidth - W - 8);
+    s.style.left = left + 'px'; s.style.bottom = (innerHeight - b.top + 8) + 'px'; s.style.width = W + 'px';
+    s.style.transformOrigin = `${b.left + b.width / 2 - left}px 100%`;   // mọc ra từ nút 🎤
+    s.querySelectorAll('.vc-opt').forEach(x => x.onclick = () => { vcCloseSheet(); x.dataset.k === 'rec' ? vcRecord(o) : vcListen(o); });
+    requestAnimationFrame(() => s.classList.add('open'));
+    setTimeout(() => addEventListener('pointerdown', function h(e) { if (!s.contains(e.target) && e.target !== btn) { vcCloseSheet(); removeEventListener('pointerdown', h, true); } }, true), 0);
+}
+// ---- Ghi âm ----
+async function vcRecord(o) {
+    let stream; try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); }
+    catch (e) { o.error('Không mở được micro — hãy cho phép trang dùng micro trong cài đặt trình duyệt'); return; }
+    const mime = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/webm'].find(t => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || '';
+    const mr = new MediaRecorder(stream, Object.assign({ audioBitsPerSecond: 24000 }, mime ? { mimeType: mime } : {})), chunks = []; let t0 = Date.now(), cancelled = false;
+    mr.ondataavailable = e => e.data && e.data.size && chunks.push(e.data);
+    const bar = document.createElement('div'); bar.className = 'vc-rec'; bar.setAttribute('role', 'status');
+    bar.innerHTML = `<span class="vc-dot"></span><b class="vc-t">0:00</b><span class="vc-hint">Đang ghi âm…</span><button type="button" class="vc-cancel">Huỷ</button><button type="button" class="vc-send">Gửi ➤</button>`;
+    o.host.appendChild(bar); requestAnimationFrame(() => bar.classList.add('open'));
+    const tick = setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); bar.querySelector('.vc-t').textContent = `0:${String(s).padStart(2, '0')}`; if (s >= 30) stop(); }, 250);
+    const stop = () => { if (mr.state !== 'inactive') mr.stop(); };
+    bar.querySelector('.vc-cancel').onclick = () => { cancelled = true; stop(); };
+    bar.querySelector('.vc-send').onclick = stop;
+    mr.onstop = () => {
+        clearInterval(tick); stream.getTracks().forEach(t => t.stop()); bar.classList.remove('open'); setTimeout(() => bar.remove(), 200);
+        if (cancelled || !chunks.length) return;
+        const dur = Math.max(1, Math.min(30, Math.round((Date.now() - t0) / 1000)));
+        const blob = new Blob(chunks, { type: (mr.mimeType || mime || 'audio/webm').split(';')[0] });
+        const fr = new FileReader(); fr.onload = () => { const url = String(fr.result).replace(/^data:audio\/([a-z0-9-]+);[^,]*base64,/i, 'data:audio/$1;base64,');
+            if (url.length > 300 * 1024) { o.error('Tin nhắn thoại quá dài, hãy nói ngắn hơn'); return; } o.onVoice(url, dur); };
+        fr.readAsDataURL(blob);
+    };
+    mr.start(500);
+}
+// ---- Nói để nhập chữ ----
+function vcListen(o) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return;
+    const r = new SR(); r.lang = 'vi-VN'; r.interimResults = true; r.continuous = false;
+    const inp = o.input, base = inp.value ? inp.value.replace(/\s*$/, ' ') : '';
+    const bar = document.createElement('div'); bar.className = 'vc-rec stt'; bar.setAttribute('role', 'status');
+    bar.innerHTML = `<span class="vc-dot"></span><span class="vc-hint">Đang nghe… nói tiếng Việt</span><button type="button" class="vc-send">Xong</button>`;
+    o.host.appendChild(bar); requestAnimationFrame(() => bar.classList.add('open'));
+    r.onresult = e => { let t = ''; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; inp.value = base + t; inp.dispatchEvent(new Event('input', { bubbles: true })); };
+    r.onerror = e => { if (e.error === 'not-allowed') o.error('Hãy cho phép trang dùng micro để nói thành chữ'); else if (e.error !== 'no-speech' && e.error !== 'aborted') o.error('Không nhận được giọng nói, thử lại nhé'); };
+    r.onend = () => { bar.classList.remove('open'); setTimeout(() => bar.remove(), 200); inp.focus(); };
+    bar.querySelector('.vc-send').onclick = () => r.stop();
+    try { r.start(); } catch (e) { r.onend(); }
+}
+// ---- Phát tin nhắn thoại trong khung chat ----
+const _vcAudio = {};
+function vcPlayerHtml(id, dur) { return `<button type="button" class="vn" data-vn="${id}" aria-label="Phát tin nhắn thoại ${dur} giây"><span class="vn-i">▶</span><span class="vn-bar"><i></i></span><span class="vn-d">0:${String(dur || 0).padStart(2, '0')}</span></button>`; }
+document.addEventListener('click', e => {
+    const b = e.target.closest('.vn'); if (!b) return; e.stopPropagation();
+    const id = b.dataset.vn, src = (window.vcSrc && window.vcSrc(id)); if (!src) return;
+    Object.entries(_vcAudio).forEach(([k, a]) => { if (k !== id && !a.paused) a.pause(); });
+    let a = _vcAudio[id]; if (!a) { a = _vcAudio[id] = new Audio(src);
+        a.ontimeupdate = () => document.querySelectorAll(`.vn[data-vn="${id}"] .vn-bar i`).forEach(i => i.style.width = (a.duration ? a.currentTime / a.duration * 100 : 0) + '%');
+        a.onplay = a.onpause = a.onended = () => document.querySelectorAll(`.vn[data-vn="${id}"] .vn-i`).forEach(i => i.textContent = a.paused ? '▶' : '❚❚'); }
+    a.paused ? a.play().catch(() => {}) : a.pause();
+}, true);
 
 // ---------------- Giao diện ----------------
 function showJoin(msg) {
