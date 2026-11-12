@@ -398,6 +398,8 @@
     .ch-head #ch-label { margin-left: auto; }
     .chat .g-timer { margin: 0; padding: 3px 10px; gap: 8px; border-radius: 99px; font-size: 12px; min-height: 0; }
     .chat .g-timer b { font-size: 18px; letter-spacing: .02em; }
+    .chat .g-timer span { white-space: nowrap; }
+    .ch-head b { white-space: nowrap; }
     .chat .g-timer.hidden { display: none !important; }
     body.lobbyring #ring-box { display: block; margin-top: 12px; }
 
@@ -442,6 +444,43 @@
     /* Đồng hồ lượt đêm */
     .pf-timer { font-size: 14px; font-weight: 800; color: #fde68a; text-align: center; font-variant-numeric: tabular-nums; padding: 4px 0; }
     .pf-timer.low { color: #fca5a5; animation: tw 1s ease-in-out infinite; }
+
+    /* Ban ngày tự động */
+    .df-bar { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 10px; padding:9px 14px; border-radius:12px; background:#1e1b4b; border:1px solid #4338ca; color:#e0e7ff; font-weight:700; font-size:14px; }
+    body:not(.ingame) .df-bar { display:none !important; }
+    .df-bar .df-t { font-size:20px; font-variant-numeric:tabular-nums; } .df-bar.low { background:#2a0f12; border-color:#7f1d1d; color:#fecaca; }
+    .seat.accused .av { box-shadow:0 0 0 3px #ef4444, 0 0 14px rgba(239,68,68,.6) !important; }
+    .seat.speaking .av { box-shadow:0 0 0 3px #fbbf24, 0 0 18px rgba(251,191,36,.8) !important; animation: turnGlow 1.4s ease-in-out infinite; }
+    .seat.speaking::before { content:'🗣️'; position:absolute; top:-16px; left:50%; transform:translateX(-50%); font-size:15px; }
+    .hang-bar { margin-top:10px; display:flex; flex-direction:column; gap:10px; }
+    .hb { padding:10px 12px; border-radius:14px; background:#0f1626; border:1px solid var(--line); }
+    .hb-q { font-size:15px; font-weight:700; line-height:1.4; text-wrap:balance; margin-bottom:8px; } .hb-q b { color:#fca5a5; }
+    .hb-btns { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .hb-btns button { min-height:48px; border-radius:12px; font:inherit; font-size:15px; font-weight:800; cursor:pointer; border:1.5px solid var(--line); background:#111827; color:#e2e8f0; }
+    .hb-y.on { background:#7f1d1d; border-color:#ef4444; color:#fff; } .hb-n.on { background:#334155; border-color:#94a3b8; color:#fff; }
+    .hb-note { font-size:12px; color:var(--mute); text-align:center; text-wrap:pretty; }
+
+    /* Sổ tay luật & vai */
+    .ch-empty { color: var(--mute) !important; }
+    .btn-main { background: #5b45d6; } .btn-main:not(:disabled):hover { background: #6650e0; }   /* chữ trắng đủ tương phản (>= 4.5) */
+    .rules-btn { width:100%; min-height:44px; margin-bottom:8px; border-radius:12px; border:1px solid var(--line); background:#0f1626; color:#c7d2fe; font:inherit; font-size:14px; font-weight:800; cursor:pointer; }
+    .rules-ov { position:fixed; inset:0; z-index:150; background:rgba(2,6,16,.82); display:flex; align-items:flex-end; justify-content:center; opacity:0; transition:opacity .2s; padding-top:env(safe-area-inset-top,0px); }
+    .rules-ov.show { opacity:1; }
+    .rules-card { width:min(640px,100%); max-height:92dvh; display:flex; flex-direction:column; background:var(--card); border:1px solid var(--line); border-radius:20px 20px 0 0; padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px)); transform:translateY(20px); transition:transform .25s cubic-bezier(.2,.8,.2,1); }
+    .rules-ov.show .rules-card { transform:none; }
+    @media (min-width:700px) { .rules-ov { align-items:center; } .rules-card { border-radius:20px; } }
+    .rules-top { display:flex; align-items:center; justify-content:space-between; } .rules-top h2 { font-size:20px; margin:0; }
+    .rules-x { min-width:44px; min-height:44px; border-radius:12px; border:1px solid var(--line); background:#111827; color:#e2e8f0; font-size:16px; cursor:pointer; }
+    .rules-tabs { display:flex; gap:6px; margin:10px 0; } .rules-tabs button { flex:1; min-height:44px; border-radius:12px; border:1px solid var(--line); background:#111827; color:var(--mute); font:inherit; font-weight:800; cursor:pointer; }
+    .rules-tabs button[aria-selected="true"] { background:#3b2f8f; border-color:var(--iris); color:#fff; }
+    #rules-q { min-height:44px; margin-bottom:10px; }
+    .rules-body { overflow-y:auto; overscroll-behavior:contain; line-height:1.55; }
+    .rules-body h3 { font-size:15px; margin:14px 0 4px; } .rules-body p { margin:0 0 8px; color:#cbd5e1; font-size:14px; max-width:62ch; text-wrap:pretty; }
+    .rcard { border:1px solid var(--line); border-left:4px solid var(--fc); border-radius:12px; padding:10px 12px; margin-bottom:8px; background:#0f1626; }
+    .rcard.mine { box-shadow:0 0 0 2px var(--fc); } .rcard header { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-bottom:4px; } .rcard header b { font-size:16px; color:var(--fc); }
+    .rc-n { font-size:12px; font-weight:800; color:#e2e8f0; background:#1e293b; border-radius:6px; padding:1px 6px; } .rc-f { font-size:12px; color:var(--mute); margin-left:auto; }
+    .rc-me { font-size:11px; font-weight:800; color:#0b1120; background:var(--fc); border-radius:6px; padding:2px 6px; }
+    .rcard p { font-size:13.5px; } .rcard i { font-style:normal; color:var(--mute); font-weight:700; } .rules-empty { color:var(--mute); text-align:center; padding:20px 0; }
 </style>
 </head>
 <body>
@@ -449,6 +488,14 @@
 <div id="card-ov" class="hidden"></div>
 <div id="turn-toast"></div>
 <div id="net-bar" class="net-bar" role="status" aria-live="polite"></div>
+<div id="rules-ov" class="rules-ov hidden" role="dialog" aria-modal="true" aria-labelledby="rules-h">
+  <div class="rules-card">
+    <div class="rules-top"><h2 id="rules-h">📖 Luật &amp; vai</h2><button type="button" id="rules-x" class="rules-x" aria-label="Đóng">✕</button></div>
+    <div class="rules-tabs" role="tablist"><button type="button" role="tab" id="rt-roles" aria-selected="true">Vai trong ván</button><button type="button" role="tab" id="rt-rules" aria-selected="false">Luật chơi</button></div>
+    <input id="rules-q" type="search" placeholder="Tìm vai… (gõ không dấu cũng được)" aria-label="Tìm vai" autocomplete="off">
+    <div id="rules-body" class="rules-body" tabindex="0" aria-label="Nội dung sổ tay"></div>
+  </div>
+</div>
 <div id="pick-ov" class="hidden"></div>
 <div class="wrap">
     <div class="brand">
@@ -485,8 +532,9 @@
         <div id="card-zone" class="hidden"></div>
         <div id="g-status" class="g-status"></div>
         <div id="g-end" class="g-end hidden"></div>
+        <div id="df-bar" class="df-bar hidden" role="timer" aria-live="off"></div>
         <div id="role-bar" class="rb"></div>
-        <div id="ring-box" class="rg"><div class="rg-head"><span>🏘️ Vòng làng</span><span class="rg-r"><span id="rg-count"></span><button id="rg-mode" class="rg-mode"></button></span></div><div id="ring-hint" class="ring-hint hidden"></div><div id="ring" class="ring"></div><div id="pick-bar" class="pick-bar hidden"></div></div>
+        <div id="ring-box" class="rg"><div class="rg-head"><span>🏘️ Vòng làng</span><span class="rg-r"><span id="rg-count"></span><button id="rg-mode" class="rg-mode"></button></span></div><div id="ring-hint" class="ring-hint hidden"></div><div id="ring" class="ring"></div><div id="pick-bar" class="pick-bar hidden"></div><div id="hang-bar" class="hang-bar hidden"></div></div>
         <details id="lb-roster" class="roster" open>
             <summary><div class="list-head"><span>Người chơi</span><span id="lb-count"></span></div></summary>
             <div id="lb-list" class="plist"></div>
@@ -495,6 +543,7 @@
             <div class="ch-head"><b>💬 Chat</b><div id="g-timer" class="g-timer hidden"></div><span id="ch-label"></span></div>
             <div id="ch-pin" class="ch-pin hidden"></div>
             <div id="ch-ghost" class="ch-ghost hidden"></div>
+            <button type="button" id="rules-btn" class="rules-btn" aria-haspopup="dialog">📖 Luật &amp; vai</button>
             <details id="ch-deck" class="ch-deck hidden"><summary>📜 Vai trong ván <span id="ch-deck-n"></span></summary><div id="ch-deck-list" class="dk-list"></div></details>
             <div id="ch-tabs" class="ch-tabs"></div>
             <div id="ch-dead" class="ch-dead hidden">💀 Bạn đã chết — tin của bạn chỉ người chết khác và quản trò thấy.</div>
@@ -684,11 +733,12 @@ function renderRingInner() {
     if (card && FAC_RING[card.role.faction]) box.style.setProperty('--myfac', FAC_RING[card.role.faction]);
     const pickedCol = {}; if (fieldsMsg) fieldsMsg.fields.forEach(fd => (picks[fd.fi] || []).forEach(t => pickedCol[t] = fd.color));
     if (!ringEntered) { ringEntered = true; box.classList.add('enter'); setTimeout(() => box.classList.remove('enter'), 1600); }
-    box.innerHTML = (grid ? '' : `<svg class="ring-svg" viewBox="0 0 100 100" preserveAspectRatio="none">${ringArrows(pos)}</svg>`) + village.map((s, i) => {
+    const accused = dflow && ['rev', 'def', 'hang'].includes(dflow.ph) ? dflow.accused || [] : [], speaker = dflow && dflow.ph === 'def' ? dflow.speaker : '';
+    box.innerHTML = (grid ? '' : `<svg class="ring-svg" viewBox="0 0 100 100" preserveAspectRatio="none">${ringArrows(pos)}${voteArrows(pos)}</svg>`) + village.map((s, i) => {
         const x = pos[s.n].x, y = pos[s.n].y, cant = f && !f.kind && !f.allowed.includes(s.n), bit = bitten.includes(s.n);
         const er = endRole[s.n], mu = mutedL.find(m => m.n === s.n), badge = (mu ? `<span class="mbadge" title="${esc(mu.why)}">🤐</span>` : '') + (princeL.includes(s.n) ? '<span class="pbadge">👑</span>' : '');
         const facCol = er ? ({ villager: '#4ade80', wolf: '#f87171', independent: '#facc15' }[er.f] || '#94a3b8') : '';
-        return `<div class="seat${justDied.has(s.n) ? ' just-died' : ''}${s.a ? '' : ' dead'}${me && s.n === me.name ? ' me' : ''}${cant ? ' cant' : ''}${bit ? ' bitten' : ''}${vgroup.includes(s.n) ? ' vsel' : ''}${vf && vf.anchor === s.n ? ' vanchor' : ''}${er ? ' revealed' : ''}${pickedCol[s.n] ? ' picked' : ''}" data-n="${esc(s.n)}" style="--i:${i};${grid ? '' : `left:${x}%;top:${y}%;`}${er ? '--rc:' + facCol + ';' : ''}${pickedCol[s.n] ? '--pc:' + pickedCol[s.n] + ';' : ''}">${avatar(s.n)}${s.a ? '' : '<span class="skull">💀</span>'}${bit ? '<span class="blood">🩸</span>' : ''}${badge}${er ? `<span class="rrole" style="color:${facCol}">${esc(er.r)}</span>` : ''}${(grid || per >= 30) ? `<span class="sn">${esc(s.n)}</span>` : ''}</div>`;
+        return `<div class="seat${accused.includes(s.n) ? ' accused' : ''}${speaker === s.n ? ' speaking' : ''}${justDied.has(s.n) ? ' just-died' : ''}${s.a ? '' : ' dead'}${me && s.n === me.name ? ' me' : ''}${cant ? ' cant' : ''}${bit ? ' bitten' : ''}${vgroup.includes(s.n) ? ' vsel' : ''}${vf && vf.anchor === s.n ? ' vanchor' : ''}${er ? ' revealed' : ''}${pickedCol[s.n] ? ' picked' : ''}" data-n="${esc(s.n)}" style="--i:${i};${grid ? '' : `left:${x}%;top:${y}%;`}${er ? '--rc:' + facCol + ';' : ''}${pickedCol[s.n] ? '--pc:' + pickedCol[s.n] + ';' : ''}">${avatar(s.n)}${s.a ? '' : '<span class="skull">💀</span>'}${bit ? '<span class="blood">🩸</span>' : ''}${badge}${er ? `<span class="rrole" style="color:${facCol}">${esc(er.r)}</span>` : ''}${(grid || per >= 30) ? `<span class="sn">${esc(s.n)}</span>` : ''}</div>`;
     }).join('') + (grid ? '' : `<div class="ring-mid"><b>${alive}</b>còn sống</div>`);
     $('rg-count').textContent = `${alive} còn sống, ${n - alive} đã chết`;
     // Tự đo: vẽ dạng vòng mà có tên bị ghế khác che -> chuyển sang lưới (nhớ theo số người + cỡ màn hình)
@@ -717,6 +767,7 @@ function onGm(d) {
     else if (d.kind === 'pack') pack = d.names || [];
     else if (d.kind === 'turn') { onTurn(d); return; }
     else if (d.kind === 'fields') { onFields(d); return; }
+    else if (d.kind === 'dayflow') { onDayflow(d); return; }
     else if (d.kind === 'nudge') { ting(); flashTitle(d.text ? '🔔 Quản trò gọi bạn' : '🔔 Mở lá bài của bạn'); turnToast(d.text || '🔔 Quản trò nhắc bạn mở lá bài'); if (navigator.vibrate) try { navigator.vibrate([90, 60, 90, 60, 160]); } catch (e) {} return; }
     else if (d.kind === 'dealprog') dealProg = d;
     else if (d.kind === 'rolechg') { onRoleChg(d); return; }
@@ -1048,7 +1099,7 @@ function canVote() { return gstatus && gstatus.phase === 'vote' && me && (gstatu
 function renderRingMode() {
     const hint = $('ring-hint'); if (!hint) return;
     const turn = myTurnCh();
-    if (canVote()) hint.innerHTML = myVote ? `🗳️ Bạn đã đề cử <b>${esc(myVote)}</b> — chạm lại để rút, chạm người khác để đổi` : '🗳️ Chạm vào một người để đề cử lên giàn biện minh';
+    if (canVote()) hint.innerHTML = myVote ? `🤫 Bạn đã chọn <b>${esc(myVote)}</b> (bí mật) — chạm lại để bỏ chọn` : '🤫 Bí mật: chạm vào người bạn muốn đưa lên giàn (hoặc không chọn ai)';
     else if (fieldsMsg && fieldsMsg.fields.length) { const f = curField(); hint.innerHTML = f ? `👉 ${esc(f.label)}` : ''; }
     else hint.innerHTML = '';
     hint.classList.toggle('hidden', !hint.innerHTML);
@@ -1083,7 +1134,7 @@ function renderEnd() {
 }
 function renderTimer() {
     const el = $('g-timer'); if (!el) return;
-    if (!timer || timer.off) { el.classList.add('hidden'); return; }
+    if (!timer || timer.off || dflow) { el.classList.add('hidden'); return; }   // đang chạy luồng tự động: dùng thanh đếm ngược mới
     const left = timer.running ? Math.max(0, Math.ceil((timer.endAt - Date.now()) / 1000)) : timer.remain;
     el.classList.remove('hidden'); el.classList.toggle('low', left <= 10); el.classList.toggle('paused', !timer.running);
     el.innerHTML = `<span>${timer.type === 'defense' ? '🗣️ Biện minh' : '☀️ Thảo luận'}${timer.running ? '' : ' (tạm dừng)'}</span><b>${String(Math.floor(left / 60)).padStart(2, '0')}:${String(left % 60).padStart(2, '0')}</b>`;
@@ -1108,7 +1159,34 @@ function onRoleChg(d) {
     window._rcAt = Date.now(); chatSave(); tab = 'dm'; roleShown = false; ting(); flashTitle('🔔 Vai của bạn đã đổi'); turnToast(d.text); renderLobby();
 } const autoGrid = {};
 addEventListener('resize', () => { clearTimeout(window._rzT); window._rzT = setTimeout(() => { try { renderRing(); } catch (e) {} }, 200); });
-let turnUntil = 0;
+let turnUntil = 0, dflow = null, hangMine = {};
+const DF_TXT = { nom: '🤫 Biểu quyết bí mật', rev: '📢 Công bố kết quả đề cử', def: '🗣️ Biện minh', hang: '⚖️ Bỏ phiếu treo cổ' };
+function onDayflow(d) {
+    if (!d || d.ph === 'off') { dflow = null; hangMine = {}; }
+    else { const was = dflow && dflow.ph; dflow = Object.assign({}, d, { until: Date.now() + (d.left || 0) * 1000 }); if (d.ph === 'hang' && was !== 'hang') hangMine = {};
+        if (d.ph !== was && (d.ph === 'nom' || d.ph === 'hang')) { ting(); if (navigator.vibrate) try { navigator.vibrate([60, 40, 60]); } catch (e) {} } }
+    renderLobby();
+}
+setInterval(() => { const el = $('df-bar'); if (!el) return; if (!dflow) { el.classList.add('hidden'); return; }
+    const left = Math.max(0, Math.ceil((dflow.until - Date.now()) / 1000)); el.classList.remove('hidden'); el.classList.toggle('low', left <= 5);
+    el.innerHTML = `<span>${DF_TXT[dflow.ph] || ''}${dflow.ph === 'def' && dflow.speaker ? ': <b>' + esc(dflow.speaker) + '</b>' : ''}</span><b class="df-t">${left}s</b>`; }, 250);
+function hangVote(target, v) {
+    if (!dflow || dflow.ph !== 'hang') return;
+    hangMine[target] = v; sendJ({ t: 'to_gm', data: { kind: 'hang', target, v } }); renderHangBar();
+}
+function renderHangBar() {
+    const el = $('hang-bar'); if (!el) return;
+    if (!dflow || dflow.ph !== 'hang' || !me) { el.classList.add('hidden'); el.innerHTML = ''; return; }
+    el.classList.remove('hidden');
+    const canV = (dflow.voters || []).includes(me.name);
+    el.innerHTML = !canV ? '<div class="hb-q">Bạn không được bỏ phiếu hôm nay.</div>' : dflow.accused.map(a => a === me.name
+        ? `<div class="hb-q">Bạn đang bị đề cử — bạn không bỏ phiếu cho chính mình.</div>`
+        : `<div class="hb"><div class="hb-q">Bạn có đồng ý treo cổ <b>${esc(a)}</b> hay không?</div><div class="hb-btns">
+            <button type="button" class="hb-y${hangMine[a] === 'y' ? ' on' : ''}" data-a="${esc(a)}" data-v="y" aria-pressed="${hangMine[a] === 'y'}">Treo cổ</button>
+            <button type="button" class="hb-n${hangMine[a] === 'n' ? ' on' : ''}" data-a="${esc(a)}" data-v="n" aria-pressed="${hangMine[a] === 'n'}">Không treo cổ</button></div></div>`).join('')
+        + '<div class="hb-note">Không bấm gì thì được tính là “Không treo cổ”. Đổi ý được tới khi hết giờ.</div>';
+    el.querySelectorAll('button[data-a]').forEach(b => b.onclick = () => hangVote(b.dataset.a, b.dataset.v));
+}
 setInterval(() => { const el = $('pf-timer'); if (!el || !turnUntil) return; const left = Math.max(0, Math.ceil((turnUntil - Date.now()) / 1000));
     el.textContent = left ? `⏳ Còn ${left} giây` : '⏰ Hết giờ — hãy chọn nhanh, quản trò đang chờ'; el.classList.toggle('low', left <= 10); }, 500);
 let fieldsMsg = null, picks = {}, activeFi = null, pickSent = '', wpicks = null, endInfo = null, ghostL = [], mutedL = [], princeL = [], letter = '', vampDir = 0;
@@ -1171,6 +1249,15 @@ function renderPickBar() {
     el.querySelectorAll('.pfd').forEach(b => b.onclick = () => { vampDir = +b.dataset.d; renderPickBar(); renderRing(); });
 }
 // Mũi tên trên vòng làng (từ ghế của mình / của các Sói khác tới mục tiêu)
+function voteArrows(pos) {
+    if (!dflow || dflow.ph !== 'rev' || !(dflow.pairs || []).length) return '';
+    const box = $('ring'), W = box.clientWidth || 340, sz = parseFloat(getComputedStyle(box).getPropertyValue('--sz')) || 38, rr = (sz / 2) / W * 100 + 1.2;
+    return dflow.pairs.map(([v, t]) => { const A = pos[v], B = pos[t]; if (!A || !B || A === B) return '';
+        const mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2, cx = mx + (50 - mx) * 0.38, cy = my + (50 - my) * 0.38;
+        const d1 = Math.hypot(cx - A.x, cy - A.y) || 1, d2 = Math.hypot(B.x - cx, B.y - cy) || 1;
+        const sx = A.x + (cx - A.x) / d1 * rr, sy = A.y + (cy - A.y) / d1 * rr, ex = B.x - (B.x - cx) / d2 * rr, ey = B.y - (B.y - cy) / d2 * rr, ux = (B.x - cx) / d2, uy = (B.y - cy) / d2;
+        return `<g><path class="arr" d="M${sx.toFixed(2)} ${sy.toFixed(2)} Q${cx.toFixed(2)} ${cy.toFixed(2)} ${ex.toFixed(2)} ${ey.toFixed(2)}" stroke="#f87171" style="color:#f87171" stroke-dasharray="2 1.2"/><polygon points="${ex},${ey} ${ex - ux * 2.6 - uy * 1.5},${ey - uy * 2.6 + ux * 1.5} ${ex - ux * 2.6 + uy * 1.5},${ey - uy * 2.6 - ux * 1.5}" fill="#f87171"/></g>`; }).join('');
+}
 function ringArrows(pos) {
     if (!fieldsMsg) return '';
     const box = $('ring'), W = box.clientWidth || 340, sz = parseFloat(getComputedStyle(box).getPropertyValue('--sz')) || 38;
@@ -1320,6 +1407,36 @@ function reportBug(msg, stack) {
 }
 addEventListener('error', e => reportBug(e.message || 'error', (e.error && e.error.stack) || (e.filename + ':' + e.lineno)));
 addEventListener('unhandledrejection', e => reportBug('Promise: ' + ((e.reason && e.reason.message) || e.reason), e.reason && e.reason.stack));
+// ---------------- Sổ tay luật & tra cứu vai ----------------
+const foldVi = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase();
+const RULES_HTML = `
+<h3>🎯 Mục tiêu</h3><p><b>Phe Dân Làng</b> thắng khi toàn bộ Sói đã chết. <b>Phe Sói</b> thắng khi số Sói còn sống bằng hoặc nhiều hơn số người còn lại. <b>Phe Thứ 3</b> có điều kiện thắng riêng (xem ở từng vai).</p>
+<h3>🌙 Ban đêm</h3><p>Mọi người "nhắm mắt". Quản trò gọi lần lượt từng vai. Tới lượt bạn thì điện thoại kêu <b>Ting</b>, hiện ô chọn dưới vòng làng và đồng hồ đếm ngược: chạm người trên vòng làng rồi bấm <b>Xác nhận</b>. Bầy Sói cùng chọn một mục tiêu — thấy mũi tên đề xuất của nhau. Vai soi nhận kết quả dạng lá ❓ trong tab Quản trò.</p>
+<h3>🌅 Trời sáng</h3><p>Quản trò công bố ai đã chết — không nói nguyên nhân, không lộ vai. Người chết chuyển sang phòng 👻 Người chết (cùng khán giả và quản trò), không được nói ở kênh Làng nữa.</p>
+<h3>☀️ Ban ngày</h3><p>1. <b>Thảo luận</b> 2 phút 30 giây ở kênh Làng.<br>2. <b>Đề cử bí mật</b> 15 giây: chạm người bạn muốn đưa lên giàn (có thể không chọn ai).<br>3. <b>Công bố</b> 15 giây: ai chỉ ai. Người nhiều phiếu nhất lên giàn; hoà thì cả 2–3 người cùng lên.<br>4. <b>Biện minh</b> 30 giây mỗi người — mọi người đều chat được.<br>5. <b>Bỏ phiếu</b> 15 giây: "Treo cổ" hay "Không treo cổ". Không bấm = Không treo cổ. Người bị đề cử không bỏ phiếu cho chính mình.<br>6. <b>Quản trò</b> xem kết quả và quyết định.</p>
+<h3>🤐 Bị cấm nói</h3><p>Người bị <b>cấm túc</b>, <b>phù phép</b> hoặc <b>mất não</b> trong ngày không được nói ở kênh Làng và không được đề cử / bỏ phiếu — chỉ nhắn được ở tab 🤐 (quản trò và người chết đọc). Người bị cấm túc còn không thể bị treo cổ hôm đó.</p>
+<h3>💬 Các kênh chat</h3><p><b>Làng</b>: lúc thảo luận và biện minh. <b>✉️ Quản trò</b>: nhắn riêng quản trò lúc nào cũng được. <b>🐺 Sói</b>: khi bầy Sói thức. <b>💞 Cặp Đôi</b>: khi Cặp Đôi thức. <b>👻 Người chết</b>: người chết + khán giả + quản trò.</p>
+<h3>🏁 Hết ván</h3><p>Mọi người thấy phe thắng và vai của tất cả. Bấm <b>📄 Tải PDF ván đấu</b> để xem lại toàn bộ diễn biến.</p>`;
+let rulesTab = 'roles';
+function renderRules() {
+    const body = $('rules-body'), q = foldVi($('rules-q').value.trim());
+    $('rt-roles').setAttribute('aria-selected', rulesTab === 'roles'); $('rt-rules').setAttribute('aria-selected', rulesTab === 'rules'); $('rules-q').classList.toggle('hidden', rulesTab !== 'roles');
+    if (rulesTab === 'rules') { body.innerHTML = RULES_HTML; return; }
+    if (!deck || !deck.length) { body.innerHTML = '<p class="rules-empty">Danh sách vai sẽ hiện khi quản trò chia bài.</p>'; return; }
+    const col = { villager: '#86efac', wolf: '#fca5a5', independent: '#fde68a' }, fac = { villager: 'Phe Dân Làng', wolf: 'Phe Sói', independent: 'Phe Thứ 3' };
+    const list = deck.filter(r => !q || foldVi(r.n + ' ' + (r.how || '') + ' ' + fac[r.f]).includes(q));
+    body.innerHTML = list.length ? list.map(r => `<article class="rcard${card && card.role && card.role.name === r.n ? ' mine' : ''}" style="--fc:${col[r.f] || '#e2e8f0'}">
+        <header><b>${esc(r.n)}</b>${r.c > 1 ? `<span class="rc-n">×${r.c}</span>` : ''}<span class="rc-f">${fac[r.f] || ''}</span>${card && card.role && card.role.name === r.n ? '<span class="rc-me">Vai của bạn</span>' : ''}</header>
+        ${r.how ? `<p>${esc(r.how)}</p>` : ''}${r.wake ? `<p><i>🌙 Thức dậy:</i> ${esc(r.wake)}</p>` : ''}${r.win ? `<p><i>🏆 Thắng khi:</i> ${esc(r.win)}</p>` : ''}</article>`).join('')
+        : `<p class="rules-empty">Không có vai nào khớp "${esc($('rules-q').value)}".</p>`;
+}
+function openRules() { $('rules-ov').classList.remove('hidden'); requestAnimationFrame(() => $('rules-ov').classList.add('show')); renderRules(); setTimeout(() => (rulesTab === 'roles' ? $('rules-q') : $('rules-x')).focus({ preventScroll: true }), 50); }
+function closeRules() { $('rules-ov').classList.remove('show'); setTimeout(() => $('rules-ov').classList.add('hidden'), 200); $('rules-btn').focus({ preventScroll: true }); }
+$('rules-btn').onclick = openRules; $('rules-x').onclick = closeRules;
+$('rules-ov').onclick = e => { if (e.target === $('rules-ov')) closeRules(); };
+$('rules-ov').addEventListener('keydown', e => { if (e.key === 'Escape') closeRules(); });
+$('rt-roles').onclick = () => { rulesTab = 'roles'; renderRules(); }; $('rt-rules').onclick = () => { rulesTab = 'rules'; renderRules(); };
+$('rules-q').oninput = renderRules;
 // ---------------- Giao diện ----------------
 function showJoin(msg) {
     show('scr-join');
@@ -1351,7 +1468,7 @@ function renderLobby() {
     document.body.classList.toggle('ingame', (phase === 'started' && !!card) || (!!me.spec && phase === 'started'));
     document.body.classList.toggle('lobbyring', !!me && !me.spec && phase !== 'started');   // vòng làng giữ chỗ ngay từ sảnh (không chen vào sau)
     if (!window._rosterInit) { window._rosterInit = true; $('lb-roster').open = false; }        // danh sách thu gọn: vòng làng đã cho thấy ai vào
-    renderRoleBar(); renderRing(); renderPickBar();
+    renderRoleBar(); renderRing(); renderPickBar(); renderHangBar();
     $('g-status').classList.toggle('myturn', !!(fieldsMsg && fieldsMsg.fields && fieldsMsg.fields.length) || !!(can.turn || can.wolves || can.couple));
     $('g-status').textContent = gstatus ? gstatus.text : ''; $('g-status').classList.toggle('hidden', !gstatus || !!endInfo);
     renderEnd();
