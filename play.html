@@ -432,12 +432,23 @@
     .ge-pdf { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 48px; margin: 4px 0 10px; border-radius: 12px; border: 1px solid #574a16; background: #2a2410; color: #fde68a; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; }
     .ge-pdf small { font-size: 12px; font-weight: 700; opacity: .75; font-variant-numeric: tabular-nums; }
     .ge-pdf.wait { cursor: default; opacity: .7; font-weight: 700; font-size: 13px; }
+
+    /* Thanh mất kết nối */
+    .net-bar { position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 8px); z-index: 120; transform: translate(-50%, -140%); opacity: 0; transition: transform .3s cubic-bezier(.2,.8,.2,1), opacity .2s;
+        display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 24px); padding: 10px 14px; border-radius: 14px; background: #451a03; border: 1px solid #b45309; color: #fde68a; font-size: 13.5px; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,.45); }
+    .net-bar.show { transform: translate(-50%, 0); opacity: 1; }
+    .net-bar b { display: block; font-size: 12px; color: #fcd34d; font-weight: 800; }
+    .nb-dot { width: 10px; height: 10px; border-radius: 50%; background: #f59e0b; flex-shrink: 0; animation: vcBlink 1s ease-in-out infinite; }
+    /* Đồng hồ lượt đêm */
+    .pf-timer { font-size: 14px; font-weight: 800; color: #fde68a; text-align: center; font-variant-numeric: tabular-nums; padding: 4px 0; }
+    .pf-timer.low { color: #fca5a5; animation: tw 1s ease-in-out infinite; }
 </style>
 </head>
 <body>
 <div id="net"></div>
 <div id="card-ov" class="hidden"></div>
 <div id="turn-toast"></div>
+<div id="net-bar" class="net-bar" role="status" aria-live="polite"></div>
 <div id="pick-ov" class="hidden"></div>
 <div class="wrap">
     <div class="brand">
@@ -546,7 +557,7 @@ function connect() {
         else if (pending) sendJ(pending);
     };
     ws.onmessage = e => { let m; try { m = JSON.parse(e.data); } catch (x) { return; } onMsg(m); };
-    ws.onclose = () => { clearTimeout(wakeTimer); if (!ended) { if (me && me.token) netMsg('📶 Mất kết nối — đang kết nối lại…'); scheduleRetry(); } };
+    ws.onclose = () => { live = false; renderNetBar(); clearTimeout(wakeTimer); if (!ended) { if (me && me.token) netMsg('📶 Mất kết nối — đang kết nối lại…'); scheduleRetry(); } };
     ws.onerror = () => {};
 }
 function scheduleRetry() {
@@ -555,7 +566,28 @@ function scheduleRetry() {
     retry = Math.min(retry + 1, 6);
     retryTimer = setTimeout(connect, [500, 1000, 2000, 3000, 4000, 5000][retry - 1] || 5000);
 }
-function sendJ(o) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(o)); }
+let live = false, outbox = [];
+const OUT_KEY = () => 'lxn_out_' + (me ? me.code + '_' + me.id : '');
+function outSave() { try { IDS.setItem(OUT_KEY(), JSON.stringify(outbox.slice(-40))); } catch (e) {} }
+function outLoad() { try { outbox = JSON.parse(IDS.getItem(OUT_KEY()) || '[]'); } catch (e) { outbox = []; } }
+const QUEUE_T = ['chat', 'to_gm', 'react'];
+function sendJ(o) {
+    const open = ws && ws.readyState === 1, session = ['resume', 'join', 'ping', 'leave'].includes(o.t);
+    if (open && (live || session)) { ws.send(JSON.stringify(o)); return true; }
+    if (!QUEUE_T.includes(o.t) || !me) return false;
+    // gộp thao tác trùng: lựa chọn ban đêm / phiếu bầu chỉ giữ bản mới nhất
+    const d = o.data || {}, same = x => x.t === 'to_gm' && x.data && x.data.kind === d.kind && (d.kind === 'pick' ? x.data.key === d.key : d.kind === 'vote' || (d.kind === 'viewed' && x.data.dealId === d.dealId));
+    if (o.t === 'to_gm' && ['pick', 'vote', 'viewed'].includes(d.kind)) outbox = outbox.filter(x => !same(x));
+    if (d.kind !== 'bug' || outbox.filter(x => x.data && x.data.kind === 'bug').length < 5) outbox.push(o);
+    outSave(); renderNetBar(); return false;
+}
+function flushOutbox() { if (!outbox.length) return; const q = outbox; outbox = []; outSave(); q.forEach(o => sendJ(o)); renderNetBar(); }
+function renderNetBar() {
+    const el = $('net-bar'); if (!el) return;
+    const show = !!me && !live && !ended;
+    el.classList.toggle('show', show);
+    if (show) el.innerHTML = `<span class="nb-dot"></span><span>Mất kết nối — đang kết nối lại…${outbox.length ? `<b>${outbox.length} thao tác sẽ tự gửi khi có mạng</b>` : ''}</span>`;
+}
 setInterval(() => sendJ({ t: 'ping' }), 25000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden && !ended) connect(); });
 addEventListener('online', () => { if (!ended) connect(); });
@@ -565,6 +597,7 @@ let resumeMiss = 0;
 function onMsg(m) {
     if (m.t === 'joined') {
         me = { code: m.code, token: m.token, name: m.name, id: m.playerId, spec: !!m.spec }; save(me);
+        live = true; if (!outbox.length) outLoad(); setTimeout(flushOutbox, 50); renderNetBar();
         document.body.classList.toggle('spectator', !!m.spec);
         try { localStorage.setItem('lxn_last_name', m.name); } catch (e) {}
         pending = null; resumeMiss = 0;
@@ -684,7 +717,7 @@ function onGm(d) {
     else if (d.kind === 'pack') pack = d.names || [];
     else if (d.kind === 'turn') { onTurn(d); return; }
     else if (d.kind === 'fields') { onFields(d); return; }
-    else if (d.kind === 'nudge') { ting(); flashTitle('🔔 Mở lá bài của bạn'); turnToast('🔔 Quản trò nhắc bạn mở lá bài'); return; }
+    else if (d.kind === 'nudge') { ting(); flashTitle(d.text ? '🔔 Quản trò gọi bạn' : '🔔 Mở lá bài của bạn'); turnToast(d.text || '🔔 Quản trò nhắc bạn mở lá bài'); if (navigator.vibrate) try { navigator.vibrate([90, 60, 90, 60, 160]); } catch (e) {} return; }
     else if (d.kind === 'dealprog') dealProg = d;
     else if (d.kind === 'rolechg') { onRoleChg(d); return; }
     else if (d.kind === 'end') { const was = !!endInfo; endInfo = d.off ? null : d; if (!d.off) { tab = 'public'; ting(); if (!was) setTimeout(() => { if (iWon(d.result)) confetti(); }, 300); } }
@@ -867,10 +900,25 @@ function renderChat() {
     $('ch-tabs').innerHTML = tabs.map(c => `<button class="ch-tab${c === tab ? ' on' : ''}${can[c] ? ' live' : ''}" data-c="${c}">${CH[c].ic} ${CH[c].name}${unread[c] ? `<span class="ub">${unread[c]}</span>` : ''}</button>`).join('');
     $('ch-tabs').querySelectorAll('.ch-tab').forEach(b => b.onclick = () => { tab = b.dataset.c; reactOpen = null; renderChat(); });
     $('ch-dead').classList.toggle('hidden', !(can.dead && tab === 'dead'));
+    $('ch-dead').textContent = me.spec ? '👀 Bạn là khán giả — tin của bạn chỉ người chết, khán giả khác và quản trò thấy.' : '💀 Phòng này có người chết, khán giả và quản trò.';
     // tin nhắn của tab
     const feed = $('ch-feed'), atBottom = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 70;
     const list = chatList.filter(m => m.ch === tab).slice(-300);
-    feed.innerHTML = list.length ? list.map(m => {
+    renderFeed(feed, list);
+    if (atBottom || !feed._init || feed._tab !== tab) { feed.scrollTop = feed.scrollHeight; feed._init = true; feed._tab = tab; newBelow = 0; }
+    else if (list.length > (feed._n || 0) && feed._n) newBelow += list.length - feed._n;
+    feed._n = list.length;
+    $('ch-jump').classList.toggle('hidden', !newBelow); $('ch-jump').textContent = `⬇ ${newBelow} tin mới`;
+    if (!feed._hook) { feed._hook = true; feed.addEventListener('scroll', () => { if (feed.scrollHeight - feed.scrollTop - feed.clientHeight < 40 && newBelow) { newBelow = 0; $('ch-jump').classList.add('hidden'); } }); }
+    renderTyping();
+    // ô nhập
+    const inp = $('ch-in'), on = !!can[tab], cool = tab === 'public' && slowUntil > Date.now();
+    inp.disabled = !on; $('ch-send').disabled = !on || cool; $('ch-emo').disabled = !on; $('ch-mic').disabled = !on;
+    inp.placeholder = !on ? (tab === 'public' ? (label.startsWith('🌙') ? '🌙 Ban đêm — chỉ chat khi tới lượt bạn' : can.muted ? '🤐 Bạn bị cấm nói hôm nay — nhắn ở tab Bị cấm nói' : '🔒 Chưa tới lượt bạn chat') : '🔒 Kênh này đang đóng')
+        : { public: '💬 Nhắn với cả làng… (@ để nhắc tên)', dm: '✉️ Nhắn riêng quản trò…', wolves: '🐺 Nhắn với bầy Sói…', couple: '💞 Nhắn với người ấy…', dead: me && me.spec ? '👻 Nhắn với người chết và khán giả…' : '👻 Nhắn với người chết và khán giả…', muted: '🤐 Chỉ quản trò và người chết đọc được…' }[tab];
+    $('ch-slow').textContent = slow && tab === 'public' && on ? `🐢 Chế độ chậm: mỗi người 1 tin / ${slow} giây` + (cool ? ` — chờ ${Math.ceil((slowUntil - Date.now()) / 1000)}s` : '') : '';
+}
+function msgHtml(m) {
         if (m.sys === 'result') {
             const open = revealed.has(m.id);
             return `<div class="rescard${open ? ' open' : ''}" data-id="${esc(m.id)}"><div class="rc-in"><div class="rc-back">${m.items[0] && m.items[0].title ? `<b>${esc(m.items[0].title)}</b>` : ''}<span class="rc-q">?</span><small>Chạm để lật kết quả</small></div>
@@ -884,30 +932,36 @@ function renderChat() {
         if (m.pending || m.failed) { const t2 = new Date(m.ts); return `<div class="cm mine${m.pending ? ' pending' : ' failed'}" data-cid="${esc(m.cid)}"><span class="ct">${String(t2.getHours()).padStart(2, '0')}:${String(t2.getMinutes()).padStart(2, '0')}</span><b style="color:${nameCol(m.name)}">${esc(m.name)}</b>: ${m.audio ? vcPlayerHtml(m.id, m.dur) : esc(m.text)}</div>`; }
         const tt = new Date(m.ts), hh = String(tt.getHours()).padStart(2, '0') + ':' + String(tt.getMinutes()).padStart(2, '0');
         return `<div class="cm${freshIds.has(m.id) ? ' fresh' : ''}${mine ? ' mine' : ''}${gm ? ' gm' : ''}${ment ? ' ment' : ''}${m.ch === 'public' ? ' pub' : ''}" data-id="${m.id}"><span class="ct">${hh}</span><b style="color:${gm ? '#fbbf24' : nameCol(m.name)}">${esc(gm ? 'Quản trò' : m.name)}</b>: ${txt}${r ? `<div class="rr">${r}</div>` : ''}${picker}</div>`;
-    }).join('') : `<div class="ch-empty">${tab === 'dm' ? 'Tin nhắn riêng giữa bạn và quản trò sẽ hiện ở đây' : 'Chưa có tin nhắn'}</div>`;
-    feed.querySelectorAll('.rescard:not(.open)').forEach(el => el.onclick = () => revealRes(el.dataset.id));
-    feed.querySelectorAll('.cm.failed').forEach(el => el.onclick = () => { const x = chatList.find(y => y.cid === el.dataset.cid); if (!x) return; x.failed = false; x.pending = true; renderChat();
-        sendJ(Object.assign({ t: 'chat', ch: x.ch, text: x.audio ? '' : x.text, cid: x.cid }, x.audio ? { audio: x.audio, dur: x.dur } : {})); setTimeout(() => { if (x.pending) { x.pending = false; x.failed = true; renderChat(); } }, 8000); });
-    feed.querySelectorAll('.cm.pub').forEach(el => el.onclick = e => { if (e.target.closest('.rc,.rpe')) return; if (!can.public) return;
-        const r = el.getBoundingClientRect(); window._rpOx = Math.max(16, Math.min(r.width - 16, e.clientX - r.left)) + 'px';
-        reactOpen = reactOpen === el.dataset.id ? null : el.dataset.id; renderChat(); });
-    feed.querySelectorAll('.rp').forEach(p => { p.style.setProperty('--ox', window._rpOx || '20px'); requestAnimationFrame(() => p.classList.add('in')); });
-    feed.querySelectorAll('.rc,.rpe').forEach(b => b.onclick = e => { e.stopPropagation(); if (!can.public) { chErr('Chỉ thả biểu cảm được khi làng đang thảo luận'); return; } const msg = chatList.find(x => x.id === b.dataset.id), emo = b.dataset.e;
+}
+// Chỉ thêm / sửa / xoá đúng tin thay đổi (không vẽ lại cả khung) -> nhẹ máy, không xô lệch
+function renderFeed(feed, list) {
+    if (!list.length) { feed.innerHTML = `<div class="ch-empty">${tab === 'dm' ? 'Tin nhắn riêng giữa bạn và quản trò sẽ hiện ở đây' : 'Chưa có tin nhắn'}</div>`; feed._map = new Map(); feed._ftab = tab; return; }
+    if (feed._ftab !== tab || !feed._map || feed.querySelector('.ch-empty')) { feed.innerHTML = ''; feed._map = new Map(); feed._ftab = tab; }
+    const map = feed._map, keep = new Set(); let prev = null;
+    list.forEach(m => {
+        const k = m.id || ('p:' + m.cid), h = msgHtml(m).trim(); keep.add(k);
+        let el = map.get(k);
+        if (!el || el._h !== h) {
+            const t = document.createElement('template'); t.innerHTML = h; const nel = t.content.firstElementChild; nel._h = h;
+            if (el) el.replaceWith(nel); else if (prev) prev.after(nel); else feed.prepend(nel);
+            map.set(k, nel); el = nel;
+        } else if (prev ? el.previousElementSibling !== prev : feed.firstElementChild !== el) { if (prev) prev.after(el); else feed.prepend(el); }
+        prev = el;
+    });
+    for (const [k, el] of map) if (!keep.has(k)) { el.remove(); map.delete(k); }
+    feed.querySelectorAll('.rp:not(.in)').forEach(p => { p.style.setProperty('--ox', window._rpOx || '20px'); requestAnimationFrame(() => p.classList.add('in')); });
+    if (!feed._deleg) { feed._deleg = true; feed.addEventListener('click', feedClick); }
+}
+function feedClick(e) {
+    const rc = e.target.closest('.rescard:not(.open)'); if (rc) return revealRes(rc.dataset.id);
+    const fl = e.target.closest('.cm.failed'); if (fl) { const x = chatList.find(y => y.cid === fl.dataset.cid); if (!x) return; x.failed = false; x.pending = true; renderChat();
+        sendJ(Object.assign({ t: 'chat', ch: x.ch, text: x.audio ? '' : x.text, cid: x.cid }, x.audio ? { audio: x.audio, dur: x.dur } : {})); failLater(x.cid, 8000); return; }
+    const rb = e.target.closest('.rc,.rpe'); if (rb) { e.stopPropagation(); if (!can.public) { chErr('Chỉ thả biểu cảm được khi làng đang thảo luận'); return; }
+        const msg = chatList.find(x => x.id === rb.dataset.id), emo = rb.dataset.e;
         if (msg) { msg.r = Object.assign({}, msg.r || {}); const u = (msg.r[emo] || []).slice(), k = u.indexOf(me.id); if (k >= 0) u.splice(k, 1); else u.push(me.id); if (u.length) msg.r[emo] = u; else delete msg.r[emo]; }
-        sendJ({ t: 'react', id: b.dataset.id, emo }); reactOpen = null; renderChat(); });
-    if (atBottom || !feed._init || feed._tab !== tab) { feed.scrollTop = feed.scrollHeight; feed._init = true; feed._tab = tab; newBelow = 0; }
-    else if (list.length > (feed._n || 0) && feed._n) newBelow += list.length - feed._n;
-    feed._n = list.length;
-    $('ch-jump').classList.toggle('hidden', !newBelow); $('ch-jump').textContent = `⬇ ${newBelow} tin mới`;
-    if (!feed._hook) { feed._hook = true; feed.addEventListener('scroll', () => { if (feed.scrollHeight - feed.scrollTop - feed.clientHeight < 40 && newBelow) { newBelow = 0; $('ch-jump').classList.add('hidden'); } }); }
-    renderTyping();
-    // ô nhập
-    const inp = $('ch-in'), on = !!can[tab], cool = tab === 'public' && slowUntil > Date.now();
-    inp.disabled = !on; $('ch-send').disabled = !on || cool; $('ch-emo').disabled = !on; $('ch-mic').disabled = !on || !!(me && me.spec);
-    if (me.spec) { inp.placeholder = '👀 Bạn đang xem — khán giả không chat được'; }
-    inp.placeholder = !on ? (tab === 'public' ? (label.startsWith('🌙') ? '🌙 Ban đêm — chỉ chat khi tới lượt bạn' : can.muted ? '🤐 Bạn bị cấm nói hôm nay — nhắn ở tab Bị cấm nói' : '🔒 Chưa tới lượt bạn chat') : '🔒 Kênh này đang đóng')
-        : { public: '💬 Nhắn với cả làng… (@ để nhắc tên)', dm: '✉️ Nhắn riêng quản trò…', wolves: '🐺 Nhắn với bầy Sói…', couple: '💞 Nhắn với người ấy…', dead: '👻 Nhắn với người chết…', muted: '🤐 Chỉ quản trò và người chết đọc được…' }[tab];
-    $('ch-slow').textContent = slow && tab === 'public' && on ? `🐢 Chế độ chậm: mỗi người 1 tin / ${slow} giây` + (cool ? ` — chờ ${Math.ceil((slowUntil - Date.now()) / 1000)}s` : '') : '';
+        sendJ({ t: 'react', id: rb.dataset.id, emo }); reactOpen = null; renderChat(); return; }
+    const pub = e.target.closest('.cm.pub'); if (pub && can.public) { const r = pub.getBoundingClientRect(); window._rpOx = Math.max(16, Math.min(r.width - 16, e.clientX - r.left)) + 'px';
+        reactOpen = reactOpen === pub.dataset.id ? null : pub.dataset.id; renderChat(); }
 }
 function renderTyping() {
     const el = $('ch-typing'); if (!el) return; const now = Date.now();
@@ -929,17 +983,23 @@ function chatSend() {
     const cid = 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     chatList.push({ id: 'p:' + cid, cid, ch: tab, from: me.id, name: me.name, text, ts: Date.now(), pending: true }); renderChat();
     sendJ({ t: 'chat', ch: tab, text, cid }); inp.value = ''; inp.focus(); hideMention(); hideEmo();
-    setTimeout(() => { const x = chatList.find(y => y.cid === cid && y.pending); if (x) { x.pending = false; x.failed = true; renderChat(); } }, 8000);
+    failLater(cid, 8000);
     if (tab === 'public' && slow) { slowUntil = Date.now() + slow * 1000; const iv = setInterval(() => { renderChat(); if (slowUntil <= Date.now()) clearInterval(iv); }, 500); }
 }
 $('ch-send').onclick = chatSend;
 window.vcSrc = id => (chatList.find(m => m.id === id) || {}).audio;
+function failLater(cid, ms) {
+    setTimeout(() => {
+        if (outbox.some(o => o.cid === cid)) return failLater(cid, ms);   // còn chờ mạng -> chưa coi là lỗi
+        const x = chatList.find(y => y.cid === cid && y.pending); if (x) { x.pending = false; x.failed = true; renderChat(); }
+    }, ms);
+}
 function sendVoice(audio, dur) {
     if (!can[tab]) return;
     const cid = 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     chatList.push({ id: 'p:' + cid, cid, ch: tab, from: me.id, name: me.name, text: '🎤 Tin nhắn thoại', audio, dur, ts: Date.now(), pending: true }); renderChat();
     sendJ({ t: 'chat', ch: tab, text: '', audio, dur, cid });
-    setTimeout(() => { const x = chatList.find(y => y.cid === cid && y.pending); if (x) { x.pending = false; x.failed = true; renderChat(); } }, 15000);
+    failLater(cid, 15000);
 }
 $('ch-mic').onclick = () => vcOpenSheet($('ch-mic'), { host: $('chat'), input: $('ch-in'), error: chErr, onVoice: sendVoice, disabled: () => $('ch-mic').disabled });
 $('ch-jump').onclick = () => { const f = $('ch-feed'); f.scrollTop = f.scrollHeight; newBelow = 0; $('ch-jump').classList.add('hidden'); };
@@ -1048,11 +1108,15 @@ function onRoleChg(d) {
     window._rcAt = Date.now(); chatSave(); tab = 'dm'; roleShown = false; ting(); flashTitle('🔔 Vai của bạn đã đổi'); turnToast(d.text); renderLobby();
 } const autoGrid = {};
 addEventListener('resize', () => { clearTimeout(window._rzT); window._rzT = setTimeout(() => { try { renderRing(); } catch (e) {} }, 200); });
+let turnUntil = 0;
+setInterval(() => { const el = $('pf-timer'); if (!el || !turnUntil) return; const left = Math.max(0, Math.ceil((turnUntil - Date.now()) / 1000));
+    el.textContent = left ? `⏳ Còn ${left} giây` : '⏰ Hết giờ — hãy chọn nhanh, quản trò đang chờ'; el.classList.toggle('low', left <= 10); }, 500);
 let fieldsMsg = null, picks = {}, activeFi = null, pickSent = '', wpicks = null, endInfo = null, ghostL = [], mutedL = [], princeL = [], letter = '', vampDir = 0;
 const FAC_RING = { 'Phe Dân Làng': '#4ade80', 'Phe Sói': '#f87171', 'Phe Thứ 3': '#facc15' };
 function onFields(d) {
     if (d.off) { fieldsMsg = null; picks = {}; activeFi = null; renderPickBar(); renderRing(); return; }
     const isNew = !fieldsMsg || fieldsMsg.key !== d.key;
+    if (d.tleft != null && (isNew || !turnUntil)) turnUntil = Date.now() + d.tleft * 1000; if (d.tleft == null) turnUntil = 0;
     fieldsMsg = d;
     if (isNew) {
         picks = {}; pickSent = ''; wpicks = null; letter = ''; vampDir = 0;
@@ -1092,7 +1156,7 @@ function renderPickBar() {
     if (!fieldsMsg || !fieldsMsg.fields.length) { el.classList.add('hidden'); el.innerHTML = ''; return; }
     el.classList.remove('hidden');
     const sentNow = pickSent && pickSent === curFieldsJson();
-    el.innerHTML = (fieldsMsg.notes || []).map(t => `<div class="pf-note">${esc(t)}</div>`).join('') + fieldsMsg.fields.map(f => {
+    el.innerHTML = (turnUntil ? `<div id="pf-timer" class="pf-timer" role="timer" aria-live="off"></div>` : '') + (fieldsMsg.notes || []).map(t => `<div class="pf-note">${esc(t)}</div>`).join('') + fieldsMsg.fields.map(f => {
         if (f.kind === 'letter') return `<div class="pf on" style="--fc:${f.color}"><span class="pf-l">👻 ${esc(f.label)}</span><input id="pf-letter" class="pf-letter" maxlength="2" value="${esc(letter)}" placeholder="?" autocomplete="off" autocapitalize="characters"></div>`;
         if (f.kind === 'vamp') return `<div class="pf on" style="--fc:${f.color}"><span class="pf-l">🦇 Hỏi ${f.n} người bắt đầu từ ${esc(f.anchor)} (ngồi đối diện bạn)</span></div>
             <div class="pf-dir"><button class="pfd${vampDir === 1 ? ' on' : ''}" data-d="1">⬅️ Sang TRÁI</button><button class="pfd${vampDir === -1 ? ' on' : ''}" data-d="-1">Sang PHẢI ➡️</button></div>`;
@@ -1246,6 +1310,16 @@ document.addEventListener('click', e => {
     a.paused ? a.play().catch(() => {}) : a.pause();
 }, true);
 
+// ---------------- Hộp đen: tự gửi báo lỗi về quản trò / nhật ký server ----------------
+const APP_VER = '2026-11-12';
+const _bugSeen = new Set();
+function reportBug(msg, stack) {
+    const k = String(msg).slice(0, 120); if (_bugSeen.has(k) || _bugSeen.size >= 8) return; _bugSeen.add(k);
+    sendJ({ t: 'to_gm', data: { kind: 'bug', msg: String(msg).slice(0, 300), stack: String(stack || '').split('\n').slice(0, 4).join('\n').slice(0, 600),
+        at: [phase, tab, gstatus && gstatus.phase, document.body.className].join('/').slice(0, 60), ua: navigator.userAgent.slice(0, 160), v: APP_VER } });
+}
+addEventListener('error', e => reportBug(e.message || 'error', (e.error && e.error.stack) || (e.filename + ':' + e.lineno)));
+addEventListener('unhandledrejection', e => reportBug('Promise: ' + ((e.reason && e.reason.message) || e.reason), e.reason && e.reason.stack));
 // ---------------- Giao diện ----------------
 function showJoin(msg) {
     show('scr-join');

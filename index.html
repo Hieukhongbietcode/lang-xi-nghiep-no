@@ -1793,6 +1793,15 @@
         #auto-adv.show { opacity: 1; transform: translate(-50%, 0); } #auto-adv b { font-variant-numeric: tabular-nums; font-size: 16px; }
         #auto-adv button { min-height: 40px; padding: 0 12px; border-radius: 10px; border: none; font-weight: 800; cursor: pointer; } #auto-now { background: #4f46e5; color: #fff; } #auto-no { background: #334155; color: #e2e8f0; }
         #gm-chat .gc-compose { gap: 6px; }
+
+        .bug-row { font-size: 12px; color: #fecaca; line-height: 1.4; } .bug-row b { color: #fca5a5; } .bug-row span { color: #e2e8f0; }
+        .art select { margin-left: auto; font-size: 12px; font-weight: 700; color: #e2e8f0; background: #111827; border: 1px solid #334155; border-radius: 8px; padding: 4px 8px; min-height: 32px; }
+        .gc-peerbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 14px 6px; padding: 6px 10px; border-radius: 10px; background: #1e1b4b; color: #c7d2fe; font-size: 13px; }
+        .gc-peerbar button { min-height: 36px; padding: 0 12px; border-radius: 9px; border: 1px solid #6366f1; background: #312e81; color: #fff; font-weight: 800; cursor: pointer; }
+        #gm-net { position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 8px); z-index: 9990; transform: translate(-50%, -150%); opacity: 0; transition: transform .3s cubic-bezier(.2,.8,.2,1), opacity .2s;
+            display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 14px; background: #451a03; border: 1px solid #b45309; color: #fde68a; font-size: 13.5px; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,.45); max-width: calc(100vw - 24px); }
+        #gm-net.show { transform: translate(-50%, 0); opacity: 1; }
+        #gm-net .nb-dot { width: 10px; height: 10px; border-radius: 50%; background: #f59e0b; flex-shrink: 0; animation: vcBlink 1s ease-in-out infinite; }
 </style>
 </head>
 <body>
@@ -13194,6 +13203,107 @@ document.addEventListener('click', e => {
             } finally { _pdfBusy = false; }
         }
         setInterval(() => { try { onlineSendEndPdf(); } catch (e) {} }, 1500);
+
+    
+        // =====================================================================
+        //  GĐ9: hộp đen, gọi người chơi, công khai kết quả đề cử, hẹn giờ lượt đêm, thanh mất kết nối, gửi lại khi nối lại
+        // =====================================================================
+        gmOpts = Object.assign({ turnSec: 40, pubVotes: false }, gmOpts); gmOptsSave();
+        // ---------- 3. Hộp đen: lỗi từ máy người chơi + máy quản trò ----------
+        function addBug(b) {
+            if (!state.online) return; let L = state.online.bugs || (state.online.bugs = []);
+            L.push(Object.assign({ t: Date.now() }, b)); if (L.length > 50) L.splice(0, L.length - 50); onlineSave(); renderBugs();
+        }
+        addEventListener('error', e => { if (onlineActive()) addBug({ who: 'Quản trò', msg: e.message, stack: String((e.error && e.error.stack) || (e.filename + ':' + e.lineno)).slice(0, 600), at: state.currentView }); });
+        function bugsText() { return ((state.online && state.online.bugs) || []).map(b => `[${new Date(b.t).toLocaleString('vi-VN')}] ${b.who}${b.at ? ' (' + b.at + ')' : ''}: ${b.msg}\n${b.stack || ''}\n${b.ua || ''}`).join('\n\n'); }
+        function renderBugs() {
+            let box = document.getElementById('adm-bugs'); if (!box) return;
+            let L = (state.online && state.online.bugs) || [];
+            box.innerHTML = `<div class="art-title">🐞 Báo lỗi tự động (${L.length})</div>` + (L.length
+                ? L.slice(-5).reverse().map(b => `<div class="bug-row"><b>${escapeHtml(b.who || '?')}</b> <span>${escapeHtml(String(b.msg).slice(0, 120))}</span></div>`).join('') +
+                  `<div class="art-sub"><button type="button" onclick="navigator.clipboard && navigator.clipboard.writeText(bugsText()).then(()=>onlineToast('Đã chép — dán gửi cho người sửa app'))">📋 Chép toàn bộ để gửi</button><button type="button" onclick="state.online.bugs=[];onlineSave();renderBugs()">Xoá</button></div>`
+                : '<div class="art-sub">Chưa có lỗi nào. Lỗi trên máy người chơi sẽ tự hiện ở đây.</div>');
+        }
+        // ---------- 11 + 12: công tắc trong Admin Actions ----------
+        (function () {
+            const _m = mountAssistToggles;
+            mountAssistToggles = function () {
+                _m.apply(this, arguments);
+                let d = document.getElementById('adm-assist'); if (!d || document.getElementById('opt-turn')) return;
+                d.insertAdjacentHTML('beforeend', `<label class="art">⏳ Thời gian mỗi lượt đêm (online) <select id="opt-turn"><option value="0">Tắt</option><option value="20">20 giây</option><option value="30">30 giây</option><option value="40">40 giây</option><option value="60">60 giây</option><option value="90">90 giây</option></select></label>
+                    <div class="art-sub">Người chơi thấy đồng hồ đếm ngược; hết giờ thì máy họ được nhắc và bạn được báo.</div>
+                    <label class="art"><input type="checkbox" id="opt-pubvotes"> 🗳️ Công khai kết quả đề cử (ai đề cử ai)</label>`);
+                let t = d.querySelector('#opt-turn'), pv = d.querySelector('#opt-pubvotes');
+                t.value = String(gmOpts.turnSec ?? 40); pv.checked = !!gmOpts.pubVotes;
+                t.onchange = () => { gmOpts.turnSec = +t.value; gmOptsSave(); _turnDl = null; _fieldsSent = {}; };
+                pv.onchange = () => { gmOpts.pubVotes = pv.checked; gmOptsSave(); };
+                let bugs = document.createElement('div'); bugs.id = 'adm-bugs'; bugs.className = 'admin-ring-toggles'; d.insertAdjacentElement('afterend', bugs); renderBugs();
+            };
+        })();
+        // ---------- 11. Hẹn giờ lượt đêm ----------
+        let _turnDl = null;
+        function turnTick() {
+            let n = window._gmPermNames || {}, holders = (n.wolves || []).length ? n.wolves : (n.dm || []);
+            if (!onlineActive() || state.currentView !== 'view-night' || !gmOpts.turnSec || !holders.length || !onlineStepFields().length) { _turnDl = null; return; }
+            let key = seatStepKey();
+            if (!_turnDl || _turnDl.key !== key) _turnDl = { key, until: Date.now() + gmOpts.turnSec * 1000, alerted: false };
+            if (!_turnDl.alerted && Date.now() > _turnDl.until && !stepDone()) {
+                _turnDl.alerted = true;
+                let st = state.nightSequence[state.currentStepIndex], who = (typeof stepInfo === 'function' && stepInfo(st) || {}).who || '';
+                onlineToast(`⏰ Hết ${gmOpts.turnSec} giây — ${who} (${holders.join(', ')}) chưa chọn xong. Bạn có thể chọn thay hoặc bấm 🔔 Gọi.`);
+                try { haptic && haptic([60, 40, 60]); } catch (e) {}
+                holders.forEach(h => { let id = onlineIdOf(h); if (id) gmSend({ t: 'to', to: id, data: { kind: 'nudge', text: '⏰ Hết giờ chọn — quản trò đang chờ bạn' } }); });
+            }
+        }
+        setInterval(() => { try { turnTick(); } catch (e) {} }, 1000);
+        (function () {
+            const _gs = gmSend;
+            gmSend = function (o) {
+                if (o && o.t === 'to' && o.data && o.data.kind === 'fields' && !o.data.off) { turnTick(); if (_turnDl) o.data.tleft = Math.max(0, Math.ceil((_turnDl.until - Date.now()) / 1000)); }
+                return _gs.apply(this, arguments);
+            };
+        })();
+        // ---------- 12. Công khai kết quả đề cử khi đưa người lên giàn ----------
+        (function () {
+            const _td = onlineToDefense;
+            onlineToDefense = function (name) {
+                if (gmOpts.pubVotes && onlineVoteOpen()) {
+                    let map = onlineVotes(), by = {}; Object.entries(map).forEach(([v, t]) => (by[t] = by[t] || []).push(v));
+                    let voters = ((statusNow() || {}).voters || []), none = voters.filter(v => !map[v]);
+                    let rows = Object.entries(by).sort((a, b) => b[1].length - a[1].length).map(([t, vs]) => `• ${t} ← ${vs.join(', ')}`);
+                    if (rows.length) { let orig = confirm; confirm = () => true; try { gmSend({ t: 'chat', ch: 'public', text: `🗳️ Kết quả đề cử Ngày ${state.dayCount}:\n${rows.join('\n')}${none.length ? `\nKhông đề cử: ${none.join(', ')}` : ''}` }); } finally { confirm = orig; } }
+                }
+                return _td.apply(this, arguments);
+            };
+        })();
+        // ---------- 13. Gọi người chơi (phòng Riêng) ----------
+        function gmNudge(id) { let nm = gmPlayerName(id); if (gmSend({ t: 'to', to: id, data: { kind: 'nudge', text: '🔔 Quản trò đang gọi bạn' } })) onlineToast('🔔 Đã gọi ' + nm); }
+        (function () {
+            const _render = renderGmChat;
+            renderGmChat = function () {
+                _render.apply(this, arguments);
+                let feed = document.getElementById('gc-feed'), bar = document.getElementById('gc-peerbar');
+                let on = window._gmChatFilter === 'dm' && window._gmDmPeer;
+                if (!on) { if (bar) bar.remove(); return; }
+                if (!bar) { bar = document.createElement('div'); bar.id = 'gc-peerbar'; bar.className = 'gc-peerbar'; feed.insertAdjacentElement('beforebegin', bar); }
+                let id = window._gmDmPeer, nm = gmPlayerName(id), rn = roleNameOf(nm);
+                bar.innerHTML = `<span>✉️ Đang nhắn riêng <b>${escapeHtml(nm)}</b>${rn ? ' — ' + escapeHtml(rn) : ''}</span><button type="button" onclick="gmNudge('${id}')" aria-label="Gọi ${escapeHtml(nm)}">🔔 Gọi</button>`;
+            };
+        })();
+        // ---------- 1. Quản trò mất kết nối: thanh báo + gửi lại toàn bộ trạng thái khi nối lại ----------
+        setInterval(() => {
+            let on = onlineActive() && !(gmWs && gmWs.readyState === 1), b = document.getElementById('gm-net');
+            if (!b) { b = document.createElement('div'); b.id = 'gm-net'; b.setAttribute('role', 'status'); b.innerHTML = '<span class="nb-dot"></span> Mất kết nối server — đang kết nối lại… (thao tác của bạn vẫn được lưu trên máy)'; document.body.appendChild(b); }
+            b.classList.toggle('show', !!on);
+        }, 800);
+        (function () {
+            const _gm = gmOnMsg;
+            gmOnMsg = function (m) {
+                if (m.t === 'gm_ok') { try { _villageKey = _endKey = _ghostKey = _mutedKey = _packKey = _progKey = _pdfKey = _deckKey = _statusKey = _turnKey = ''; _timerSent = null; _fieldsSent = {}; _resultSent = {}; _lastPermKey = ''; } catch (e) {} }
+                if (m.t === 'msg' && m.data && m.data.kind === 'bug') { addBug({ who: m.data.who, msg: m.data.msg, stack: m.data.stack, ua: m.data.ua, at: m.data.at }); return; }
+                return _gm(m);
+            };
+        })();
 
     </script>
 </body>
