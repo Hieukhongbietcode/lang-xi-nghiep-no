@@ -481,6 +481,13 @@
     .rc-n { font-size:12px; font-weight:800; color:#e2e8f0; background:#1e293b; border-radius:6px; padding:1px 6px; } .rc-f { font-size:12px; color:var(--mute); margin-left:auto; }
     .rc-me { font-size:11px; font-weight:800; color:#0b1120; background:var(--fc); border-radius:6px; padding:2px 6px; }
     .rcard p { font-size:13.5px; } .rcard i { font-style:normal; color:var(--mute); font-weight:700; } .rules-empty { color:var(--mute); text-align:center; padding:20px 0; }
+
+    .vbub { position:absolute; top:-30px; left:50%; transform:translateX(-50%); white-space:nowrap; font-size:11.5px; font-weight:800; padding:3px 8px; border-radius:10px; z-index:4; pointer-events:none;
+        animation: bubIn .3s cubic-bezier(.2,.8,.2,1) both; box-shadow:0 4px 12px rgba(0,0,0,.45); }
+    .vbub::after { content:''; position:absolute; left:50%; bottom:-5px; transform:translateX(-50%); border:5px solid transparent; border-bottom:0; border-top-color:inherit; }
+    .vbub.live { background:#14532d; color:#bbf7d0; border:1px solid #22c55e; border-top-color:#22c55e; } .vbub.die { background:#7f1d1d; color:#fecaca; border:1px solid #ef4444; border-top-color:#ef4444; }
+    @keyframes bubIn { from { opacity:0; transform:translate(-50%, 6px) scale(.85); } }
+    .seat.speaking.has-bub::before { display:none; }
 </style>
 </head>
 <body>
@@ -733,12 +740,13 @@ function renderRingInner() {
     if (card && FAC_RING[card.role.faction]) box.style.setProperty('--myfac', FAC_RING[card.role.faction]);
     const pickedCol = {}; if (fieldsMsg) fieldsMsg.fields.forEach(fd => (picks[fd.fi] || []).forEach(t => pickedCol[t] = fd.color));
     if (!ringEntered) { ringEntered = true; box.classList.add('enter'); setTimeout(() => box.classList.remove('enter'), 1600); }
-    const accused = dflow && ['rev', 'def', 'hang'].includes(dflow.ph) ? dflow.accused || [] : [], speaker = dflow && dflow.ph === 'def' ? dflow.speaker : '';
+    const accused = dflow && ['def', 'live', 'res', 'hang'].includes(dflow.ph) ? dflow.accused || [] : [], speaker = dflow && ['def', 'live', 'res'].includes(dflow.ph) ? dflow.speaker : '';
+    const lv = dflow && dflow.ph === 'res' && dflow.lv ? dflow.lv : null;
     box.innerHTML = (grid ? '' : `<svg class="ring-svg" viewBox="0 0 100 100" preserveAspectRatio="none">${ringArrows(pos)}${voteArrows(pos)}</svg>`) + village.map((s, i) => {
         const x = pos[s.n].x, y = pos[s.n].y, cant = f && !f.kind && !f.allowed.includes(s.n), bit = bitten.includes(s.n);
         const er = endRole[s.n], mu = mutedL.find(m => m.n === s.n), badge = (mu ? `<span class="mbadge" title="${esc(mu.why)}">🤐</span>` : '') + (princeL.includes(s.n) ? '<span class="pbadge">👑</span>' : '');
         const facCol = er ? ({ villager: '#4ade80', wolf: '#f87171', independent: '#facc15' }[er.f] || '#94a3b8') : '';
-        return `<div class="seat${accused.includes(s.n) ? ' accused' : ''}${speaker === s.n ? ' speaking' : ''}${justDied.has(s.n) ? ' just-died' : ''}${s.a ? '' : ' dead'}${me && s.n === me.name ? ' me' : ''}${cant ? ' cant' : ''}${bit ? ' bitten' : ''}${vgroup.includes(s.n) ? ' vsel' : ''}${vf && vf.anchor === s.n ? ' vanchor' : ''}${er ? ' revealed' : ''}${pickedCol[s.n] ? ' picked' : ''}" data-n="${esc(s.n)}" style="--i:${i};${grid ? '' : `left:${x}%;top:${y}%;`}${er ? '--rc:' + facCol + ';' : ''}${pickedCol[s.n] ? '--pc:' + pickedCol[s.n] + ';' : ''}">${avatar(s.n)}${s.a ? '' : '<span class="skull">💀</span>'}${bit ? '<span class="blood">🩸</span>' : ''}${badge}${er ? `<span class="rrole" style="color:${facCol}">${esc(er.r)}</span>` : ''}${(grid || per >= 30) ? `<span class="sn">${esc(s.n)}</span>` : ''}</div>`;
+        return `<div class="seat${lv && lv[s.n] ? ' has-bub' : ''}${accused.includes(s.n) ? ' accused' : ''}${speaker === s.n ? ' speaking' : ''}${justDied.has(s.n) ? ' just-died' : ''}${s.a ? '' : ' dead'}${me && s.n === me.name ? ' me' : ''}${cant ? ' cant' : ''}${bit ? ' bitten' : ''}${vgroup.includes(s.n) ? ' vsel' : ''}${vf && vf.anchor === s.n ? ' vanchor' : ''}${er ? ' revealed' : ''}${pickedCol[s.n] ? ' picked' : ''}" data-n="${esc(s.n)}" style="--i:${i};${grid ? '' : `left:${x}%;top:${y}%;`}${er ? '--rc:' + facCol + ';' : ''}${pickedCol[s.n] ? '--pc:' + pickedCol[s.n] + ';' : ''}">${avatar(s.n)}${s.a ? '' : '<span class="skull">💀</span>'}${bit ? '<span class="blood">🩸</span>' : ''}${badge}${er ? `<span class="rrole" style="color:${facCol}">${esc(er.r)}</span>` : ''}${(grid || per >= 30) ? `${lv && lv[s.n] ? `<span class="vbub ${lv[s.n]}">${lv[s.n] === 'die' ? '👎 chết' : '👍 sống'}</span>` : ''}<span class="sn">${esc(s.n)}</span>` : ''}</div>`;
     }).join('') + (grid ? '' : `<div class="ring-mid"><b>${alive}</b>còn sống</div>`);
     $('rg-count').textContent = `${alive} còn sống, ${n - alive} đã chết`;
     // Tự đo: vẽ dạng vòng mà có tên bị ghế khác che -> chuyển sang lưới (nhớ theo số người + cỡ màn hình)
@@ -1134,7 +1142,7 @@ function renderEnd() {
 }
 function renderTimer() {
     const el = $('g-timer'); if (!el) return;
-    if (!timer || timer.off || dflow) { el.classList.add('hidden'); return; }   // đang chạy luồng tự động: dùng thanh đếm ngược mới
+    if (!timer || timer.off || (dflow && dflow.ph !== 'def')) { el.classList.add('hidden'); return; }   // đang chạy luồng tự động: dùng thanh đếm ngược mới
     const left = timer.running ? Math.max(0, Math.ceil((timer.endAt - Date.now()) / 1000)) : timer.remain;
     el.classList.remove('hidden'); el.classList.toggle('low', left <= 10); el.classList.toggle('paused', !timer.running);
     el.innerHTML = `<span>${timer.type === 'defense' ? '🗣️ Biện minh' : '☀️ Thảo luận'}${timer.running ? '' : ' (tạm dừng)'}</span><b>${String(Math.floor(left / 60)).padStart(2, '0')}:${String(left % 60).padStart(2, '0')}</b>`;
@@ -1160,22 +1168,33 @@ function onRoleChg(d) {
 } const autoGrid = {};
 addEventListener('resize', () => { clearTimeout(window._rzT); window._rzT = setTimeout(() => { try { renderRing(); } catch (e) {} }, 200); });
 let turnUntil = 0, dflow = null, hangMine = {};
-const DF_TXT = { nom: '🤫 Biểu quyết bí mật', rev: '📢 Công bố kết quả đề cử', def: '🗣️ Biện minh', hang: '⚖️ Bỏ phiếu treo cổ' };
+const DF_TXT = { nom: '🤫 Đề cử bí mật', rev: '📢 Công bố kết quả đề cử', pick: '📢 Quản trò đang chọn người lên giàn', def: '🗣️ Biện minh', live: '⚖️ Bỏ phiếu bí mật: sống hay chết', res: '📢 Kết quả bỏ phiếu', hang: '⚖️ Bỏ phiếu treo cổ' };
 function onDayflow(d) {
     if (!d || d.ph === 'off') { dflow = null; hangMine = {}; }
     else { const was = dflow && dflow.ph; dflow = Object.assign({}, d, { until: Date.now() + (d.left || 0) * 1000 }); if (d.ph === 'hang' && was !== 'hang') hangMine = {};
-        if (d.ph !== was && (d.ph === 'nom' || d.ph === 'hang')) { ting(); if (navigator.vibrate) try { navigator.vibrate([60, 40, 60]); } catch (e) {} } }
+        if (d.ph === 'live' && was !== 'live') hangMine = {};
+        if (d.ph !== was && (d.ph === 'nom' || d.ph === 'hang' || d.ph === 'live')) { ting(); if (navigator.vibrate) try { navigator.vibrate([60, 40, 60]); } catch (e) {} } }
     renderLobby();
 }
 setInterval(() => { const el = $('df-bar'); if (!el) return; if (!dflow) { el.classList.add('hidden'); return; }
-    const left = Math.max(0, Math.ceil((dflow.until - Date.now()) / 1000)); el.classList.remove('hidden'); el.classList.toggle('low', left <= 5);
-    el.innerHTML = `<span>${DF_TXT[dflow.ph] || ''}${dflow.ph === 'def' && dflow.speaker ? ': <b>' + esc(dflow.speaker) + '</b>' : ''}</span><b class="df-t">${left}s</b>`; }, 250);
+    const timed = ['nom', 'rev', 'live', 'hang'].includes(dflow.ph), left = Math.max(0, Math.ceil((dflow.until - Date.now()) / 1000)); el.classList.remove('hidden'); el.classList.toggle('low', timed && left <= 5);
+    el.innerHTML = `<span>${DF_TXT[dflow.ph] || ''}${['def', 'live', 'res'].includes(dflow.ph) && dflow.speaker ? ': <b>' + esc(dflow.speaker) + '</b>' : ''}</span>${timed ? `<b class="df-t">${left}s</b>` : ''}`; }, 250);
 function hangVote(target, v) {
     if (!dflow || dflow.ph !== 'hang') return;
     hangMine[target] = v; sendJ({ t: 'to_gm', data: { kind: 'hang', target, v } }); renderHangBar();
 }
+function liveVote(v) { if (!dflow || dflow.ph !== 'live') return; const a = dflow.accused[0]; hangMine[a] = v; sendJ({ t: 'to_gm', data: { kind: 'live', target: a, v } }); renderHangBar(); }
 function renderHangBar() {
     const el = $('hang-bar'); if (!el) return;
+    if (dflow && dflow.ph === 'live' && me) {
+        el.classList.remove('hidden'); const a = dflow.accused[0], mine = hangMine[a];
+        el.innerHTML = a === me.name ? '<div class="hb-q">Bạn đang bị lên giàn — bạn không bỏ phiếu cho chính mình.</div>' : !(dflow.voters || []).includes(me.name) ? '<div class="hb-q">Bạn không được bỏ phiếu hôm nay.</div>'
+            : `<div class="hb"><div class="hb-q">Quyết định <b>${esc(a)}</b> sống hay chết?</div><div class="hb-btns">
+                <button type="button" class="hb-n${mine === 'live' ? ' on' : ''}" aria-pressed="${mine === 'live'}" onclick="liveVote('live')">👍 sống</button>
+                <button type="button" class="hb-y${mine === 'die' ? ' on' : ''}" aria-pressed="${mine === 'die'}" onclick="liveVote('die')">👎 chết</button></div></div>
+               <div class="hb-note">Phiếu của bạn được giữ bí mật tới khi hết giờ. Không chọn = 👍 sống. Đổi ý được tới khi hết giờ.</div>`;
+        return;
+    }
     if (!dflow || dflow.ph !== 'hang' || !me) { el.classList.add('hidden'); el.innerHTML = ''; return; }
     el.classList.remove('hidden');
     const canV = (dflow.voters || []).includes(me.name);
@@ -1250,7 +1269,7 @@ function renderPickBar() {
 }
 // Mũi tên trên vòng làng (từ ghế của mình / của các Sói khác tới mục tiêu)
 function voteArrows(pos) {
-    if (!dflow || dflow.ph !== 'rev' || !(dflow.pairs || []).length) return '';
+    if (!dflow || !['rev', 'pick'].includes(dflow.ph) || !(dflow.pairs || []).length) return '';
     const box = $('ring'), W = box.clientWidth || 340, sz = parseFloat(getComputedStyle(box).getPropertyValue('--sz')) || 38, rr = (sz / 2) / W * 100 + 1.2;
     return dflow.pairs.map(([v, t]) => { const A = pos[v], B = pos[t]; if (!A || !B || A === B) return '';
         const mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2, cx = mx + (50 - mx) * 0.38, cy = my + (50 - my) * 0.38;

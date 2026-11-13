@@ -1852,6 +1852,14 @@
         .cr-form textarea { min-height: 72px; resize: vertical; } .cr-2 { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 8px; }
         .cr-2 > label { min-width: 0; } .cr-form select, .cr-form input, .cr-form textarea { width: 100%; box-sizing: border-box; }
         #cr-save { background: #ca8a04; border-color: #ca8a04; color: #fff; }
+
+        #flow-panel { margin:0 auto 14px; max-width:560px; padding:12px 14px; border-radius:16px; background:#111a33; border:1px solid #2c3a66; }
+        .fp-btns { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; } .fp-btn { min-height:44px; padding:0 14px; border-radius:12px; border:1px solid #4f46e5; background:#312e81; color:#fff; font-weight:800; cursor:pointer; margin-top:8px; }
+        .fp-btn.red { background:#991b1b; border-color:#ef4444; } .fp-btn.ghost { background:transparent; border-color:#334155; color:#cbd5e1; }
+        .fp-ban { font-size:11px; font-weight:800; color:#fca5a5; border:1px solid #7f1d1d; border-radius:8px; padding:3px 8px; }
+        .gc-m.gc-note { background:#111827 !important; border-left:3px solid #a5b4fc; }
+
+        .fp-title { font-size:15px; font-weight:700; color:#f1f5f9; margin-bottom:8px; line-height:1.4; text-wrap:balance; } .fp-title small { font-size:12px; color:#94a3b8; font-weight:600; }
 </style>
 </head>
 <body>
@@ -13766,6 +13774,232 @@ document.addEventListener('click', e => {
                         L.push(def); injectCustomRole(def); added++; });
                     if (added) saveCustomRoles(L); } catch (e) {} }
                 return _imp.apply(this, arguments);
+            };
+        })();
+
+    
+        // =====================================================================
+        //  Ban ngày (bản 2): đề cử bí mật 15s -> mũi tên ai chỉ ai -> QUẢN TRÒ chọn người lên giàn -> biện minh 1 phút (chỉnh ở vòng làng)
+        //  -> bỏ phiếu bí mật 15s "👍 sống / 👎 chết" -> bong bóng phiếu trên avatar + báo riêng quản trò -> treo / chọn người tiếp
+        // =====================================================================
+        FL.live = 15; FL.defDefault = 60;
+        const aliveNames = () => (state.players || []).filter(p => p.isAlive).map(p => p.name);
+        const banishedNow = () => (typeof getBanishedAliveNames === 'function' ? getBanishedAliveNames() : []);
+        function defTimerDone() { let T = state.timers && state.timers.defense; return !!(T && !T.running && T.m === 0 && T.s === 0); }
+        function startDefTimer() { let T = state.timers.defense; if (T.running) toggleTimer('defense'); T.m = Math.floor(FL.defDefault / 60); T.s = FL.defDefault % 60; T.total = FL.defDefault; try { updateTimerDisplay && updateTimerDisplay('defense'); } catch (e) {} setTimeout(() => { if (!state.timers.defense.running) toggleTimer('defense'); }, 400); }
+        // 1) hết 15s đề cử -> công bố mũi tên, CHỜ quản trò chọn người lên giàn
+        endNom = function () {
+            let F = flowNow(), map = onlineVotes(); F.votes = Object.assign({}, map); F.defended = F.defended || [];
+            state.online.dayVote = { day: state.dayCount, open: false };
+            let by = {}; Object.entries(map).forEach(([v, t]) => (by[t] = by[t] || []).push(v));
+            let rows = Object.entries(by).sort((a, b) => b[1].length - a[1].length).map(([t, vs]) => `• ${t} ← ${vs.join(', ')}`), none = flowVoters().filter(v => !map[v]);
+            F.ph = 'pick'; F.until = 0; onlineSave();
+            flowSay(rows.length ? `🗳️ Kết quả đề cử:\n${rows.join('\n')}${none.length ? `\nKhông đề cử: ${none.join(', ')}` : ''}\n⏳ Quản trò đang chọn người lên giàn.` : '🗳️ Không ai đề cử ai. Quản trò sẽ quyết định.');
+            flowBroadcast(); renderFlowPanel();
+        };
+        // 2) quản trò chọn người lên giàn -> biện minh (đồng hồ 1 phút ở giữa vòng làng, chỉnh được bằng ±)
+        function flowPick(name) {
+            let F = flowNow(); if (!F) return;
+            if (banishedNow().includes(name)) { onlineToast(`${name} đang bị cấm túc — không thể lên giàn hôm nay`); return; }
+            F.accused = [name]; F.idx = 0; F.ph = 'def'; F.lv = {}; F.defended = (F.defended || []).concat(name); onlineSave();
+            state.online.accused = { day: state.dayCount, name };
+            if (state.currentView !== 'view-day-defense') goToDefense();
+            startDefTimer();
+            flowSay(`⚖️ ${name} được đưa lên giàn — biện minh 1 phút. Mọi người còn sống có thể chat.`);
+            flowBroadcast(); renderFlowPanel();
+        }
+        // 3) hết giờ biện minh -> bỏ phiếu bí mật 15s
+        function startLive() {
+            let F = flowNow(); F.ph = 'live'; F.until = Date.now() + FL.live * 1000; F.lv = {}; onlineSave();
+            let T = state.timers.defense; if (T.running) toggleTimer('defense');
+            flowSay(`⚖️ ${FL.live} giây bỏ phiếu BÍ MẬT: quyết định ${F.accused[0]} sống hay chết?`);
+            flowBroadcast(); renderFlowPanel();
+        }
+        // 4) hết 15s -> bong bóng phiếu + báo riêng quản trò
+        function endLive() {
+            let F = flowNow(), a = F.accused[0], alive = aliveNames(), voters = flowVoters();
+            voters.forEach(v => { if (!F.lv[v]) F.lv[v] = 'live'; });               // không chọn = muốn sống
+            let die = voters.filter(v => F.lv[v] === 'die').length, live = alive.length - die, half = alive.length / 2;
+            F.ph = 'res'; F.until = 0; F.result = { die, live, alive: alive.length }; onlineSave();
+            let cmp = die * 2 === alive.length ? 'eq' : die > half ? 'gt' : 'lt';
+            let word = { eq: 'một nửa', gt: '<b style="color:#f87171">hơn</b> một nửa', lt: '<b style="color:#4ade80">ít hơn</b> một nửa' }[cmp];
+            gmLocalNote(`⚖️ ${word} làng vote <b>${escapeHtml(a)}</b> chết (👎 ${die} / ${alive.length} người còn sống)`,
+                `⚖️ ${cmp === 'eq' ? 'một nửa' : cmp === 'gt' ? 'hơn một nửa' : 'ít hơn một nửa'} làng vote ${a} chết (👎 ${die} / ${alive.length})`);
+            F.cmp = cmp; onlineSave(); flowBroadcast(); renderFlowPanel();
+        }
+        // ghi chú chỉ quản trò thấy (không gửi người chơi), có tô màu
+        function gmLocalNote(html, text) {
+            let m = { id: 'note:' + Date.now(), ch: 'public', from: 'note', name: '🤖 Kết quả bỏ phiếu', text, html, ts: Date.now(), local: true };
+            window._gmChat.push(m); try { gmChatSave(); } catch (e) {} renderGmChat(); try { gmFeedBottom(); } catch (e) {}
+            onlineToast(text);
+        }
+        (function () {
+            const _r = renderGmChat;
+            renderGmChat = function () {
+                _r.apply(this, arguments);
+                let notes = window._gmChat.filter(m => m.local && m.html); if (!notes.length) return;
+                document.querySelectorAll('#gc-feed .gc-m').forEach(el => { let n = notes.find(m => el.textContent.includes(m.text)); if (n) { let t = el.querySelector('.gc-txt') || el; t.innerHTML = n.html; el.classList.add('gc-note'); } });
+            };
+        })();
+        flowTick = function () {
+            if (!gmOpts.autoDay || !onlineActive() || !state.online.locked || !(state.online.deal && state.online.deal.started) || !gmWs || gmWs.readyState !== 1) return;
+            let v = state.currentView, F = flowNow(), now = Date.now();
+            if (v === 'view-day-discuss' && onlineDiscussOver() && !F) return startNom();
+            if (!F || F.ph === 'done') return;
+            const ok = { nom: ['view-day-discuss'], pick: ['view-day-discuss', 'view-day-defense'], def: ['view-day-defense'], live: ['view-day-defense'], res: ['view-day-defense'] }[F.ph];
+            if (ok && !ok.includes(v)) { F.ph = 'done'; onlineSave(); flowBroadcast(); renderFlowPanel(); return; }   // quản trò tự chuyển màn -> dừng tự động
+            if (F.ph === 'nom' && now >= F.until) endNom();
+            else if (F.ph === 'def' && defTimerDone()) startLive();
+            else if (F.ph === 'live') { renderFlowPanel(); if (now >= F.until || flowVoters().every(x => F.lv[x])) endLive(); }
+        };
+        flowBroadcast = function () {
+            let F = flowNow(), left = F && F.until ? Math.max(0, Math.ceil((F.until - Date.now()) / 1000)) : 0;
+            let data = F && F.ph !== 'done' ? { kind: 'dayflow', ph: F.ph, left, accused: F.accused || [], speaker: ['def', 'live', 'res'].includes(F.ph) ? (F.accused || [])[0] : '',
+                pairs: ['rev', 'pick'].includes(F.ph) ? Object.entries(F.votes || {}) : [], voters: flowVoters(), lv: F.ph === 'res' ? F.lv : null } : { kind: 'dayflow', ph: 'off' };
+            gmSend({ t: 'all', keep: 'dayflow', data });
+        };
+        (function () {
+            const _st = statusNow;
+            statusNow = function () {
+                let F = flowNow(), a = F && (F.accused || [])[0];
+                if (F && F.ph === 'pick') return { text: '📢 Kết quả đề cử — quản trò đang chọn người lên giàn', phase: 'day' };
+                if (F && F.ph === 'def') return { text: `🗣️ ${a} đang biện minh — mọi người còn sống có thể chat`, phase: 'day' };
+                if (F && F.ph === 'live') return { text: `⚖️ Bỏ phiếu bí mật: ${a} sống hay chết?`, phase: 'live' };
+                if (F && F.ph === 'res') return { text: `📢 Đã bỏ phiếu xong — quản trò đang quyết định về ${a}`, phase: 'day' };
+                return _st.apply(this, arguments);
+            };
+            const _gm = gmOnMsg;
+            gmOnMsg = function (m) {
+                if (m.t === 'msg' && m.data && m.data.kind === 'live') {
+                    let F = flowNow(), who = onlineNameOf(m.from);
+                    if (F && F.ph === 'live' && m.data.target === F.accused[0] && flowVoters().includes(who) && (m.data.v === 'live' || m.data.v === 'die')) { F.lv[who] = m.data.v; onlineSave(); renderFlowPanel(); }
+                    return;
+                }
+                return _gm(m);
+            };
+            const _vt = renderVoteTally;
+            renderVoteTally = function () { let F = flowNow(); if (F && F.ph !== 'nom' && F.ph !== 'done') { let b = document.getElementById('vote-tally'); if (b) b.remove(); return; } return _vt.apply(this, arguments); };
+        })();
+        renderHangTally = function () { let b = document.getElementById('hang-tally'); if (b) b.remove(); };
+        // ---------- bảng điều khiển của quản trò ----------
+        function renderFlowPanel() {
+            let F = flowNow(), v = state.currentView, box = document.getElementById('flow-panel');
+            let show = F && ['pick', 'def', 'live', 'res'].includes(F.ph) && (v === 'view-day-discuss' || v === 'view-day-defense');
+            if (!show) { if (box) box.remove(); return; }
+            let host = document.querySelector(`#${v} .flex-1`) || document.getElementById(v);
+            if (!box || box.parentElement !== host) { if (box) box.remove(); box = document.createElement('div'); box.id = 'flow-panel'; host.insertBefore(box, host.firstChild); }
+            let a = (F.accused || [])[0], html = '';
+            const pickList = () => {
+                let by = {}; Object.entries(F.votes || {}).forEach(([vv, t]) => (by[t] = by[t] || []).push(vv));
+                let ban = banishedNow(), names = aliveNames().filter(n => !(F.defended || []).includes(n)).sort((x, y) => (by[y] || []).length - (by[x] || []).length);
+                return names.map(n => `<div class="vt-row${(by[n] || []).length ? ' top' : ''}">${avatarHtml(n, 26)}<b>${escapeHtml(n)}</b><span class="vt-n">${(by[n] || []).length}</span>
+                    ${ban.includes(n) ? '<span class="fp-ban">cấm túc</span>' : `<button type="button" class="vt-up" onclick="flowPick(this.dataset.n)" data-n="${escapeHtml(n)}">⬆️ Lên giàn</button>`}<div class="vt-who">${(by[n] || []).map(escapeHtml).join(', ') || '—'}</div></div>`).join('');
+            };
+            if (F.ph === 'pick') html = `<div class="vt-head">⬆️ Chọn người lên giàn <span>số phiếu đề cử</span></div>${pickList()}<button type="button" class="fp-btn ghost" onclick="flowSleep()">🌙 Không ai lên giàn — làng đi ngủ</button>`;
+            else if (F.ph === 'def') html = `<div class="vt-head">🗣️ ${escapeHtml(a)} đang biện minh</div><div class="vt-hint">Chỉnh thời gian bằng các nút ± ở giữa vòng làng. Hết giờ thì tự chuyển sang bỏ phiếu sống / chết.</div><button type="button" class="fp-btn" onclick="startLive()">⚖️ Cho bỏ phiếu ngay</button>`;
+            else if (F.ph === 'live') { let n = Object.keys(F.lv || {}).length; html = `<div class="vt-head">⚖️ Đang bỏ phiếu bí mật: ${escapeHtml(a)} sống hay chết? <span>còn ${Math.max(0, Math.ceil((F.until - Date.now()) / 1000))} giây</span></div><div class="vt-hint">${n}/${flowVoters().length} người đã bỏ phiếu. Ai không chọn sẽ được tính là 👍 sống.</div>`; }
+            else if (F.ph === 'res') {
+                let r = F.result || {}, word = { eq: 'Một nửa', gt: '<b style="color:#f87171">Hơn</b> một nửa', lt: '<b style="color:#4ade80">Ít hơn</b> một nửa' }[F.cmp];
+                let dies = Object.entries(F.lv || {}).filter(([, x]) => x === 'die').map(([n]) => n), lives = aliveNames().filter(n => !dies.includes(n));
+                html = `<div class="fp-title">⚖️ ${word} làng vote <b>${escapeHtml(a)}</b> chết <small>(👎 ${r.die} / ${r.alive} người còn sống)</small></div>
+                    <div class="hg-row"><span class="hg-l">👎 chết</span><span class="hg-bar y"><i style="width:${Math.round(r.die / Math.max(1, r.alive) * 100)}%"></i></span><b class="hg-c">${r.die}</b></div><div class="hg-who">${dies.map(escapeHtml).join(', ') || '—'}</div>
+                    <div class="hg-row"><span class="hg-l">👍 sống</span><span class="hg-bar n"><i style="width:${Math.round(r.live / Math.max(1, r.alive) * 100)}%"></i></span><b class="hg-c">${r.live}</b></div><div class="hg-who">${lives.map(escapeHtml).join(', ') || '—'}</div>
+                    <div class="fp-btns"><button type="button" class="fp-btn red" onclick="flowHang()">⚖️ Treo cổ ${escapeHtml(a)}</button><button type="button" class="fp-btn" onclick="flowNext()">⬆️ Đưa người khác lên giàn</button><button type="button" class="fp-btn ghost" onclick="flowSleep()">🌙 Không treo ai — đi ngủ</button></div>`;
+            }
+            if (box._h !== html) { box._h = html; box.innerHTML = html; }
+        }
+        function flowNext() { let F = flowNow(); F.ph = 'pick'; F.lv = {}; onlineSave(); flowSay('⏳ Quản trò đang chọn người tiếp theo lên giàn.'); flowBroadcast(); renderFlowPanel(); }
+        function flowHang() { let F = flowNow(), a = F.accused[0]; F.ph = 'done'; onlineSave(); flowBroadcast(); renderFlowPanel(); goToExecution(); onlineToast(`Chạm vào ${a} trên vòng làng để xác nhận treo cổ`); }
+        function flowSleep() { let F = flowNow(); F.ph = 'done'; onlineSave(); flowBroadcast(); renderFlowPanel(); if (state.currentView !== 'view-day-execute') goToExecution(); setTimeout(() => { try { confirmSleepAction(); } catch (e) {} }, 300); }
+        setInterval(() => { try { renderFlowPanel(); } catch (e) {} }, 700);
+        (function () {   // chữ trong Admin Actions
+            const _m = mountAssistToggles;
+            mountAssistToggles = function () { _m.apply(this, arguments); let l = document.querySelector('#opt-autoday'); if (l && l.parentElement) l.parentElement.lastChild.textContent = ' 🤖 Tự động ban ngày (online): đề cử bí mật 15s → quản trò chọn người lên giàn → biện minh 1 phút → bỏ phiếu sống/chết 15s'; };
+        })();
+
+    
+        // =====================================================================
+        //  Ban ngày (bản 3): người được bỏ phiếu = còn sống trừ cấm túc + mất não (phù phép VẪN bỏ phiếu);
+        //  người lên giàn không tự bỏ phiếu; n = còn sống trừ người lên giàn; Thị Trưởng x2; kết quả lưu trên server (kênh gmnote)
+        // =====================================================================
+        flowVoters = function () {
+            let ban = banishedNow(), gp = state.players || [];
+            let br = ((state.history && state.history.brainlessIds) || []).map(id => gp.find(p => p.id === id)).filter(p => p && p.isAlive).map(p => p.name);
+            return aliveNames().filter(n => !ban.includes(n) && !br.includes(n));
+        };
+        const liveVoters = () => { let F = flowNow(), a = F && (F.accused || [])[0]; return flowVoters().filter(n => n !== a); };
+        const verdictWord = c => ({ eq: 'một nửa', gt: 'hơn một nửa', lt: 'ít hơn một nửa' })[c];
+        function verdictHtml(text) {   // tô màu chữ "hơn" (đỏ) / "ít hơn" (xanh lá)
+            let h = escapeHtml(text);
+            if (h.includes('ít hơn một nửa')) return h.replace('ít hơn', '<b style="color:#4ade80">ít hơn</b>');
+            if (/(^|\s)hơn một nửa/.test(h)) return h.replace(/(^|\s)hơn một nửa/, '$1<b style="color:#f87171">hơn</b> một nửa');
+            return h;
+        }
+        endLive = function () {
+            let F = flowNow(), a = F.accused[0], vs = liveVoters(), n = aliveNames().filter(x => x !== a).length;
+            vs.forEach(v => { if (!F.lv[v]) F.lv[v] = 'live'; });                                   // không chọn = muốn sống
+            let die = vs.filter(v => F.lv[v] === 'die').reduce((t, v) => t + mayorW(v), 0);        // Thị Trưởng x2
+            let live = vs.filter(v => F.lv[v] !== 'die').reduce((t, v) => t + mayorW(v), 0);
+            let cmp = die * 2 > n ? 'gt' : die * 2 === n ? 'eq' : 'lt';                           // hơn khi die >= n/2 + 0.5
+            F.ph = 'res'; F.until = 0; F.cmp = cmp; F.result = { die, live, n }; onlineSave();
+            let text = `⚖️ ${verdictWord(cmp)} làng vote ${a} chết (👎 ${die} / ${n} người còn sống, không tính ${a})`;
+            if (!gmSend({ t: 'chat', ch: 'gmnote', text })) gmLocalNote(verdictHtml(text), text);   // mất mạng -> tạm ghi trên máy
+            onlineToast(text); flowBroadcast(); renderFlowPanel();
+        };
+        flowTick = function () {
+            if (!gmOpts.autoDay || !onlineActive() || !state.online.locked || !(state.online.deal && state.online.deal.started) || !gmWs || gmWs.readyState !== 1) return;
+            let v = state.currentView, F = flowNow(), now = Date.now();
+            if (v === 'view-day-discuss' && onlineDiscussOver() && !F) return startNom();
+            if (!F || F.ph === 'done') return;
+            const okv = { nom: ['view-day-discuss'], pick: ['view-day-discuss', 'view-day-defense'], def: ['view-day-defense'], live: ['view-day-defense'], res: ['view-day-defense'] }[F.ph];
+            if (okv && !okv.includes(v)) { F.ph = 'done'; onlineSave(); flowBroadcast(); renderFlowPanel(); return; }
+            if (F.ph === 'nom' && now >= F.until) endNom();
+            else if (F.ph === 'def' && defTimerDone()) startLive();
+            else if (F.ph === 'live') { renderFlowPanel(); if (now >= F.until || liveVoters().every(x => F.lv[x])) endLive(); }
+        };
+        (function () {
+            const _fb = flowBroadcast;
+            flowBroadcast = function () {
+                let F = flowNow();
+                if (F && (F.ph === 'live' || F.ph === 'res')) {
+                    let left = F.until ? Math.max(0, Math.ceil((F.until - Date.now()) / 1000)) : 0;
+                    gmSend({ t: 'all', keep: 'dayflow', data: { kind: 'dayflow', ph: F.ph, left, accused: F.accused || [], speaker: F.accused[0], pairs: [], voters: liveVoters(), lv: F.ph === 'res' ? F.lv : null } });
+                    return;
+                }
+                return _fb.apply(this, arguments);
+            };
+            const _gm = gmOnMsg;
+            gmOnMsg = function (m) {
+                // người lên giàn không được tự bỏ phiếu
+                if (m.t === 'msg' && m.data && m.data.kind === 'live') { let F = flowNow(); if (F && onlineNameOf(m.from) === (F.accused || [])[0]) return; }
+                // ghi chú kết quả (kênh gmnote, lưu trên server) -> hiện trong phòng Làng của quản trò
+                if (m.t === 'chat' && m.m && m.m.ch === 'gmnote') m = Object.assign({}, m, { m: Object.assign({}, m.m, { ch: 'public', note: true, name: '🤖 Kết quả bỏ phiếu' }) });
+                if (m.t === 'chat_hist' && Array.isArray(m.list)) m = Object.assign({}, m, { list: m.list.map(x => x.ch === 'gmnote' ? Object.assign({}, x, { ch: 'public', note: true, name: '🤖 Kết quả bỏ phiếu' }) : x) });
+                return _gm(m);
+            };
+            const _r = renderGmChat;
+            renderGmChat = function () {
+                _r.apply(this, arguments);
+                let notes = window._gmChat.filter(x => x.note); if (!notes.length) return;
+                document.querySelectorAll('#gc-feed .gc-m:not(.gc-note)').forEach(el => { let t = el.querySelector('.gc-txt') || el, n = notes.find(x => t.textContent.trim() === x.text.trim()); if (n) { t.innerHTML = verdictHtml(n.text); el.classList.add('gc-note'); } });
+            };
+        })();
+        (function () {   // bảng kết quả: n = còn sống trừ người lên giàn, Thị Trưởng x2
+            const _p = renderFlowPanel;
+            renderFlowPanel = function () {
+                let F = flowNow();
+                if (!(F && F.ph === 'res' && F.result && F.result.n != null)) return _p.apply(this, arguments);
+                let v = state.currentView, box = document.getElementById('flow-panel'), host = document.querySelector(`#${v} .flex-1`) || document.getElementById(v);
+                if (!host) return;
+                if (!box || box.parentElement !== host) { if (box) box.remove(); box = document.createElement('div'); box.id = 'flow-panel'; host.insertBefore(box, host.firstChild); }
+                let a = F.accused[0], r = F.result, vs = liveVoters(), tag = x => escapeHtml(x) + (mayorW(x) > 1 ? ' (×2)' : '');
+                let dies = vs.filter(x => F.lv[x] === 'die'), lives = vs.filter(x => F.lv[x] !== 'die'), out = aliveNames().filter(x => x !== a && !vs.includes(x));
+                let html = `<div class="fp-title">${verdictHtml(`⚖️ ${verdictWord(F.cmp)} làng vote ${a} chết`)} <small>(👎 ${r.die} / ${r.n} người còn sống, không tính ${escapeHtml(a)})</small></div>
+                    <div class="hg-row"><span class="hg-l">👎 chết</span><span class="hg-bar y"><i style="width:${Math.round(r.die / Math.max(1, r.n) * 100)}%"></i></span><b class="hg-c">${r.die}</b></div><div class="hg-who">${dies.map(tag).join(', ') || '—'}</div>
+                    <div class="hg-row"><span class="hg-l">👍 sống</span><span class="hg-bar n"><i style="width:${Math.round(r.live / Math.max(1, r.n) * 100)}%"></i></span><b class="hg-c">${r.live}</b></div><div class="hg-who">${lives.map(tag).join(', ') || '—'}</div>
+                    ${out.length ? `<div class="vt-hint">Không được bỏ phiếu (cấm túc / mất não): ${out.map(escapeHtml).join(', ')}</div>` : ''}
+                    <div class="fp-btns"><button type="button" class="fp-btn red" onclick="flowHang()">⚖️ Treo cổ ${escapeHtml(a)}</button><button type="button" class="fp-btn" onclick="flowNext()">⬆️ Đưa người khác lên giàn</button><button type="button" class="fp-btn ghost" onclick="flowSleep()">🌙 Không treo ai — đi ngủ</button></div>`;
+                if (box._h !== html) { box._h = html; box.innerHTML = html; }
             };
         })();
 
