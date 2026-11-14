@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Làng Xí Nghiệp Nợ — Quản trò Ma Sói</title>
     <!-- Chạy fullscreen như app khi "Thêm vào Màn hình chính" (iOS/Android) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1831,7 +1831,7 @@
         .ds-btns { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:10px; } .ds-btns button { min-height:44px; padding:0 14px; border-radius:12px; border:1px solid #334155; background:#111827; color:#e2e8f0; font-weight:800; cursor:pointer; }
         #ds-share { background:#16a34a; border-color:#16a34a; color:#fff; }
 
-        html, body { touch-action: manipulation; }   /* không zoom khi chạm 2 lần, vẫn zoom được bằng 2 ngón */
+        
         .gc-empty { color: #94a3b8 !important; }
 
         #music-toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom,0px) + 90px); transform: translate(-50%, 16px); opacity: 0; z-index: 9990; pointer-events: none;
@@ -1860,6 +1860,43 @@
         .gc-m.gc-note { background:#111827 !important; border-left:3px solid #a5b4fc; }
 
         .fp-title { font-size:15px; font-weight:700; color:#f1f5f9; margin-bottom:8px; line-height:1.4; text-wrap:balance; } .fp-title small { font-size:12px; color:#94a3b8; font-weight:600; }
+
+        /* ===== Quản trò trên điện thoại dọc ===== */
+        @media (max-width: 899px) {
+            /* 1. nút Chat nằm trong thanh đáy (bên trái nút chính) — không đè nội dung */
+            body.gm-docked [id^=view-] .bottom-safe { padding-left: 80px !important; }
+            body.gm-docked #gc-pill { left: max(16px, env(safe-area-inset-left,0px)); right: auto; bottom: calc(env(safe-area-inset-bottom,0px) + 18px); width: 56px; min-height: 52px; padding: 0; justify-content: center; flex-direction: column; gap: 0; border-radius: 14px; font-size: 12px; }
+            body.gm-docked #gc-pill em { position: absolute; top: -6px; right: -6px; }
+            body.gm-docked #gc-pill.up { top: calc(env(safe-area-inset-top,0px) + 10px); bottom: auto; left: auto; right: max(14px, env(safe-area-inset-right,0px)); width: auto; min-height: 40px; padding: 0 14px; flex-direction: row; border-radius: 99px; }
+            /* 2. công cụ bộ bài: 1 dòng vuốt ngang */
+            #deck-preset-area { display: flex !important; flex-wrap: nowrap !important; overflow-x: auto; gap: 6px; padding-bottom: 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+            #deck-preset-area::-webkit-scrollbar { display: none; }
+            #deck-preset-area > * { flex-shrink: 0; white-space: nowrap; }
+            /* 3. nút nhỏ lớn hơn */
+            :is(div, span, nav):has(> button[onclick*="setBoardMode"]) > button { min-width: 36px !important; min-height: 36px !important; display: inline-flex; align-items: center; justify-content: center; }
+            :is(div, span, nav):has(> button[onclick*="setBoardMode"]) { gap: 6px; }
+            .nstep { min-height: 36px !important; }
+            #info-modal button { min-height: 36px; }
+        }
+        .auto-lock { opacity: .6 !important; font-size: 14px !important; }
+        details.fp-rest { margin-top: 6px; } details.fp-rest > summary { cursor: pointer; min-height: 40px; display: flex; align-items: center; font-size: 13px; font-weight: 800; color: #a5b4fc; list-style: none; }
+        details.fp-rest > summary::after { content: ' ▸'; margin-left: 4px; } details.fp-rest[open] > summary::after { content: ' ▾'; }
+
+        /* bộ bài: 1 hàng */
+        .deck-row { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 6px; width: 100%; } .deck-row.c4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
+        .deck-row .deck-tool { margin: 0; min-height: 40px; padding: 0 4px; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
+        .deck-row .rand-deck { background: #7c2d12; border-color: #ea580c; color: #fed7aa; } .deck-row .saved-deck { background: #312e81; border-color: #6366f1; color: #e0e7ff; }
+        .deck-row .chat-deck { background: #1e1b4b; border-color: #818cf8; color: #fff; position: relative; } .deck-row .chat-deck em { font-style: normal; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 99px; background: #ef4444; font-size: 10px; display: inline-flex; align-items: center; justify-content: center; }
+        body.on-deck #gc-pill { display: none !important; } body.on-deck #view-deck .bottom-safe { padding-left: 16px !important; }
+        #deck-preset-area { overflow: visible !important; }
+        .cr-inline-wrap { padding: 8px 12px 12px; } .cr-open-inline { width: 100%; min-height: 44px; border-radius: 12px; border: 1px dashed #ca8a04; background: rgba(202,138,4,.08); color: #fde68a; font-weight: 800; font-size: 13px; cursor: pointer; }
+        .dsv-list { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; max-height: 50dvh; overflow-y: auto; }
+        /* 5. bỏ nút gửi — Enter / phím "Gửi" của bàn phím là gửi */
+        #gc-send { display: none !important; }
+        /* không zoom: iPhone tự phóng to khi chạm ô nhập có chữ < 16px -> ép tối thiểu 16px trên điện thoại */
+        html, body { touch-action: pan-x pan-y; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+        button, a, [onclick], .seat, input, select, textarea, label { touch-action: manipulation; }
+        @media (max-width: 1024px), (pointer: coarse) { input, select, textarea, [contenteditable="true"] { font-size: max(16px, 1em) !important; } }
 </style>
 </head>
 <body>
@@ -12496,18 +12533,18 @@ var qrcode = function() {
             return best.deck;
         }
         function onlineRandomDeck() {
-            let N = state.totalPlayers || 0; if (N < 5) { showPopup('Bộ bài bất ngờ', 'Cần ít nhất 5 người chơi.', 'warning'); return; }
+            let N = state.totalPlayers || 0; if (N < 5) { showPopup('Bộ bài ngẫu nhiên', 'Cần ít nhất 5 người chơi.', 'warning'); return; }
             let d = randomBalancedDeck(N); if (!d) return;
             ROLES_DB.forEach(r => state.deck[r.id] = 0); Object.assign(state.deck, d); renderDeck(); saveGame();
             haptic && haptic([30, 20, 50]);
-            showPopup('🎲 Bộ bài bất ngờ', `Đã tạo bộ ${N} lá, điểm cân bằng ${ptsLabel(deckScore())}. Bấm lần nữa để đổi bộ khác.`, 'info');
+            showPopup('🎲 Bộ bài ngẫu nhiên', `Đã tạo bộ ${N} lá, điểm cân bằng ${ptsLabel(deckScore())}. Bấm lần nữa để đổi bộ khác.`, 'info');
         }
         (function () {
             const _p = renderDeckPresetUI;
             renderDeckPresetUI = function () {
                 _p.apply(this, arguments);
                 let c = document.getElementById('deck-preset-area'); if (!c || c.querySelector('.rand-deck')) return;
-                c.insertAdjacentHTML('afterbegin', '<button type="button" class="rand-deck" onclick="onlineRandomDeck()">🎲 Bộ bài bất ngờ</button>');
+                c.insertAdjacentHTML('afterbegin', '<button type="button" class="rand-deck" onclick="onlineRandomDeck()">🎲 Bộ bài ngẫu nhiên</button>');
             };
         })();
         // ---------- Lá ❓ màu cam (theo logo) ----------
@@ -12968,7 +13005,7 @@ var qrcode = function() {
                 sel.insertAdjacentElement('afterend', btn);
             });
         }
-        new MutationObserver(() => { clearTimeout(enhanceSelects._t); enhanceSelects._t = setTimeout(enhanceSelects, 60); }).observe(document.body, { childList: true, subtree: true });
+        /* nút 🔍 tìm tên ở màn đêm: đã bỏ theo yêu cầu */ document.querySelectorAll('.cbx-btn').forEach(b => b.remove());
         // ---------- Gửi lạc quan (khung chat quản trò) ----------
         (function () {
             const _send = gmChatSend;
@@ -13381,7 +13418,7 @@ document.addEventListener('click', e => {
             function renderPill() {
                 let on = mq.matches && document.body.classList.contains('gm-docked'), p = ensurePill();
                 let U = Object.values(window._gmUnreadCh || {}).reduce((a, b) => a + (b || 0), 0);
-                p.classList.toggle('show', on);
+                p.classList.toggle('show', on); p.classList.toggle('up', chatInView);
                 p.innerHTML = chatInView ? '⬆ Lên trên' : `💬 Chat${U ? `<em>${U > 99 ? '99+' : U}</em>` : ''}`;
                 p.setAttribute('aria-label', chatInView ? 'Lên lại vòng làng' : `Tới khung chat${U ? ', ' + U + ' tin chưa đọc' : ''}`);
             }
@@ -14001,6 +14038,205 @@ document.addEventListener('click', e => {
                     <div class="fp-btns"><button type="button" class="fp-btn red" onclick="flowHang()">⚖️ Treo cổ ${escapeHtml(a)}</button><button type="button" class="fp-btn" onclick="flowNext()">⬆️ Đưa người khác lên giàn</button><button type="button" class="fp-btn ghost" onclick="flowSleep()">🌙 Không treo ai — đi ngủ</button></div>`;
                 if (box._h !== html) { box._h = html; box.innerHTML = html; }
             };
+        })();
+
+    
+        // =====================================================================
+        //  Quản trò trên điện thoại dọc: nút Chat vào thanh đáy, dải công cụ bộ bài 1 dòng, nút lớn hơn,
+        //  thảo luận tự động rõ ràng hơn, danh sách lên giàn gọn, khoá nút "Tiếp theo" khi đang tự động
+        // =====================================================================
+        // nút bước đêm (1. Cupid, 2. Đàn Sói…): đánh dấu để phóng to
+        setInterval(() => {
+            document.querySelectorAll('#view-night button[aria-label], #view-night button[title]').forEach(b => { if (/^\d+\.\s/.test(b.getAttribute('aria-label') || b.title || '') && !b.classList.contains('nstep')) b.classList.add('nstep'); });
+            // 6. khi luồng tự động đang chạy: khoá nút đáy để khỏi bấm nhầm làm dừng luồng
+            ['view-day-discuss', 'view-day-defense'].forEach(vid => {
+                let btn = document.querySelector(`#${vid} .bottom-safe button:last-of-type`); if (!btn) return;
+                let F = typeof flowNow === 'function' ? flowNow() : null, busy = !!(F && ['nom', 'pick', 'def', 'live', 'res'].includes(F.ph) && state.currentView === vid && gmOpts.autoDay);
+                if (busy && !btn._lock) { btn._lock = { html: btn.innerHTML, dis: btn.disabled }; btn.innerHTML = '🤖 Đang tự động — dùng bảng phía trên'; btn.disabled = true; btn.classList.add('auto-lock'); }
+                else if (!busy && btn._lock) { btn.innerHTML = btn._lock.html; btn.disabled = btn._lock.dis; btn._lock = null; btn.classList.remove('auto-lock'); }
+            });
+        }, 500);
+        // 4. thảo luận: nói rõ đề cử sẽ tự mở, có nút kết thúc sớm
+        function endDiscussNow() {
+            let T = state.timers.discuss; if (T.running) toggleTimer('discuss'); T.m = 0; T.s = 0;
+            try { document.getElementById('time-discuss-m').innerText = '00'; document.getElementById('time-discuss-s').innerText = '00'; } catch (e) {}
+            onlineToast('⏭ Đã kết thúc thảo luận — mở đề cử bí mật');
+        }
+        (function () {
+            const _vt = renderVoteTally;
+            renderVoteTally = function () {
+                if (gmOpts.autoDay && onlineActive() && state.online.locked && state.currentView === 'view-day-discuss' && !flowNow() && !onlineVoteOpen()) {   // đã tự mở biểu quyết bằng tay -> hiện bảng đếm phiếu thật
+                    let host = document.querySelector('#view-day-discuss .flex-1') || document.getElementById('view-day-discuss'), box = document.getElementById('vote-tally');
+                    if (!box && host) { box = document.createElement('div'); box.id = 'vote-tally'; host.insertBefore(box, host.firstChild); }
+                    let html = `<div class="vt-head">🤖 Đề cử bí mật sẽ tự mở khi hết giờ thảo luận</div><div class="vt-hint">Muốn rút ngắn thì chỉnh đồng hồ ở giữa vòng làng, hoặc:</div><button type="button" class="fp-btn ghost" onclick="endDiscussNow()">⏭ Kết thúc thảo luận ngay</button>`;
+                    if (box && box._h !== html) { box._h = html; box.innerHTML = html; }
+                    return;
+                }
+                return _vt.apply(this, arguments);
+            };
+            // 5. danh sách lên giàn: người có phiếu đề cử trước, những người khác thu gọn
+            const _fp = renderFlowPanel;
+            renderFlowPanel = function () {
+                let F = flowNow();
+                if (!(F && F.ph === 'pick')) return _fp.apply(this, arguments);
+                let v = state.currentView, host = document.querySelector(`#${v} .flex-1`) || document.getElementById(v), box = document.getElementById('flow-panel');
+                if (!host) return;
+                if (!box || box.parentElement !== host) { if (box) box.remove(); box = document.createElement('div'); box.id = 'flow-panel'; host.insertBefore(box, host.firstChild); }
+                let by = {}; Object.entries(F.votes || {}).forEach(([vv, t]) => (by[t] = by[t] || []).push(vv));
+                let w = n => (by[n] || []).reduce((t, x) => t + mayorW(x), 0), ban = banishedNow();
+                let names = aliveNames().filter(n => !(F.defended || []).includes(n)).sort((x, y) => w(y) - w(x));
+                let row = n => `<div class="vt-row${w(n) ? ' top' : ''}">${avatarHtml(n, 26)}<b>${escapeHtml(n)}</b><span class="vt-n">${w(n)}</span>
+                    ${ban.includes(n) ? '<span class="fp-ban">cấm túc</span>' : `<button type="button" class="vt-up" onclick="flowPick(this.dataset.n)" data-n="${escapeHtml(n)}">⬆️ Lên giàn</button>`}<div class="vt-who">${(by[n] || []).map(escapeHtml).join(', ') || '—'}</div></div>`;
+                let hot = names.filter(n => w(n) > 0), rest = names.filter(n => !w(n));
+                let open = box.querySelector('details.fp-rest') && box.querySelector('details.fp-rest').open;
+                let html = `<div class="vt-head">⬆️ Chọn người lên giàn <span>số phiếu đề cử</span></div>${hot.map(row).join('') || '<div class="vt-hint">Không ai được đề cử.</div>'}
+                    ${rest.length ? `<details class="fp-rest"${open || !hot.length ? ' open' : ''}><summary>Người khác (${rest.length})</summary>${rest.map(row).join('')}</details>` : ''}
+                    <button type="button" class="fp-btn ghost" onclick="flowSleep()">🌙 Không ai lên giàn — làng đi ngủ</button>`;
+                if (box._h !== html) { box._h = html; box.innerHTML = html; }
+            };
+        })();
+
+    
+        // =====================================================================
+        //  Sửa gấp: kết quả đề cử + sống/chết vào khung chat quản trò; Sói thấy nhau + mũi tên nháp;
+        //  bộ bài 1 hàng; Vai tự tạo ở cuối Phe Thứ 3; bỏ nút gửi
+        // =====================================================================
+        FL.live = 30;
+        // ---------- 7. đề cử: xác nhận sớm + kết quả chi tiết vào khung chat quản trò ----------
+        function nomResultText(F) {
+            let map = F.votes || {}, by = {}; Object.entries(map).forEach(([v, t]) => (by[t] = by[t] || []).push(v));
+            let w = t => (by[t] || []).reduce((s, v) => s + mayorW(v), 0), voters = flowVoters(), none = voters.filter(v => !map[v]);
+            let rows = Object.keys(by).sort((a, b) => w(b) - w(a)).map(t => `• ${t} — ${w(t)} phiếu: ${by[t].map(v => v + (mayorW(v) > 1 ? ' (×2)' : '')).join(', ')}`);
+            return `🗳️ Kết quả đề cử (${Object.keys(map).length}/${voters.length} người đã chọn):\n${rows.join('\n') || '• Không ai đề cử ai'}${none.length ? `\nKhông đề cử: ${none.join(', ')}` : ''}\n➡ Chọn người lên giàn ở bảng phía trên màn hình.`;
+        }
+        (function () {
+            const _en = endNom;
+            endNom = function () {
+                let r = _en.apply(this, arguments), F = flowNow();
+                if (F) { let text = nomResultText(F); if (!gmSend({ t: 'chat', ch: 'gmnote', text })) gmLocalNote(escapeHtml(text), text); onlineToast('🗳️ Đã có kết quả đề cử — xem khung chat / bảng phía trên'); }
+                return r;
+            };
+            const _el = endLive;
+            endLive = function () {
+                let F = flowNow(), a = F && F.accused[0];
+                if (!F) return _el.apply(this, arguments);
+                // ghi chi tiết ai bầu gì (endLive gốc gửi dòng kết quả chính)
+                let vs = liveVoters(), tag = x => x + (mayorW(x) > 1 ? ' (×2)' : '');
+                let noVote = vs.filter(v => !F.lv[v]);
+                let r = _el.apply(this, arguments);
+                let dies = vs.filter(v => F.lv[v] === 'die'), lives = vs.filter(v => F.lv[v] === 'live' && !noVote.includes(v));
+                let text = `📋 Chi tiết phiếu về ${a}:\n👎 chết: ${dies.map(tag).join(', ') || '—'}\n👍 sống: ${lives.map(tag).join(', ') || '—'}${noVote.length ? `\nKhông bỏ phiếu (tính là sống): ${noVote.map(tag).join(', ')}` : ''}`;
+                if (!gmSend({ t: 'chat', ch: 'gmnote', text })) gmLocalNote(escapeHtml(text), text);
+                return r;
+            };
+            const _gm = gmOnMsg;
+            gmOnMsg = function (m) {
+                if (m.t === 'msg' && m.data && m.data.kind === 'vote_ok') {
+                    let F = flowNow(), who = onlineNameOf(m.from);
+                    if (F && F.ph === 'nom' && flowVoters().includes(who)) { F.okv = F.okv || {}; F.okv[who] = true; onlineSave(); if (flowVoters().every(v => F.okv[v])) endNom(); }
+                    return;
+                }
+                return _gm(m);
+            };
+        })();
+        // ---------- 6. bầy Sói: mũi tên nháp ngay khi chạm, viền đỏ cả bầy, chỉ tự chốt khi cả bầy xác nhận ----------
+        (function () {
+            const _op = onlineOnPick;
+            onlineOnPick = function (pid, d) {
+                let name = onlineNameOf(pid), n = window._gmPermNames || {};
+                if (!name || state.currentView !== 'view-night' || d.key !== seatStepKey() || !(n.wolves || []).includes(name)) return _op.apply(this, arguments);
+                let wp = state.online.wolfPicks && state.online.wolfPicks.key === d.key ? state.online.wolfPicks : (state.online.wolfPicks = { key: d.key, picks: {}, ok: {} });
+                wp.ok = wp.ok || {};
+                let f0 = (d.fields || [])[0] || {}; wp.picks[name] = (f0.names || [])[0] || ''; wp.fi = f0.fi;
+                if (d.draft) delete wp.ok[name]; else wp.ok[name] = true;
+                n.wolves.forEach(w => { let id = onlineIdOf(w); if (id) gmSend({ t: 'to', to: id, keep: 'wpicks', data: { kind: 'wpicks', key: d.key, picks: wp.picks, ok: wp.ok, pack: n.wolves } }); });
+                let vals = n.wolves.map(w => wp.picks[w] || ''), agree = vals.every(v => v && v === vals[0]) && n.wolves.every(w => wp.ok[w]);
+                if (agree && wp.fi != null) { onlineApplyFieldValues(wp.fi, [vals[0]]); onlineToast(`🐺 Cả bầy xác nhận cắn ${vals[0]}`); }
+                else if (!d.draft) onlineToast(`🐺 ${name} xác nhận cắn ${wp.picks[name] || '(bỏ chọn)'}`);
+                onlineSave();
+            };
+            const _gs = gmSend;
+            gmSend = function (o) {   // ô chọn của Sói kèm danh sách cả bầy đang thức (để vẽ viền đỏ)
+                if (o && o.t === 'to' && o.data && o.data.kind === 'fields' && !o.data.off) { let n = window._gmPermNames || {}, nm = onlineNameOf(o.to); if ((n.wolves || []).includes(nm)) o.data.pack = n.wolves.slice(); }
+                return _gs.apply(this, arguments);
+            };
+        })();
+        // ---------- 2 + 4. bộ bài: 1 hàng (Ngẫu nhiên · Chia sẻ · Bộ bài · Chat); Vai tự tạo ở cuối Phe Thứ 3 ----------
+        function openDeckSaved() {
+            document.querySelectorAll('.ds-ov').forEach(x => x.remove());
+            let P = getDeckPresets(), total = ROLES_DB.reduce((s, r) => s + (state.deck[r.id] || 0), 0);
+            let ov = document.createElement('div'); ov.className = 'tk-ov ds-ov'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Bộ bài đã lưu');
+            ov.innerHTML = `<div class="tk-card" style="max-width:440px;text-align:left"><div class="tk-h">💾 Bộ bài đã lưu</div>
+                ${total ? `<button type="button" class="fp-btn" id="dsv-save" style="width:100%">💾 Lưu bộ hiện tại (${total} lá)</button>` : '<p class="tk-p">Chọn vai trước rồi mới lưu được.</p>'}
+                <div class="dsv-list">${P.length ? P.map((p, i) => `<div class="cr-row"><b>${escapeHtml(p.name)}</b><span>${p.total} lá</span><button type="button" data-load="${i}">Dùng</button><button type="button" class="cr-del" data-del="${i}">Xoá</button></div>`).join('') : '<p class="tk-p">Chưa có bộ bài nào được lưu.</p>'}</div>
+                <div class="ds-btns"><button type="button" class="tk-close">Đóng</button></div></div>`;
+            document.body.appendChild(ov);
+            let sv = ov.querySelector('#dsv-save'); if (sv) sv.onclick = () => { let nm = prompt('Đặt tên cho bộ bài:'); if (nm && nm.trim()) { saveDeckPreset(nm.trim()); ov.remove(); } };
+            ov.querySelectorAll('[data-load]').forEach(b => b.onclick = () => { loadDeckPreset(+b.dataset.load); ov.remove(); });
+            ov.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { if (confirm('Xoá bộ bài này?')) { deleteDeckPreset(+b.dataset.del); ov.remove(); openDeckSaved(); } });
+            ov.querySelector('.tk-close').onclick = () => ov.remove(); ov.onclick = e => { if (e.target === ov) ov.remove(); };
+        }
+        function deckChatJump() { let c = document.getElementById('gm-chat'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+        renderDeckPresetUI = function () {
+            let c = document.getElementById('deck-preset-area'); if (!c) return;
+            let n = getDeckPresets().length, chat = document.body.classList.contains('gm-docked');
+            let U = Object.values(window._gmUnreadCh || {}).reduce((a, b) => a + (b || 0), 0);
+            let html = `<div class="deck-row${chat ? ' c4' : ''}">
+                <button type="button" class="deck-tool rand-deck" onclick="randomBalancedDeck()">🎲 Ngẫu nhiên</button>
+                <button type="button" class="deck-tool share-deck" onclick="openDeckShare()">🔗 Chia sẻ</button>
+                <button type="button" class="deck-tool saved-deck" onclick="openDeckSaved()">💾 Bộ bài${n ? ` (${n})` : ''}</button>
+                ${chat ? `<button type="button" class="deck-tool chat-deck" onclick="deckChatJump()">💬 Chat${U ? `<em>${U > 99 ? '99+' : U}</em>` : ''}</button>` : ''}</div>`;
+            if (c._h !== html) { c._h = html; c.innerHTML = html; }
+        };
+        (function () {
+            const _rd = renderDeck;
+            renderDeck = function () {
+                let r = _rd.apply(this, arguments);
+                try {
+                    let ind = document.querySelector('#view-deck .deck-fac-independent');
+                    if (ind && !ind.querySelector('.cr-open-inline')) ind.insertAdjacentHTML('beforeend', '<div class="cr-inline-wrap"><button type="button" class="cr-open-inline" onclick="openCustomRoles()">⭐ Vai tự tạo — tạo vai mới của nhóm bạn</button></div>');
+                    renderDeckPresetUI();
+                } catch (e) {}
+                return r;
+            };
+        })();
+        setInterval(() => {
+            document.body.classList.toggle('on-deck', state.currentView === 'view-deck');
+            if (state.currentView === 'view-deck') try { renderDeckPresetUI(); } catch (e) {}
+            let gi = document.getElementById('gc-in'); if (gi && gi.getAttribute('enterkeyhint') !== 'send') gi.setAttribute('enterkeyhint', 'send');
+        }, 800);
+        setTimeout(() => { try { if (state.currentView === 'view-deck') renderDeck(); } catch (e) {} }, 400);
+
+            // ---------- luồng tự động: không bật cửa sổ "HẾT GIỜ" đỏ che màn hình (nó đè lên bảng kết quả) ----------
+        (function () {
+            const _ta = triggerAlarm;
+            triggerAlarm = function () {
+                if (gmOpts.autoDay && onlineActive() && state.online.locked && ['view-day-discuss', 'view-day-defense'].includes(state.currentView)) {
+                    try { if (navigator.vibrate) navigator.vibrate([120, 60, 120]); } catch (e) {}
+                    onlineToast(state.currentView === 'view-day-discuss' ? '⏰ Hết giờ thảo luận — mở đề cử bí mật' : '⏰ Hết giờ biện minh — mở bỏ phiếu sống / chết');
+                    return;
+                }
+                return _ta.apply(this, arguments);
+            };
+        })();
+
+    
+        // =====================================================================
+        //  KHÔNG CHO ZOOM trong mọi trường hợp (kể cả khi gõ chữ) — iPhone bỏ qua user-scalable=no với cử chỉ 2 ngón
+        // =====================================================================
+        (function () {
+            const VP = 'width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover';
+            let m = document.querySelector('meta[name="viewport"]'); if (m) m.setAttribute('content', VP);
+            const block = e => { e.preventDefault(); };
+            document.addEventListener('gesturestart', block, { passive: false });      // Safari: chụm 2 ngón
+            document.addEventListener('gesturechange', block, { passive: false });
+            document.addEventListener('gestureend', block, { passive: false });
+            document.addEventListener('touchmove', e => { if (e.touches && e.touches.length > 1) e.preventDefault(); }, { passive: false });
+            document.addEventListener('dblclick', block, { passive: false });          // nhấn đúp
+            document.addEventListener('wheel', e => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });   // chụm trên touchpad
+            document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && ['+', '-', '=', '0'].includes(e.key)) e.preventDefault(); });
+            // lỡ bị phóng to (ví dụ máy cũ) -> gõ xong tự thu về
+            document.addEventListener('focusout', () => { if (window.visualViewport && visualViewport.scale > 1.01 && m) { m.setAttribute('content', VP + ', width=device-width'); setTimeout(() => m.setAttribute('content', VP), 60); } }, true);
         })();
 
     </script>
