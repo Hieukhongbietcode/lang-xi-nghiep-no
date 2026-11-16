@@ -508,6 +508,68 @@
     html, body { touch-action: pan-x pan-y; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     button, a, [onclick], .seat, input, select, textarea, label { touch-action: manipulation; }
     @media (max-width: 1024px), (pointer: coarse) { input, select, textarea, [contenteditable="true"] { font-size: max(16px, 1em) !important; } }
+/* ===== Bottom sheet / thông báo kiểu iOS ===== */
+.ui-sheet-ov { position: fixed; inset: 0; z-index: 10050; background: rgba(4, 6, 12, .55); display: flex; align-items: flex-end; justify-content: center; opacity: 0; transition: opacity .24s cubic-bezier(.22,1,.36,1); }
+.ui-sheet-ov.show { opacity: 1; }
+.ui-sheet { width: min(520px, 100%); margin: 0 8px calc(8px + env(safe-area-inset-bottom, 0px)); padding: 8px 16px 14px; border-radius: 22px; background: rgba(22, 30, 52, .92); -webkit-backdrop-filter: blur(24px) saturate(160%); backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid rgba(255,255,255,.08); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 24px 60px rgba(0,0,0,.55); color: #f2f4fa; transform: translateY(24px); transition: transform .32s cubic-bezier(.22,1,.36,1); }
+.ui-sheet-ov.show .ui-sheet { transform: none; }
+@media (min-width: 700px) { .ui-sheet-ov { align-items: center; } .ui-sheet { margin-bottom: 0; } }
+.ui-grab { width: 36px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.22); margin: 0 auto 12px; }
+.ui-title { font-size: 17px; font-weight: 700; line-height: 1.35; text-align: center; letter-spacing: -0.01em; text-wrap: balance; }
+.ui-msg { margin-top: 6px; font-size: 15px; line-height: 1.45; color: rgba(235,240,255,.72); text-align: center; text-wrap: pretty; max-height: 40dvh; overflow-y: auto; }
+.ui-input { width: 100%; box-sizing: border-box; margin-top: 12px; min-height: 48px; padding: 0 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,.10); background: #0d1222; color: #fff; font: inherit; font-size: 16px; }
+.ui-btns { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; margin-top: 14px; }
+.ui-btns button { min-height: 50px; border-radius: 14px; border: 1px solid rgba(255,255,255,.08); font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; transition: transform .16s cubic-bezier(.22,1,.36,1); }
+.ui-btns button:active { transform: scale(.96); }
+.ui-cancel { background: #1C2541; color: #e6e9f5; box-shadow: inset 0 1px 0 rgba(255,255,255,.12); }
+.ui-ok { background: #5E5CE6; color: #fff; } .ui-ok.danger { background: #FF453A; }
+#ui-banner { position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 10px); z-index: 10060; transform: translate(-50%, -140%); opacity: 0; max-width: calc(100vw - 24px);
+    padding: 12px 18px; border-radius: 22px; background: rgba(10,12,20,.92); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,.10); color: #fff; font-size: 14.5px; font-weight: 600; text-align: center;
+    transition: transform .38s cubic-bezier(.22,1,.36,1), opacity .2s; pointer-events: none; box-shadow: 0 12px 30px rgba(0,0,0,.5); }
+#ui-banner.show { transform: translate(-50%, 0); opacity: 1; } #ui-banner.err { border-color: rgba(255,69,58,.6); }
+@media (prefers-reduced-motion: reduce) { .ui-sheet-ov, .ui-sheet, #ui-banner { transition: none; } }
+    /* ===== Đợt A: hệ màu Apple (đêm), viền mảnh, lò xo, nhấn ===== */
+    :root { --bg: #080B14; --card: #121A2E; --line: rgba(255,255,255,.08); --iris: #5E5CE6; --iris2: #7D7AFF; --f-dan: #30D158; --f-soi: #FF453A; --f-ba: #FFD60A; --ok: #30D158; --bad: #FF453A; --warn: #FFD60A; --ember: #FF9F0A; --ease: cubic-bezier(.22,1,.36,1); }
+    body { background-color: var(--bg); }
+    button:not(:disabled):active, .ch-tab:active, .pf:active { transform: scale(.96); transition: transform .16s var(--ease); }
+    .btn-main { background: #5E5CE6; } .btn-main:not(:disabled):hover { background: #6D6BEA; }
+    /* ===== Đợt C ===== */
+    /* 1. sảnh chờ: radar nhịp thở + danh sách người đã vào */
+    .radar { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 8px 0 4px; }
+    .radar-dish { position: relative; width: 84px; height: 84px; display: flex; align-items: center; justify-content: center; font-size: 30px; border-radius: 50%; background: radial-gradient(circle, rgba(94,92,230,.32), rgba(94,92,230,.06) 70%); }
+    .radar-dish::before, .radar-dish::after { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid rgba(125,122,255,.55); animation: radarPulse 2.6s var(--ease) infinite; }
+    .radar-dish::after { animation-delay: 1.3s; }
+    @keyframes radarPulse { 0% { transform: scale(.85); opacity: .9; } 100% { transform: scale(1.9); opacity: 0; } }
+    .radar-t { font-size: 15px; font-weight: 700; text-align: center; text-wrap: balance; } .radar-t small { display: block; margin-top: 2px; font-size: 13px; font-weight: 600; color: var(--mute); }
+    .lb-pills { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; max-width: 520px; margin: 4px auto 0; }
+    .lb-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 4px; border-radius: 99px; background: #1C2541; box-shadow: inset 0 1px 0 rgba(255,255,255,.12); font-size: 13px; font-weight: 700; animation: pillIn .4s var(--ease) both; }
+    .lb-pill i { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-style: normal; font-size: 10px; font-weight: 800; color: #fff; }
+    .lb-pill.off { opacity: .45; } @keyframes pillIn { from { opacity: 0; transform: scale(.85); } }
+    #lb-status.dup-wait { display: none; }
+    /* 2. lá bài: ánh nhũ mặt úp, lật lò xo, úp bài nhanh */
+    .dl-back-card, .mini-card { position: relative; overflow: hidden; }
+    .dl-back-card::after, .mini-card::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.28) 48%, rgba(255,255,255,.06) 55%, transparent 68%); background-size: 260% 100%; animation: foil 3.2s var(--ease) infinite; }
+    @keyframes foil { 0% { background-position: 140% 0; } 55%, 100% { background-position: -60% 0; } }
+    .dl-flipper { transition-duration: .7s !important; transition-timing-function: cubic-bezier(.22,1,.36,1) !important; }
+    .dl-scene, .dl-card { perspective: 1200px; }
+    .rb-autohide { font-size: 11.5px; color: var(--mute); text-align: right; margin-top: 4px; font-variant-numeric: tabular-nums; }
+    /* 3. ban đêm, chưa tới lượt: màn tối OLED */
+    #night-dim { position: fixed; inset: 0; z-index: 90; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: #05070C; color: rgba(235,240,255,.55); text-align: center; padding: 24px;
+        opacity: 0; pointer-events: none; transition: opacity .9s var(--ease); }
+    #night-dim.on { opacity: .96; pointer-events: auto; } #night-dim.on.peek { opacity: 0; pointer-events: none; transition-duration: .35s; }
+    #night-dim .nd-moon { font-size: 40px; filter: grayscale(.3); animation: tw 4s ease-in-out infinite; } #night-dim b { font-size: 18px; font-weight: 700; color: rgba(235,240,255,.7); }
+    #night-dim small { font-size: 12.5px; color: rgba(235,240,255,.35); }
+    /* 4. ban ngày: ấm lên; ban đêm: lạnh hơn */
+    body { transition: background-color .9s var(--ease); }
+    body.day-warm { background-image: radial-gradient(120% 55% at 50% 0%, rgba(255,159,10,.13), transparent 62%); background-attachment: fixed; }
+    body.night-cool { background-image: radial-gradient(120% 55% at 50% 0%, rgba(94,92,230,.10), transparent 62%); background-attachment: fixed; }
+    /* 5. người đã chết: màn Linh hồn tông xám */
+    .ghost-bar { display: none; margin: 0 0 10px; padding: 10px 14px; border-radius: 14px; background: rgba(28,37,65,.8); border: 1px solid rgba(255,255,255,.08); font-size: 13.5px; font-weight: 600; color: rgba(235,240,255,.8); text-wrap: pretty; }
+    .ghost-bar b { display: block; font-size: 15px; color: #fff; margin-bottom: 2px; }
+    body.ghost .ghost-bar { display: block; }
+    body.ghost #ring-box, body.ghost #role-bar, body.ghost #g-status, body.ghost #df-bar { filter: grayscale(.85) brightness(.85); transition: filter .8s var(--ease); }
+    @media (prefers-reduced-motion: reduce) { .radar-dish::before, .radar-dish::after, .dl-back-card::after, .mini-card::after, #night-dim .nd-moon { animation: none; } }
 </style>
 </head>
 <body>
@@ -597,6 +659,40 @@
 </div>
 
 <script>
+
+// =====================================================================
+//  Bottom sheet / thông báo kiểu iOS — thay hộp thoại gốc confirm / prompt / alert của trình duyệt
+//  (khi chạy dưới công cụ test tự động, sheet tự trả lời "Đồng ý" trừ khi test bật window.__LXN_REAL_SHEETS)
+// =====================================================================
+const _uiEsc = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const _uiAuto = () => navigator.webdriver && !window.__LXN_REAL_SHEETS;
+function uiSheet(o) {
+    return new Promise(resolve => {
+        document.querySelectorAll('.ui-sheet-ov').forEach(x => x._close && x._close(null));
+        const ov = document.createElement('div'); ov.className = 'ui-sheet-ov'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
+        const msg = String(o.msg || ''), [title, ...rest] = msg.split('\n\n');
+        ov.innerHTML = `<div class="ui-sheet" role="document"><div class="ui-grab"></div>
+            <div class="ui-title">${_uiEsc(o.title || title)}</div>${(o.title ? msg : rest.join('\n\n')).trim() ? `<div class="ui-msg">${_uiEsc(o.title ? msg : rest.join('\n\n')).replace(/\n/g, '<br>')}</div>` : ''}
+            ${o.input != null ? `<input class="ui-input" type="text" value="${_uiEsc(o.input)}" ${o.readonly ? 'readonly' : ''} enterkeyhint="done" autocomplete="off">` : ''}
+            <div class="ui-btns">${o.cancel === false ? '' : `<button type="button" class="ui-cancel">${_uiEsc(o.cancel || 'Huỷ')}</button>`}<button type="button" class="ui-ok${o.danger ? ' danger' : ''}">${_uiEsc(o.ok || 'Đồng ý')}</button></div></div>`;
+        document.body.appendChild(ov);
+        const inp = ov.querySelector('.ui-input'), prev = document.activeElement;
+        const close = v => { if (ov._done) return; ov._done = true; ov.classList.remove('show'); setTimeout(() => ov.remove(), 240); try { prev && prev.focus && prev.focus({ preventScroll: true }); } catch (e) {} resolve(v); };
+        ov._close = close;
+        ov.querySelector('.ui-ok').onclick = () => close(inp ? inp.value : true);
+        const c = ov.querySelector('.ui-cancel'); if (c) c.onclick = () => close(inp ? null : false);
+        ov.onclick = e => { if (e.target === ov) close(inp ? null : (o.cancel === false ? true : false)); };
+        ov.addEventListener('keydown', e => { if (e.key === 'Escape') close(inp ? null : false); if (e.key === 'Enter' && (inp || e.target.classList.contains('ui-ok'))) { e.preventDefault(); close(inp ? inp.value : true); } });
+        requestAnimationFrame(() => { ov.classList.add('show'); (inp && !o.readonly ? inp : ov.querySelector('.ui-ok')).focus({ preventScroll: true }); if (inp && o.readonly) inp.select(); });
+    });
+}
+function uiConfirm(msg, o) { if (_uiAuto()) return Promise.resolve(true); return uiSheet(Object.assign({ msg }, o || {})); }
+function uiPrompt(msg, def, o) { if (_uiAuto()) return Promise.resolve(window.__LXN_AUTO_PROMPT != null ? window.__LXN_AUTO_PROMPT : (def || 'Test')); return uiSheet(Object.assign({ msg, input: def || '' }, o || {})); }
+function uiBanner(msg, kind) {   // thông báo trên đầu kiểu Dynamic Island, tự ẩn
+    let b = document.getElementById('ui-banner'); if (!b) { b = document.createElement('div'); b.id = 'ui-banner'; b.setAttribute('role', 'status'); b.setAttribute('aria-live', 'polite'); document.body.appendChild(b); }
+    b.className = kind || ''; b.textContent = msg; requestAnimationFrame(() => b.classList.add('show'));
+    clearTimeout(b._t); b._t = setTimeout(() => b.classList.remove('show'), 3200);
+}
 // ==== ĐỊA CHỈ SERVER: đổi thành link Render của bạn (wss://...) ====
 const WS_SERVER = 'wss://lang-xi-nghiep-no-server.onrender.com';
 // ===================================================================
@@ -727,14 +823,19 @@ let card = null, phase = 'waiting', pack = null, village = null, roleShown = fal
 function roleInfoHtml(r) {
     return `<div class="role-info">${r.desc ? `<div><b>📜 Chức năng</b>${esc(r.desc)}</div>` : ''}${r.wake ? `<div><b>🌙 Thức dậy</b>${esc(r.wake)}</div>` : ''}${r.win ? `<div><b>🏆 Thắng khi</b>${esc(r.win)}</div>` : ''}${(r.mates || []).length ? `<div class="mates">👯 Sinh Đôi của bạn: <b>${r.mates.map(esc).join(', ')}</b></div>` : ''}</div>`;
 }
+function rbAutoHide() {   // vai tự úp lại sau 20 giây (chống nhìn trộm)
+    clearInterval(_rbTimer); if (!roleShown) return; _rbLeft = 20;
+    _rbTimer = setInterval(() => { _rbLeft--; const el = $('rb-autohide'); if (el) el.textContent = `Tự úp sau ${_rbLeft} giây`;
+        if (_rbLeft <= 0 || !roleShown) { clearInterval(_rbTimer); if (roleShown) { roleShown = false; renderRoleBar(); } } }, 1000);
+}
 function renderRoleBar() {
     const el = $('role-bar'); if (!card || !me) { el.innerHTML = ''; return; }
     const r = card.role;
     el.innerHTML = `<div class="rb-top"><div class="rb-ic" style="${roleShown ? 'border-color:' + (FAC_HEX[r.f] || '') : ''}">${roleShown ? (card.icon ? `<img class="color" src="${esc(card.icon)}" alt="">` : '🃏') : '🂠'}</div>
         <div><div class="rb-k">Vai của ${esc(me.name)}</div><div class="rb-n${roleShown ? '' : ' hid'}">${roleShown ? esc(r.name) : '••••••'}</div></div>
-        <button class="rb-btn" id="rb-btn">${roleShown ? '🙈 Ẩn' : '👁 Hiện'}</button></div>
-        ${roleShown ? `<div class="rb-more"><div class="role-info"><div>${esc(r.desc || '')}</div>${(r.mates || []).length ? `<div class="mates">👯 Sinh Đôi của bạn: <b>${r.mates.map(esc).join(', ')}</b></div>` : ''}</div>${(r.wake || r.win) ? `<details class="more-d"><summary>Khi nào thức dậy, thắng khi nào</summary><div class="role-info">${r.wake ? `<div><b>Thức dậy</b>${esc(r.wake)}</div>` : ''}${r.win ? `<div><b>Thắng khi</b>${esc(r.win)}</div>` : ''}</div></details>` : ''}</div>${pack && pack.length ? `<div class="rb-pack">🐺 Bầy Sói: ${pack.map(esc).join(', ')}</div>` : ''}` : ''}`;
-    $('rb-btn').onclick = () => { roleShown = !roleShown; renderRoleBar(); };
+        <button class="rb-btn" id="rb-btn">${roleShown ? '🙈 Úp bài' : '👁 Hiện'}</button></div>
+        ${roleShown ? `<div class="rb-autohide" id="rb-autohide"></div><div class="rb-more"><div class="role-info"><div>${esc(r.desc || '')}</div>${(r.mates || []).length ? `<div class="mates">👯 Sinh Đôi của bạn: <b>${r.mates.map(esc).join(', ')}</b></div>` : ''}</div>${(r.wake || r.win) ? `<details class="more-d"><summary>Khi nào thức dậy, thắng khi nào</summary><div class="role-info">${r.wake ? `<div><b>Thức dậy</b>${esc(r.wake)}</div>` : ''}${r.win ? `<div><b>Thắng khi</b>${esc(r.win)}</div>` : ''}</div></details>` : ''}</div>${pack && pack.length ? `<div class="rb-pack">🐺 Bầy Sói: ${pack.map(esc).join(', ')}</div>` : ''}` : ''}`;
+    $('rb-btn').onclick = () => { roleShown = !roleShown; renderRoleBar(); rbAutoHide(); };
 }
 function renderRing() {
     const box = $('ring');
@@ -850,7 +951,7 @@ function openCard() {
     ov.innerHTML = `<div class="dl-wrap" id="dl-wrap"><div class="dl-scene">
         <button class="dl-x" id="dl-x" aria-label="Đóng">✕</button>
         <div class="dl-flipper" id="dl-flip">
-          <div class="dl-back"><div class="dl-back-name">${esc(me.name)}</div><div class="dl-back-card" id="dl-q">?</div><div class="dl-back-hint">Chạm vào lá bài để lật</div></div>
+          <div class="dl-back"><div class="dl-back-name">${esc(me.name)}</div><div class="dl-back-card" id="dl-q">?</div><div class="dl-back-hint">Chạm để lật lá bài của bạn</div></div>
           <div class="dl-front">${card.icon ? `<img class="role-ic color" src="${esc(card.icon)}" alt="">` : ''}
             <div class="role-fac" style="background:${FAC_HEX[card.role.f] || '#374151'}22;color:${FAC_HEX[card.role.f] || '#d1d5db'};border:1px solid ${FAC_HEX[card.role.f] || '#374151'}">${esc(card.role.faction)}</div><div class="role-nm">${esc(card.role.name)}</div>${roleInfoHtml(card.role)}</div>
         </div></div>
@@ -1526,6 +1627,45 @@ function renderVoteCard() {
 }
 setInterval(() => { try { renderVoteCard(); } catch (e) {} }, 500);
 
+// ---------------- Đợt C: sảnh chờ radar, úp bài nhanh, màn tối ban đêm, ấm ban ngày, Linh hồn ----------------
+let _rbTimer = null, _rbLeft = 0, _dimPeek = 0;
+function ambientTick() {
+    if (!me) return;
+    const ph = gstatus && gstatus.phase, inGame = document.body.classList.contains('ingame'), seat = (village || []).find(s => s.n === me.name);
+    const alive = !!seat && !!seat.a, dead = !!seat && !seat.a, isNight = ph === 'night', isDay = ['day', 'vote', 'live', 'hang'].includes(ph), over = ph === 'end' || ended;
+    document.body.classList.toggle('night-cool', inGame && isNight && !over);
+    document.body.classList.toggle('day-warm', inGame && isDay && !over);
+    document.body.classList.toggle('ghost', inGame && dead && !me.spec && !over);
+    // màn tối: ban đêm, còn sống, chưa tới lượt
+    const dim = $('night-dim'), idle = !(navigator.webdriver && !window.__LXN_REAL_DIM) && inGame && isNight && alive && !me.spec && !over && !myTurnCh() && !(fieldsMsg && fieldsMsg.fields && fieldsMsg.fields.length);
+    if (dim) { dim.classList.toggle('on', idle); dim.classList.toggle('peek', idle && Date.now() < _dimPeek); }
+}
+setInterval(ambientTick, 400);
+document.addEventListener('DOMContentLoaded', () => {});
+(function () {
+    const d = document.createElement('div'); d.id = 'night-dim'; d.setAttribute('role', 'status'); d.setAttribute('aria-live', 'polite');
+    d.innerHTML = '<div class="nd-moon">🌙</div><b>Cả làng đi ngủ… Hãy nhắm mắt lại</b><small>Chạm để xem nhanh · tới lượt bạn sẽ tự sáng lại</small>';
+    d.onclick = () => { _dimPeek = Date.now() + 8000; ambientTick(); setTimeout(ambientTick, 8100); };
+    document.body.appendChild(d);
+    const g = document.createElement('div'); g.className = 'ghost-bar'; g.setAttribute('role', 'note');
+    g.innerHTML = '<b>👻 Linh hồn — bạn đã tử vong</b>Hãy im lặng ngoài đời. Bạn vẫn xem được làng và chat trong phòng Người chết.';
+    const st = $('g-status'); if (st) st.insertAdjacentElement('beforebegin', g);
+})();
+// sảnh chờ: radar + người đã vào
+function renderRadar() {
+    const st = $('lb-status'); if (!st || !me || me.spec) return;
+    let box = $('lb-radar');
+    const waiting = roster && phase !== 'started' && phase !== 'dealing' && !card;
+    st.classList.toggle('dup-wait', !!waiting && /Đang chờ quản trò/.test(st.textContent));   // radar đã nói điều này -> ẩn dòng trùng
+    if (!waiting) { if (box) box.remove(); return; }
+    if (!box) { box = document.createElement('div'); box.id = 'lb-radar'; box.className = 'radar'; st.insertAdjacentElement('beforebegin', box); }
+    const ps = (roster.players || []), on = ps.filter(p => p.on !== false).length;
+    const html = `<div class="radar-dish" aria-hidden="true">🌙</div><div class="radar-t">Đã vào phòng — đang chờ quản trò chia bài…<small>${ps.length} người trong làng${on < ps.length ? ` · ${on} đang trực tuyến` : ''}</small></div>
+        <div class="lb-pills">${ps.slice(0, 40).map(p => `<span class="lb-pill${p.on === false ? ' off' : ''}"><i style="background:${nameCol(p.name)}">${esc((p.name || '?').slice(0, 2).toUpperCase())}</i>${esc(p.name)}${p.name === me.name ? ' (bạn)' : ''}</span>`).join('')}${ps.length > 40 ? `<span class="lb-pill">+${ps.length - 40}</span>` : ''}</div>`;
+    if (box._h !== html) { box._h = html; box.innerHTML = html; }
+}
+setInterval(renderRadar, 600);
+
 // ---------------- Giao diện ----------------
 function showJoin(msg) {
     show('scr-join');
@@ -1586,8 +1726,8 @@ $('btn-join').onclick = doJoin;
 $('btn-knock').onclick = () => doJoin('knock');
 $('btn-spec').onclick = () => doJoin('spectate');
 ['in-name', 'in-code'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') doJoin(); }));
-$('btn-leave').onclick = () => {
-    if (!confirm('Rời phòng ' + me.code + '?')) return;
+$('btn-leave').onclick = async () => {
+    if (!await uiConfirm('Rời phòng ' + me.code + '?', { ok: 'Rời phòng', danger: true })) return;
     sendJ({ t: 'leave' }); me = null; save(null); roster = null; card = null; phase = 'waiting'; chatList = []; chatSeen = new Set(); can = {}; pack = null; village = null; document.body.classList.remove('ingame'); showJoin('');
 };
 $('btn-wait-cancel').onclick = () => { me = null; save(null); showJoin(''); };
