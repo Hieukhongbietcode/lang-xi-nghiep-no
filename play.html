@@ -570,6 +570,28 @@
     body.ghost .ghost-bar { display: block; }
     body.ghost #ring-box, body.ghost #role-bar, body.ghost #g-status, body.ghost #df-bar { filter: grayscale(.85) brightness(.85); transition: filter .8s var(--ease); }
     @media (prefers-reduced-motion: reduce) { .radar-dish::before, .radar-dish::after, .dl-back-card::after, .mini-card::after, #night-dim .nd-moon { animation: none; } }
+
+    /* người đã chết: vai mọi người + nhật ký */
+    .rev-btn { display: block; width: 100%; margin-top: 8px; min-height: 44px; border-radius: 12px; border: 1px solid rgba(255,255,255,.10); background: #1C2541; color: #fff; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,.12); }
+    .rv-row { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 9px 12px; margin-bottom: 6px; border-radius: 12px; background: #0f1626; border: 1px solid var(--line); font-size: 14px; }
+    .rv-row b { font-weight: 800; } .rv-row span { font-weight: 800; text-align: right; } .rv-row em { grid-column: 1 / -1; font-style: normal; font-size: 12px; color: var(--mute); }
+    .rv-row.dead { opacity: .6; } .rv-log { padding: 10px 12px; margin-bottom: 8px; border-radius: 12px; background: #0f1626; border: 1px solid var(--line); }
+    .rv-log b { font-size: 14px; } .rv-log p { margin: 4px 0 0; font-size: 13.5px; color: #cbd5e1; white-space: pre-line; text-wrap: pretty; }
+    #rev-ov.hidden { display: none; }
+
+    /* người chết (bản 2) */
+    body.ghost #ring-box { filter: none !important; }
+    body.ghost #ring .seat .av { filter: grayscale(.85) brightness(.85); transition: filter .8s var(--ease); }   /* chỉ xám hình đại diện; chữ tên vai giữ màu phe */
+    body.ghost #role-bar { display: none; }   /* người chết không cần thanh vai của mình */
+    .gb-cause { margin: 4px 0 6px; font-weight: 800; color: #fca5a5; } .gb-sum { margin-top: 6px; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+    .gb-feed { margin-top: 6px; padding: 6px 10px; border-radius: 10px; background: rgba(94,92,230,.14); font-size: 13px; }
+    .pd-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; font-size: 13px; font-weight: 700; }
+    .pd-chip { min-height: 36px; padding: 0 12px; border-radius: 99px; border: 1px solid rgba(255,255,255,.10); background: #1C2541; color: #e6e9f5; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
+    .pd-chip.on { background: #5E5CE6; color: #fff; border-color: #7D7AFF; }
+    .pd-res { margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: rgba(94,92,230,.14); font-size: 14px; }
+    .do-cause { margin-top: 10px; font-size: 16px; font-weight: 800; color: #fca5a5; text-align: center; }
+    #conma-bar.cm-bar { border-color: rgba(125,122,255,.5); } #spec-bar.sp-bar { display: none; }
+    .dead-arr .arr { fill: none; stroke-width: .9; stroke-dasharray: 2 1.2; opacity: .95; }
 </style>
 </head>
 <body>
@@ -858,13 +880,13 @@ function renderRingInner() {
     const pos = {}; village.forEach((s, i) => { const a = -Math.PI / 2 + i * 2 * Math.PI / n; pos[s.n] = { x: 50 + R * Math.cos(a), y: 50 + R * Math.sin(a) }; });
     const f = curField(), healF = fieldsMsg && fieldsMsg.fields.find(x => x.heal), bitten = healF ? healF.allowed : [];
     const vf = fieldsMsg && fieldsMsg.fields.find(x => x.kind === 'vamp'), vgroup = vf && vampDir ? (vampDir === 1 ? vf.left : vf.right) : [];
-    const endRole = {}; if (endInfo) endInfo.roles.forEach(r => endRole[r.n] = r);
+    const endRole = {}; if (endInfo) endInfo.roles.forEach(r => endRole[r.n] = r); else if (revealData && revealData.roles) revealData.roles.forEach(r => endRole[r.n] = r);   // người đã chết: thấy vai mọi người
     if (card && FAC_RING[card.role.faction]) box.style.setProperty('--myfac', FAC_RING[card.role.faction]);
     const pickedCol = {}; if (fieldsMsg) fieldsMsg.fields.forEach(fd => (picks[fd.fi] || []).forEach(t => pickedCol[t] = fd.color));
     if (!ringEntered) { ringEntered = true; box.classList.add('enter'); setTimeout(() => box.classList.remove('enter'), 1600); }
     const accused = dflow && ['def', 'live', 'res', 'hang'].includes(dflow.ph) ? dflow.accused || [] : [], speaker = dflow && ['def', 'live', 'res'].includes(dflow.ph) ? dflow.speaker : '';
     const lv = dflow && dflow.ph === 'res' && dflow.lv ? dflow.lv : null;
-    box.innerHTML = (grid ? '' : `<svg class="ring-svg" viewBox="0 0 100 100" preserveAspectRatio="none">${ringArrows(pos)}${voteArrows(pos)}</svg>`) + village.map((s, i) => {
+    box.innerHTML = (grid ? '' : `<svg class="ring-svg" viewBox="0 0 100 100" preserveAspectRatio="none">${ringArrows(pos)}${voteArrows(pos)}${deadArrows(pos)}</svg>`) + village.map((s, i) => {
         const x = pos[s.n].x, y = pos[s.n].y, cant = f && !f.kind && !f.allowed.includes(s.n), bit = bitten.includes(s.n);
         const er = endRole[s.n], mu = mutedL.find(m => m.n === s.n), badge = (mu ? `<span class="mbadge" title="${esc(mu.why)}">🤐</span>` : '') + (princeL.includes(s.n) ? '<span class="pbadge">👑</span>' : '');
         const facCol = er ? ({ villager: '#4ade80', wolf: '#f87171', independent: '#facc15' }[er.f] || '#94a3b8') : '';
@@ -903,6 +925,8 @@ function onGm(d) {
     else if (d.kind === 'dealprog') dealProg = d;
     else if (d.kind === 'rolechg') { onRoleChg(d); return; }
     else if (d.kind === 'end') { const was = !!endInfo; endInfo = d.off ? null : d; if (!d.off) { tab = 'public'; ting(); if (!was) setTimeout(() => { if (iWon(d.result)) confetti(); }, 300); } }
+    else if (d.kind === 'predict_res') { predictRes = d.off ? null : d; const pr = document.querySelector('#g-end .pd-res'); if (pr) pr.remove(); }
+    else if (d.kind === 'reveal') { revealData = d.off ? null : d; renderLobby(); if ($('rev-ov') && !$('rev-ov').classList.contains('hidden')) renderRev(); }
     else if (d.kind === 'pdf') endPdf = d.off ? null : d;
     else if (d.kind === 'ghost') ghostL = d.letters || [];
     else if (d.kind === 'muted') mutedL = d.list || [];
@@ -1635,7 +1659,7 @@ function ambientTick() {
     const alive = !!seat && !!seat.a, dead = !!seat && !seat.a, isNight = ph === 'night', isDay = ['day', 'vote', 'live', 'hang'].includes(ph), over = ph === 'end' || ended;
     document.body.classList.toggle('night-cool', inGame && isNight && !over);
     document.body.classList.toggle('day-warm', inGame && isDay && !over);
-    document.body.classList.toggle('ghost', inGame && dead && !me.spec && !over);
+    document.body.classList.toggle('ghost', inGame && dead && !me.spec && !over && !isConMaMe());   // Con Ma vẫn đang chơi
     // màn tối: ban đêm, còn sống, chưa tới lượt
     const dim = $('night-dim'), idle = !(navigator.webdriver && !window.__LXN_REAL_DIM) && inGame && isNight && alive && !me.spec && !over && !myTurnCh() && !(fieldsMsg && fieldsMsg.fields && fieldsMsg.fields.length);
     if (dim) { dim.classList.toggle('on', idle); dim.classList.toggle('peek', idle && Date.now() < _dimPeek); }
@@ -1665,6 +1689,95 @@ function renderRadar() {
     if (box._h !== html) { box._h = html; box.innerHTML = html; }
 }
 setInterval(renderRadar, 600);
+
+// ---------------- Người đã chết: xem vai mọi người + nhật ký ----------------
+let revealData = null, revTab = 'roles';
+function openRev() {
+    if (!revealData) return;
+    let ov = $('rev-ov');
+    if (!ov) { ov = document.createElement('div'); ov.id = 'rev-ov'; ov.className = 'rules-ov'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-labelledby', 'rev-h');
+        ov.innerHTML = `<div class="rules-card"><div class="rules-top"><h2 id="rev-h">📜 Vai &amp; nhật ký</h2><button type="button" class="rules-x" aria-label="Đóng" onclick="closeRev()">✕</button></div>
+            <div class="rules-tabs" role="tablist"><button type="button" role="tab" id="rv-roles" onclick="revTab='roles';renderRev()">Vai mọi người</button><button type="button" role="tab" id="rv-log" onclick="revTab='log';renderRev()">Nhật ký</button><button type="button" role="tab" id="rv-night" onclick="revTab='night';renderRev()">Đêm nay</button></div>
+            <div id="rev-body" class="rules-body" tabindex="0"></div></div>`;
+        ov.onclick = e => { if (e.target === ov) closeRev(); }; ov.addEventListener('keydown', e => { if (e.key === 'Escape') closeRev(); });
+        document.body.appendChild(ov); }
+    ov.classList.remove('hidden'); requestAnimationFrame(() => ov.classList.add('show')); renderRev();
+}
+function closeRev() { const ov = $('rev-ov'); if (!ov) return; ov.classList.remove('show'); setTimeout(() => ov.classList.add('hidden'), 200); }
+function renderRev() {
+    const body = $('rev-body'); if (!body || !revealData) return;
+    $('rv-roles').setAttribute('aria-selected', revTab === 'roles'); $('rv-log').setAttribute('aria-selected', revTab === 'log'); if ($('rv-night')) $('rv-night').setAttribute('aria-selected', revTab === 'night');
+    if (revTab === 'night') { const n = revealData.night; body.innerHTML = n && n.items.length ? `<h3>🌙 Đêm ${n.day}</h3>` + n.items.map(x => `<div class="rv-log"><p style="margin:0">${feedLine(x)}</p>${x.act ? `<p>${esc(x.act)}</p>` : ''}</div>`).join('') : '<p class="rules-empty">Phần này cập nhật trực tiếp trong lúc ban đêm.</p>'; return; }
+    const col = { villager: '#30D158', wolf: '#FF453A', independent: '#FFD60A' }, fac = { wolf: 'Phe Sói', villager: 'Phe Dân Làng', independent: 'Phe Thứ 3' };
+    if (revTab === 'roles') {
+        body.innerHTML = ['wolf', 'villager', 'independent'].map(f => { const L = revealData.roles.filter(r => (r.f || 'villager') === f); if (!L.length) return '';
+            return `<h3 style="color:${col[f]}">${fac[f]} (${L.length})</h3>` + L.map(r => `<div class="rv-row${r.a ? '' : ' dead'}"><b>${esc(r.n)}${me && r.n === me.name ? ' (bạn)' : ''}</b><span style="color:${col[f]}">${r.r0 ? esc(r.r0) + ' ➡ ' : ''}${esc(r.r)}</span><em>${r.a ? 'còn sống' : '💀 đã chết'}</em></div>`).join(''); }).join('');
+    } else {
+        const L = (revealData.log || []).slice().reverse();
+        body.innerHTML = L.length ? L.map(e => `<div class="rv-log"><b>${esc(e.t)}</b><p>${esc(e.c)}</p></div>`).join('') : '<p class="rules-empty">Chưa có gì trong nhật ký.</p>';
+    }
+}
+setInterval(() => {
+    const g = document.querySelector('.ghost-bar'); if (!g) return;
+    let btn = g.querySelector('.rev-btn');
+    if (revealData && !btn) { btn = document.createElement('button'); btn.type = 'button'; btn.className = 'rev-btn'; btn.textContent = '📜 Vai & nhật ký'; btn.onclick = openRev; g.appendChild(btn); }
+    if (!revealData && btn) btn.remove();
+    if (!revealData) closeRev();
+}, 500);
+
+// ---------------- Người chết (bản 2): Con Ma, lý do chết, lực lượng còn lại, đêm nay, đoán phe thắng, khán giả ----------------
+let myPredict = '', predictRes = null;
+const isConMaMe = () => !!(card && card.role && (card.role.id === 'ghost' || card.role.name === 'Con Ma'));
+function facSummary() {
+    if (!revealData || !revealData.roles) return '';
+    const c = { wolf: 0, villager: 0, independent: 0 }; revealData.roles.filter(r => r.a).forEach(r => c[r.f || 'villager']++);
+    return `Còn lại: <b style="color:#FF453A">${c.wolf} Sói</b> · <b style="color:#30D158">${c.villager} Dân</b>${c.independent ? ` · <b style="color:#FFD60A">${c.independent} Thứ 3</b>` : ''}`;
+}
+function feedLine(x) { return `${x.ic} ${esc(x.who)}${x.holders && x.holders.length ? ` (${x.holders.map(esc).join(', ')})` : ''} ${x.targets && x.targets.length ? '→ <b>' + x.targets.map(esc).join(', ') + '</b>' : '<i>đang chọn…</i>'}`; }
+function predictHtml() {
+    if (ended || (gstatus && gstatus.phase === 'end')) return '';
+    const opt = [['wolf', '🐺 Sói'], ['villager', '🏡 Dân'], ['independent', '⭐ Thứ 3']];
+    return `<div class="pd-row"><span>🎯 Đoán phe thắng:</span>${opt.map(([f, t]) => `<button type="button" class="pd-chip${myPredict === f ? ' on' : ''}" aria-pressed="${myPredict === f}" onclick="predictPick('${f}')">${t}</button>`).join('')}</div>`;
+}
+function predictPick(f) { myPredict = f; sendJ({ t: 'to_gm', data: { kind: 'predict', f } }); renderDeadBars(); }
+function renderDeadBars() {
+    if (!me) return;
+    const seat = (village || []).find(s => s.n === me.name), dead = !!seat && !seat.a, inGame = document.body.classList.contains('ingame'), over = ended || (gstatus && gstatus.phase === 'end');
+    // thanh Linh hồn (người chết, trừ Con Ma)
+    const g = document.querySelector('.ghost-bar');
+    if (g) {
+        const cause = revealData && revealData.me && revealData.me.cause, nf = revealData && revealData.night && revealData.night.items, last = nf && nf.length ? nf[nf.length - 1] : null;
+        const html = `<b>👻 Linh hồn — bạn đã tử vong</b>${cause ? `<div class="gb-cause">💀 ${esc(cause)}</div>` : ''}Hãy im lặng ngoài đời. Bạn vẫn xem được làng và chat trong phòng Người chết.
+            ${facSummary() ? `<div class="gb-sum">${facSummary()}</div>` : ''}${last ? `<div class="gb-feed">🌙 ${feedLine(last)}</div>` : ''}${predictHtml()}${revealData ? '<button type="button" class="rev-btn" onclick="openRev()">📜 Vai & nhật ký</button>' : ''}`;
+        if (g._h !== html) { g._h = html; g.innerHTML = html; }
+    }
+    // thanh Con Ma (đã chết nhưng vẫn chơi)
+    let cm = $('conma-bar');
+    const showCM = inGame && dead && isConMaMe() && !over;
+    if (showCM && !cm) { cm = document.createElement('div'); cm.id = 'conma-bar'; cm.className = 'ghost-bar cm-bar'; cm.innerHTML = '<b>👻 Bạn là Con Ma — vẫn đang chơi cho phe Dân</b>Mỗi đêm viết 1 chữ gửi cho làng. Bạn chỉ nhắn được với quản trò.'; const st = $('g-status'); if (st) st.insertAdjacentElement('beforebegin', cm); }
+    if (cm) cm.style.display = showCM ? 'block' : 'none';
+    // thanh khán giả
+    let sb = $('spec-bar');
+    const showSB = !!me.spec && !over && (inGame || document.body.classList.contains('spectator'));   // trang khán giả có chế độ riêng
+    if (showSB && !sb) { sb = document.createElement('div'); sb.id = 'spec-bar'; sb.className = 'ghost-bar sp-bar'; const anchor = $('ring-box') || $('g-status'); if (anchor) anchor.insertAdjacentElement('beforebegin', sb); }
+    if (sb) { sb.style.display = showSB ? 'block' : 'none';
+        if (showSB) { const html = `<b>👀 Bạn đang xem với tư cách khán giả</b>${facSummary() ? `<div class="gb-sum">${facSummary()}</div>` : ''}${predictHtml()}${revealData ? '<button type="button" class="rev-btn" onclick="openRev()">📜 Vai & nhật ký</button>' : ''}`; if (sb._h !== html) { sb._h = html; sb.innerHTML = html; } } }
+    // lý do chết trên màn "Bạn đã chết"
+    const dov = document.querySelector('.death-ov'), cause = revealData && revealData.me && revealData.me.cause;
+    if (dov && cause && !dov.querySelector('.do-cause')) dov.insertAdjacentHTML('beforeend', `<div class="do-cause">${esc(cause)}</div>`);
+    // kết quả đoán phe thắng ở màn hết ván
+    const ge = $('g-end');
+    if (ge && predictRes && predictRes.n && !ge.querySelector('.pd-res')) { const fn = { wolf: 'Phe Sói', villager: 'Phe Dân Làng', independent: 'Phe Thứ 3' }[predictRes.f] || '';
+        ge.insertAdjacentHTML('beforeend', `<div class="pd-res">🎯 Đoán đúng phe thắng (${fn}): <b>${predictRes.ok && predictRes.ok.length ? predictRes.ok.map(esc).join(', ') : 'không ai'}</b></div>`); }
+}
+setInterval(() => { try { renderDeadBars(); } catch (e) {} }, 500);
+function deadArrows(pos) {   // mũi tên "đêm nay" cho người chết / khán giả
+    const n = revealData && revealData.night; if (!n || !(n.arrows || []).length || !(gstatus && gstatus.phase === 'night')) return '';
+    const col = { wolf: '#FF453A', villager: '#30D158', independent: '#FFD60A' };
+    return n.arrows.map(([a, b, f]) => { const A = pos[a], B = pos[b]; if (!A || !B || A === B) return '';
+        const mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2, cx = mx + (50 - mx) * 0.38, cy = my + (50 - my) * 0.38, d2 = Math.hypot(B.x - cx, B.y - cy) || 1, ux = (B.x - cx) / d2, uy = (B.y - cy) / d2, ex = B.x - ux * 6, ey = B.y - uy * 6, c = col[f] || '#7D7AFF';
+        return `<g class="dead-arr"><path class="arr" d="M${A.x.toFixed(2)} ${A.y.toFixed(2)} Q${cx.toFixed(2)} ${cy.toFixed(2)} ${ex.toFixed(2)} ${ey.toFixed(2)}" stroke="${c}" style="color:${c}"/><polygon points="${ex},${ey} ${ex - ux * 2.6 - uy * 1.5},${ey - uy * 2.6 + ux * 1.5} ${ex - ux * 2.6 + uy * 1.5},${ey - uy * 2.6 - ux * 1.5}" fill="${c}"/></g>`; }).join('');
+}
 
 // ---------------- Giao diện ----------------
 function showJoin(msg) {

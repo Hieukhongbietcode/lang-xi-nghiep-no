@@ -1982,6 +1982,11 @@
         button[onclick^="updateRoleCount"] { width: 36px !important; height: 36px !important; border-radius: 50% !important; background: var(--a-chip) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.12); border: 1px solid var(--a-hair) !important; position: relative; }
         button[onclick^="updateRoleCount"]::after { content: ''; position: absolute; inset: -4px; }
         @media (prefers-reduced-motion: reduce) { #night-progress .seg.missing::before, #result-zoom .rz-stage::after, #view-night-result .res-body.stagger-in .stg-item { animation: none; } }
+
+        #srv-ver-bar { position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 8px); transform: translateX(-50%); z-index: 9995; width: min(560px, calc(100vw - 20px)); display: block;
+            padding: 12px 44px 12px 14px; border-radius: 16px; background: rgba(66,32,6,.96); border: 1px solid #f59e0b; color: #fde68a; font-size: 14px; line-height: 1.45; box-shadow: 0 14px 40px rgba(0,0,0,.5); }
+        #srv-ver-bar b { color: #fff; } #srv-ver-bar code { background: rgba(0,0,0,.3); padding: 1px 5px; border-radius: 6px; font-size: 12.5px; } #srv-ver-bar small { display: block; margin-top: 4px; color: #fcd34d; opacity: .85; font-size: 12px; }
+        #srv-ver-bar button { position: absolute; top: 6px; right: 6px; width: 36px; height: 36px; border-radius: 10px; border: none; background: transparent; color: #fde68a; font-size: 16px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -9307,7 +9312,7 @@ function uiBanner(msg, kind) {   // thông báo trên đầu kiểu Dynamic Isla
                 label = `🌙 Đêm ${d} — mọi người nhắm mắt`;
                 if (v === 'view-night') {
                     let st = state.nightSequence && state.nightSequence[state.currentStepIndex], called = st ? namesCalledInStep(st) : [];
-                    called = called.filter(n => !deadNames.includes(n));
+                    called = called.filter(n => !deadNames.includes(n) || isConMa(n));   // Con Ma đã chết vẫn tới lượt viết chữ
                     if (st && (st.type === 'group_action' || st.type === 'bigbad_action')) perm.wolves = called;
                     else if (st && st.type === 'couple') perm.couple = called;
                     else perm.dm = called;
@@ -14450,6 +14455,172 @@ document.addEventListener('click', e => {
             };
         })();
         setTimeout(() => { try { if (state.currentView === 'view-deck') renderDeck(); } catch (e) {} }, 500);
+
+    
+        // =====================================================================
+        //  Người chơi online đã chết: xem vai mọi người + nhật ký các đêm/ngày (gửi RIÊNG từng người chết)
+        // =====================================================================
+        const _revSent = {};
+        function revealPayload() {
+            const plain = h => String(h || '').replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/[ \t]+\n/g, '\n').trim();
+            const roles = (state.players || []).map(p => { const r = ROLES_DB.find(x => x.id === p.roleId) || {}, r0 = ROLES_DB.find(x => x.id === p.initialRoleId) || {};
+                return { n: p.name, r: r.name || '?', r0: r0.name && r0.name !== r.name ? r0.name : '', f: r.faction || 'villager', a: !!p.isAlive }; });
+            const log = (state.eventLog || []).map(e => ({ t: plain(e.title), c: plain(e.content) })).filter(e => e.t || e.c).slice(-80);
+            return { kind: 'reveal', roles, log };
+        }
+        setInterval(() => {
+            try {
+                if (window._revDisabled) return;   // đã thay bằng bộ gửi bản 2
+                if (!onlineActive() || !state.online.locked || !(state.online.deal && state.online.deal.started) || !gmWs || gmWs.readyState !== 1) return;
+                const dead = (state.players || []).filter(p => !p.isAlive).map(p => p.name);
+                let payload = null, key = '';
+                dead.forEach(n => { const id = onlineIdOf(n); if (!id) return; if (!payload) { payload = revealPayload(); key = JSON.stringify(payload); }
+                    if (_revSent[n] !== key) { gmSend({ t: 'to', to: id, keep: 'reveal', data: payload }); _revSent[n] = key; } });
+                Object.keys(_revSent).forEach(n => { if (dead.includes(n)) return; const id = onlineIdOf(n); if (id) gmSend({ t: 'to', to: id, keep: 'reveal', data: { kind: 'reveal', off: true } }); delete _revSent[n]; });   // sống lại -> thu hồi
+            } catch (e) {}
+        }, 1500);
+        (function () { const _gm = gmOnMsg; gmOnMsg = function (m) { if (m.t === 'gm_ok') Object.keys(_revSent).forEach(k => delete _revSent[k]); return _gm(m); }; })();
+
+    
+        // =====================================================================
+        //  Người chết (bản 2): Con Ma loại trừ; theo dõi đêm trực tiếp; lý do chết riêng; đoán phe thắng; khán giả xem như người chết
+        // =====================================================================
+        gmOpts = Object.assign({ specReveal: false }, gmOpts); gmOptsSave();
+        const isConMa = n => (state.players || []).some(p => p.name === n && p.roleId === 'ghost');
+        // Con Ma không vào phòng Người chết (người chết biết hết vai -> không được mách cho Con Ma)
+        (function () {
+            const _cp = onlineComputePerm;
+            onlineComputePerm = function () { let r = _cp.apply(this, arguments); try { if (r && Array.isArray(r.dead)) r.dead = r.dead.filter(n => !isConMa(n)); } catch (e) {} return r; };
+        })();
+        // theo dõi đêm trực tiếp: tóm tắt từng bước của đêm hiện tại
+        let _feed = { day: -1, items: {} };
+        const FEED_IC = { guard: '🛡', seer: '🔮', witch: '🧪', group_action: '🐺', cupid: '💘', hunter: '🏹', ghost: '👻', priest: '✝️', spellcaster: '🪄', old_hag: '🧙', huntress: '🎯', bodyguard: '🛡' };
+        function feedTick() {
+            if (state.currentView !== 'view-night') return;
+            if (_feed.day !== state.dayCount) _feed = { day: state.dayCount, items: {} };
+            let st = state.nightSequence && state.nightSequence[state.currentStepIndex]; if (!st) return;
+            let info = typeof stepInfo === 'function' ? stepInfo(st) : null; if (!info || info.who === 'Quản trò') return;
+            let F = []; try { F = seatFields(); } catch (e) {}
+            let names = (state.players || []).map(p => p.name), targets = [].concat(...F.map(f => (f.values || []).map(v => (typeof valToName === 'function' && valToName(v)) || v))).filter(Boolean);
+            let rid = st.type === 'group_action' ? 'group_action' : (st.role && st.role.id);
+            let holders = st.type === 'group_action' ? (state.players || []).filter(p => p.isAlive && PACK_ROLES.includes(p.roleId)).map(p => p.name)
+                : (state.players || []).filter(p => st.role && p.roleId === st.role.id && (p.isAlive || p.roleId === 'ghost')).map(p => p.name);
+            _feed.items[state.currentStepIndex] = { ic: FEED_IC[rid] || '✨', who: info.who, holders, act: info.act, targets, onTargets: targets.filter(t => names.includes(t)), f: st.type === 'group_action' ? 'wolf' : ((st.role && st.role.faction) || 'villager') };
+        }
+        setInterval(() => { try { feedTick(); } catch (e) {} }, 700);
+        // gói dữ liệu cho người chết: thêm "đêm nay" + lý do chết riêng
+        (function () {
+            const _rp = revealPayload;
+            revealPayload = function (forName) {
+                let d = _rp.apply(this, arguments);
+                if (state.currentView === 'view-night' && _feed.day === state.dayCount) {
+                    let items = Object.keys(_feed.items).map(Number).sort((a, b) => a - b).map(k => _feed.items[k]);
+                    d.night = { day: state.dayCount, items: items.map(x => ({ ic: x.ic, who: x.who, holders: x.holders, act: x.act, targets: x.targets })),
+                        arrows: [].concat(...items.map(x => x.onTargets.length ? x.holders.map(h => x.onTargets.map(t => [h, t, x.f])) : []).flat()) };
+                }
+                return d;
+            };
+        })();
+        function deathLine(n) { let p = (state.players || []).find(x => x.name === n), di = p && p.deathInfo; return di ? `${di.reason || 'Đã chết'} — ${di.phase || ''} ${di.day || ''}`.trim() : ''; }
+        // gửi: người chết (trừ Con Ma) + khán giả (nếu bật)
+        const _revSent2 = {};
+        setInterval(() => {
+            try {
+                if (!onlineActive() || !state.online.locked || !(state.online.deal && state.online.deal.started) || !gmWs || gmWs.readyState !== 1) return;
+                let base = null;
+                const want = {};
+                (state.players || []).filter(p => !p.isAlive && p.roleId !== 'ghost').forEach(p => { let id = onlineIdOf(p.name); if (id) want[id] = { me: { cause: deathLine(p.name) } }; });
+                if (gmOpts.specReveal) ((window._onlineRoster && window._onlineRoster.spec) || []).forEach(s => { if (s && s.id) want[s.id] = { me: { spec: true } }; });
+                Object.entries(want).forEach(([id, extra]) => { if (!base) base = revealPayload(); let d = Object.assign({}, base, extra), key = JSON.stringify(d);
+                    if (_revSent2[id] !== key) { gmSend({ t: 'to', to: id, keep: 'reveal', data: d }); _revSent2[id] = key; } });
+                Object.keys(_revSent2).forEach(id => { if (want[id]) return; gmSend({ t: 'to', to: id, keep: 'reveal', data: { kind: 'reveal', off: true } }); delete _revSent2[id]; });
+            } catch (e) {}
+        }, 1200);
+        // tắt bộ gửi cũ (thay bằng bộ trên, có loại Con Ma + khán giả)
+        Object.defineProperty(window, '_revDisabled', { value: true });
+        (function () { const _gm = gmOnMsg; gmOnMsg = function (m) { if (m.t === 'gm_ok') Object.keys(_revSent2).forEach(k => delete _revSent2[k]); return _gm(m); }; })();
+        // đoán phe thắng
+        (function () {
+            const _gm = gmOnMsg;
+            gmOnMsg = function (m) {
+                if (m.t === 'msg' && m.data && m.data.kind === 'predict') {
+                    let id = m.from, n = onlineNameOf(id) || (((window._onlineRoster && window._onlineRoster.spec) || []).find(s => s.id === id) || {}).name;
+                    let p = (state.players || []).find(x => x.name === n), okWho = (p && !p.isAlive && p.roleId !== 'ghost') || (!p && n);
+                    if (n && okWho && ['wolf', 'villager', 'independent'].includes(m.data.f) && !(state.currentView === 'view-end')) { state.online.predict = state.online.predict || {}; state.online.predict[n] = m.data.f; onlineSave(); }
+                    return;
+                }
+                return _gm(m);
+            };
+        })();
+        let _predKey = '';
+        setInterval(() => {
+            try {
+                if (!onlineActive() || !gmWs || gmWs.readyState !== 1) return;
+                let end = state.currentView === 'view-end' && state.gameResult, pr = (state.online && state.online.predict) || {};
+                if (!end) { if (_predKey) { _predKey = ''; gmSend({ t: 'all', keep: 'predict', data: { kind: 'predict_res', off: true } }); } return; }
+                let R = String(state.gameResult).toUpperCase(), win = /SÓI/.test(R) && !/DÂN/.test(R) ? 'wolf' : /DÂN|LÀNG/.test(R) ? 'villager' : 'independent';
+                let ok = Object.keys(pr).filter(n => pr[n] === win), key = win + '|' + ok.join(',') + '|' + Object.keys(pr).length;
+                if (key !== _predKey) { _predKey = key; gmSend({ t: 'all', keep: 'predict', data: { kind: 'predict_res', f: win, ok, n: Object.keys(pr).length } }); }
+            } catch (e) {}
+        }, 1500);
+        // công tắc: khán giả xem như người chết
+        (function () {
+            const _m = mountAssistToggles;
+            mountAssistToggles = function () {
+                _m.apply(this, arguments);
+                let d = document.getElementById('adm-assist'); if (!d || document.getElementById('opt-specrev')) return;
+                d.insertAdjacentHTML('beforeend', `<label class="art"><input type="checkbox" id="opt-specrev"> 👀 Khán giả xem được vai + nhật ký (như người chết)</label>`);
+                let c = d.querySelector('#opt-specrev'); c.checked = !!gmOpts.specReveal; c.onchange = () => { gmOpts.specReveal = c.checked; gmOptsSave(); };
+            };
+        })();
+
+    
+        // Con Ma: lọc khỏi phòng Người chết ngay lúc gửi quyền chat lên server (dù quyền được tính ở đâu)
+        (function () {
+            const _gs = gmSend;
+            gmSend = function (o) {
+                try { if (o && o.t === 'perm' && o.perm && Array.isArray(o.perm.dead)) { const cm = (state.players || []).filter(p => p.roleId === 'ghost').map(p => onlineIdOf(p.name)).filter(Boolean); if (cm.length) o.perm = Object.assign({}, o.perm, { dead: o.perm.dead.filter(id => !cm.includes(id)) }); } } catch (e) {}
+                return _gs.apply(this, arguments);
+            };
+        })();
+
+    
+        // Con Ma đã chết vẫn tới lượt viết chữ (trước đây chỉ tính người còn sống -> điện thoại Con Ma không nhận được lượt)
+        (function () {
+            const _nc = namesCalledInStep;
+            namesCalledInStep = function (st) {
+                let r = _nc.apply(this, arguments);
+                if (st && st.role && st.role.id === 'ghost' && (!r || !r.length)) r = (state.players || []).filter(p => p.roleId === 'ghost').map(p => p.name);
+                return r;
+            };
+        })();
+
+    
+        // =====================================================================
+        //  Báo khi app quản trò và server lệch phiên bản (hay gặp: quên upload 1 trong 2 kho)
+        // =====================================================================
+        const EXPECTED_SERVER_V = '2026-11-18.1';
+        window._srvV = null;
+        function verBar(html) {
+            let b = document.getElementById('srv-ver-bar');
+            if (!html) { if (b) b.remove(); return; }
+            if (!b) { b = document.createElement('div'); b.id = 'srv-ver-bar'; b.setAttribute('role', 'alert'); document.body.appendChild(b); }
+            b.innerHTML = html + '<button type="button" aria-label="Ẩn" onclick="this.parentElement.remove()">✕</button>';
+        }
+        function verCheck() {
+            let v = window._srvV;
+            if (!v || v < EXPECTED_SERVER_V) verBar(`⚠️ <b>Server chưa được cập nhật</b> — hãy upload <code>server.js</code> mới lên kho <code>lang-xi-nghiep-no-server</code>, đợi Render báo "Live" rồi tải lại trang.<small>Server đang chạy: ${v || 'bản cũ (chưa có số phiên bản)'} · app cần: ${EXPECTED_SERVER_V}</small>`);
+            else if (v > EXPECTED_SERVER_V) verBar(`⚠️ <b>App quản trò cũ hơn server</b> — hãy upload <code>index.html</code> mới lên kho <code>lang-xi-nghiep-no</code> rồi tải lại trang.<small>Server: ${v} · app: ${EXPECTED_SERVER_V}</small>`);
+            else verBar('');
+        }
+        (function () {
+            const _gm = gmOnMsg;
+            gmOnMsg = function (m) {
+                if (m && m.t === 'hello') { window._srvV = m.v || null; return; }
+                if (m && (m.t === 'gm_ok' || m.t === 'created')) setTimeout(verCheck, 1500);   // server cũ không gửi 'hello' -> cũng bị phát hiện
+                return _gm(m);
+            };
+        })();
 
     </script>
 </body>
