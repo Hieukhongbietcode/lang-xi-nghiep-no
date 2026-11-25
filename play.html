@@ -592,6 +592,10 @@
     .do-cause { margin-top: 10px; font-size: 16px; font-weight: 800; color: #fca5a5; text-align: center; }
     #conma-bar.cm-bar { border-color: rgba(125,122,255,.5); } #spec-bar.sp-bar { display: none; }
     .dead-arr .arr { fill: none; stroke-width: .9; stroke-dasharray: 2 1.2; opacity: .95; }
+
+    .pf-choice { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:6px 0 10px; } .pf-choice .pfc:last-child:nth-child(odd) { grid-column:1 / -1; }
+    .pfc { min-height:52px; padding:0 12px; border-radius:14px; border:1px solid rgba(255,255,255,.12); background:#1C2541; color:#e6e9f5; font:inherit; font-size:15px; font-weight:800; cursor:pointer; }
+    .pfc.on { background:#5E5CE6; color:#fff; border-color:#7D7AFF; }
 </style>
 </head>
 <body>
@@ -1380,9 +1384,14 @@ function onFields(d) {
     renderPickBar(); renderRing();
 }
 const curField = () => fieldsMsg && fieldsMsg.fields.find(f => f.fi === activeFi);
-const fieldsReady = () => fieldsMsg && fieldsMsg.fields.every(f => f.kind === 'letter' ? /^\S$/u.test(letter) : f.kind === 'vamp' ? !!vampDir : (f.optional || (picks[f.fi] || []).length >= f.n));
+const fieldsReady = () => fieldsMsg && fieldsMsg.fields.every(f => f.kind === 'choice' ? !!choiceV : f.kind === 'letter' ? /^\S$/u.test(letter) : f.kind === 'vamp' ? !!vampDir : (f.optional || (picks[f.fi] || []).length >= f.n));
 function pickTap(name) {
     const f = curField(); if (!f) return false;
+    if (f.kind === 'choice') {   // chạm ghế -> chuyển sang khung chọn NGƯỜI kế tiếp (nếu có)
+        const nf = fieldsMsg.fields.find(x => !['choice', 'letter', 'vamp'].includes(x.kind));
+        if (!nf) { chErr('Hãy bấm một lựa chọn bên dưới vòng làng'); return true; }
+        activeFi = nf.fi; return pickTap(name);
+    }
     if (f.kind === 'letter') { chErr('Hãy gõ 1 chữ cái vào ô bên dưới vòng làng'); return true; }
     if (f.kind === 'vamp') { chErr('Hãy chọn hướng: sang TRÁI hoặc sang PHẢI'); return true; }
     if (!f.allowed.includes(name)) { chErr('Không chọn được ' + name + ' cho ô này'); return true; }
@@ -1395,20 +1404,22 @@ function pickTap(name) {
 }
 function pickConfirm() {
     if (!fieldsReady()) return;
-    const fields = fieldsMsg.fields.map(f => f.kind === 'letter' ? { fi: 'ghost', letter } : f.kind === 'vamp' ? { fi: f.fi, dir: vampDir } : { fi: f.fi, names: picks[f.fi] || [] });
+    const fields = fieldsMsg.fields.map(f => f.kind === 'choice' ? { fi: 'choice', choice: choiceV } : f.kind === 'letter' ? { fi: 'ghost', letter } : f.kind === 'vamp' ? { fi: f.fi, dir: vampDir } : { fi: f.fi, names: picks[f.fi] || [] });
     sendJ({ t: 'to_gm', data: { kind: 'pick', key: fieldsMsg.key, fields } });
-    const parts = fieldsMsg.fields.map(f => f.kind === 'letter' ? `viết chữ "${letter}"` : f.kind === 'vamp' ? `hỏi ${f.n} người sang ${vampDir === 1 ? 'TRÁI' : 'PHẢI'} của ${f.anchor}` : (picks[f.fi] || []).length ? `${f.label.replace(/\?$/, '')}: ${(picks[f.fi]).join(', ')}` : `${f.label.replace(/\?$/, '')}: không`);
+    const parts = fieldsMsg.fields.map(f => f.kind === 'choice' ? `${f.label.replace(/\?$/, '')}: ${((f.options || []).find(o => o.v === choiceV) || {}).t || choiceV}` : f.kind === 'letter' ? `viết chữ "${letter}"` : f.kind === 'vamp' ? `hỏi ${f.n} người sang ${vampDir === 1 ? 'TRÁI' : 'PHẢI'} của ${f.anchor}` : (picks[f.fi] || []).length ? `${f.label.replace(/\?$/, '')}: ${(picks[f.fi]).join(', ')}` : `${f.label.replace(/\?$/, '')}: không`);
     const text = fieldsMsg.ch === 'wolves' ? `👉 Đề xuất cắn: ${fieldsMsg.fields.map(f => (picks[f.fi] || []).join(', ')).filter(Boolean).join(' + ') || 'bỏ chọn'}` : `👉 ${fieldsMsg.role || (card && card.role.name) || ''} — ${parts.join(' · ')}`;
     sendJ({ t: 'chat', ch: fieldsMsg.ch, text });
     pickSent = JSON.stringify(fields); renderPickBar();
 }
-const curFieldsJson = () => JSON.stringify(fieldsMsg.fields.map(f => f.kind === 'letter' ? { fi: 'ghost', letter } : f.kind === 'vamp' ? { fi: f.fi, dir: vampDir } : { fi: f.fi, names: picks[f.fi] || [] }));
+const curFieldsJson = () => JSON.stringify(fieldsMsg.fields.map(f => f.kind === 'choice' ? { fi: 'choice', choice: choiceV } : f.kind === 'letter' ? { fi: 'ghost', letter } : f.kind === 'vamp' ? { fi: f.fi, dir: vampDir } : { fi: f.fi, names: picks[f.fi] || [] }));
 function renderPickBar() {
     const el = $('pick-bar'); if (!el) return;
     if (!fieldsMsg || !fieldsMsg.fields.length) { el.classList.add('hidden'); el.innerHTML = ''; return; }
     el.classList.remove('hidden');
     const sentNow = pickSent && pickSent === curFieldsJson();
     el.innerHTML = (turnUntil ? `<div id="pf-timer" class="pf-timer" role="timer" aria-live="off"></div>` : '') + (fieldsMsg.notes || []).map(t => `<div class="pf-note">${esc(t)}</div>`).join('') + fieldsMsg.fields.map(f => {
+        if (f.kind === 'choice') { if (!choiceV && f.values && f.values[0]) choiceV = f.values[0];
+            return `<div class="pf on" style="--fc:${f.color}"><span class="pf-l">🃏 ${esc(f.label)}</span></div><div class="pf-choice" role="group" aria-label="${esc(f.label)}">${(f.options || []).map(o => `<button type="button" class="pfc${choiceV === o.v ? ' on' : ''}" aria-pressed="${choiceV === o.v}" data-v="${esc(o.v)}">${esc(o.t)}</button>`).join('')}</div>`; }
         if (f.kind === 'letter') return `<div class="pf on" style="--fc:${f.color}"><span class="pf-l">👻 ${esc(f.label)}</span><input id="pf-letter" class="pf-letter" maxlength="2" value="${esc(letter)}" placeholder="?" autocomplete="off" autocapitalize="characters"></div>`;
         if (f.kind === 'vamp') return `<div class="pf on" style="--fc:${f.color}"><span class="pf-l">🦇 Hỏi ${f.n} người bắt đầu từ ${esc(f.anchor)} (ngồi đối diện bạn)</span></div>
             <div class="pf-dir"><button class="pfd${vampDir === 1 ? ' on' : ''}" data-d="1">⬅️ Sang TRÁI</button><button class="pfd${vampDir === -1 ? ' on' : ''}" data-d="-1">Sang PHẢI ➡️</button></div>`;
@@ -1419,6 +1430,7 @@ function renderPickBar() {
     el.querySelectorAll('.pf').forEach(r => r.onclick = e => { if (e.target.closest('.pf-x')) return; activeFi = +r.dataset.fi; renderPickBar(); renderRing(); });
     el.querySelectorAll('.pf-x').forEach(b => b.onclick = () => { picks[+b.dataset.fi] = []; renderPickBar(); renderRing(); });
     $('pf-ok').onclick = pickConfirm;
+    el.querySelectorAll('.pfc').forEach(b => b.onclick = () => { choiceV = b.dataset.v; renderPickBar(); });
     const li = $('pf-letter'); if (li) li.oninput = () => { letter = li.value.toUpperCase().replace(/\s/g, '').slice(-1); li.value = letter; const b = $('pf-ok'); const sent = pickSent && pickSent === curFieldsJson(); b.disabled = !fieldsReady() || sent; b.textContent = sent ? '✅ Đã gửi — chạm để đổi lựa chọn' : '✅ Xác nhận'; };
     el.querySelectorAll('.pfd').forEach(b => b.onclick = () => { vampDir = +b.dataset.d; renderPickBar(); renderRing(); });
 }
@@ -1779,6 +1791,8 @@ function deadArrows(pos) {   // mũi tên "đêm nay" cho người chết / khá
         return `<g class="dead-arr"><path class="arr" d="M${A.x.toFixed(2)} ${A.y.toFixed(2)} Q${cx.toFixed(2)} ${cy.toFixed(2)} ${ex.toFixed(2)} ${ey.toFixed(2)}" stroke="${c}" style="color:${c}"/><polygon points="${ex},${ey} ${ex - ux * 2.6 - uy * 1.5},${ey - uy * 2.6 + ux * 1.5} ${ex - ux * 2.6 + uy * 1.5},${ey - uy * 2.6 - ux * 1.5}" fill="${c}"/></g>`; }).join('');
 }
 
+let choiceV = '', _choiceKey = '';
+setInterval(() => { const k = fieldsMsg ? fieldsMsg.key : ''; if (k !== _choiceKey) { _choiceKey = k; const f = fieldsMsg && fieldsMsg.fields.find(x => x.kind === 'choice'); choiceV = f && f.values && f.values[0] ? f.values[0] : ''; if (f) try { renderPickBar(); } catch (e) {} } }, 300);   // khung mới -> lấy lựa chọn đã có từ quản trò
 // ---------------- Giao diện ----------------
 function showJoin(msg) {
     show('scr-join');
