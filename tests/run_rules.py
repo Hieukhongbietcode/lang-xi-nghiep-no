@@ -1,7 +1,7 @@
 # Chay tat ca bo test luat + online. Co bat ky "❌" hoac loi JavaScript -> thoat ma loi (GitHub bao do).
 import subprocess, sys, os, re
 HERE = os.path.dirname(os.path.abspath(__file__))
-SUITES = ['e2e_core', 'e2e_roles1', 'e2e_roles2', 'e2e_roles3', 'e2e_audit', 'e2e_fix2b', 'e2e_rev', 'e2e_dead2', 'e2e_fix2']
+SUITES = ['e2e_core', 'e2e_roles1', 'e2e_roles2', 'e2e_roles3', 'e2e_audit', 'e2e_fix2b', 'e2e_fix3', 'e2e_actor2', 'e2e_rev', 'e2e_dead2', 'e2e_fix2']
 bad = 0
 for s in SUITES:
     r = subprocess.run([sys.executable, os.path.join(HERE, s + '.py')], capture_output=True, text=True, timeout=600)

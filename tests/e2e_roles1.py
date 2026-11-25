@@ -51,15 +51,15 @@ ok(pg.evaluate("()=>state.foxLost && !state.nightSequence.some(s=>s.role&&s.role
 # 2. Gấu (có xếp chỗ): Bình(Sói) ngồi sát Gấu
 pg=fresh(); S=[('An','villager'),('Gau','bear_tamer'),('Binh','wolf'),('Chi','villager'),('Dung','villager'),('Em','villager')]
 setup(pg,S); pg.evaluate("()=>startNightPhase()"); pg.wait_for_timeout(300); pg.evaluate("()=>resolveNight()"); pg.wait_for_timeout(600)
-t=pg.locator('#night-result-text').inner_text(); ok('Gấu gầm' in t, '2. Soi ngoi sat Gau -> sang ra "🐻 Gau gam!"')
+t=pg.locator('#night-result-text').inner_text(); ok('gấu gầm' in t.lower(), '2. Soi ngoi sat Gau -> sang ra "🐻 Gau gam!"')
 pg=fresh(); S=[('An','villager'),('Gau','bear_tamer'),('Chi','villager'),('Binh','wolf'),('Dung','villager'),('Em','villager')]
 setup(pg,S); pg.evaluate("()=>startNightPhase()"); pg.wait_for_timeout(300); pg.evaluate("()=>resolveNight()"); pg.wait_for_timeout(600)
-t=pg.locator('#night-result-text').inner_text(); ok('Gấu im lặng' in t and 'Gấu gầm' not in t, '2. Soi KHONG ngoi sat -> "Gau im lang"')
+t=pg.locator('#night-result-text').inner_text(); ok('gấu im lặng' in t.lower() and 'gấu gầm' not in t.lower(), '2. Soi KHONG ngoi sat -> "Gau im lang"')
 # 2b. Gấu, ván không xếp chỗ -> quản trò chọn
 setup(pg,S,seating=False); pg.evaluate("()=>startNightPhase()"); pg.wait_for_timeout(300); pg.evaluate("()=>resolveNight()"); pg.wait_for_timeout(600)
 ok(pg.locator('#night-result-text .bear-nb0').count()==1, '2. khong xep cho -> quan tro chon 2 nguoi sat Gau')
 pg.select_option('#night-result-text .bear-nb0','An'); pg.select_option('#night-result-text .bear-nb1','Binh'); pg.wait_for_timeout(300)
-ok('Gấu gầm' in pg.locator('#night-result-text').inner_text(), '2. quan tro chon An + Binh(Soi) -> Gau gam')
+ok('gấu gầm' in pg.locator('#night-result-text').inner_text().lower(), '2. quan tro chon An + Binh(Soi) -> Gau gam')
 # 3. Hiệp Sĩ Rỉ Sét: bên trái Hiệp Sĩ (seatNeighbor +1) là ai?
 pg=fresh(); S=[('An','villager'),('HiepSi','rusty_knight'),('Binh','wolf'),('Chi','villager'),('Soi2','wolf'),('Em','villager'),('Gia','villager')]
 setup(pg,S); left=pg.evaluate("()=>seatNeighbor('HiepSi',1)"); print('   ben TRAI Hiep Si theo quy uoc app:', left)

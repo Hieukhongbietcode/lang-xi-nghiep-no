@@ -2011,6 +2011,7 @@
         .thief-row, .actor-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px; } .thief-row .thief-b:last-child:nth-child(3), .actor-row .actor-b:last-child { grid-column: 1 / -1; }
         .hound-b:disabled { opacity:.45; cursor:not-allowed; } .hound-b.on { box-shadow: 0 0 0 2px #fff inset; }
 
+        .actor-now { margin-top:12px; padding:12px 14px; border-radius:12px; background:rgba(125,122,255,.14); border:1px solid rgba(125,122,255,.4); color:#e0e7ff; font-size:14px; line-height:1.45; }
         .opt-i { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; margin-left:8px; border-radius:50%; background:rgba(255,255,255,.14); color:#fff; font:italic 800 13px Georgia, serif; vertical-align:middle; cursor:pointer; }
         .opt-i:hover { background:rgba(255,255,255,.28); } .r1-do { display:block; margin-top:4px; font-size:13px; color:#fde68a; }
 </style>
@@ -15061,14 +15062,11 @@ document.addEventListener('click', e => {
                             let pool = state.actorPool, used = state.actorUsed || [], cur = state.actorPick && state.actorPick.day === state.dayCount ? state.actorPick : null;
                             html += `<div class="gm-only-note">Diễn Viên chọn dùng lá nào đêm nay?</div><div class="actor-row r-choice" data-label="Dùng lá nào đêm nay?">${pool.map(x => `<button type="button" class="hound-b actor-b${cur && cur.card === x ? ' on' : ''}" data-v="${x}" data-role="${x}"${used.includes(x) ? ' disabled' : ''}><i class="fa-solid ${(ROLES_DB.find(r => r.id === x) || {}).icon || ''}"></i> ${escapeHtml(roleName(x))}${used.includes(x) ? ' (đã dùng)' : ''}<span class="opt-i" role="button" tabindex="0" aria-label="Xem mô tả ${escapeHtml(roleName(x))}" onclick="event.stopPropagation(); openRoleInfo('${x}')">i</span></button>`).join('')}
                                 <button type="button" class="hound-b actor-b${cur && cur.card === '' ? ' on' : ''}" data-v="">Bỏ qua đêm nay</button></div>`;
-                            if (cur && cur.card) {
-                                html += `<label class="text-xs font-bold text-purple-300 mt-3 mb-1 block">${ACTOR_AUTO[cur.card] === 'soi' ? '🔮 Soi ai?' : ACTOR_AUTO[cur.card] === 'protect' ? '🛡 Bảo vệ ai?' : `Dùng ${escapeHtml(roleName(cur.card))} lên ai?`}</label>
-                                    <select class="mod-input act-actor-sel w-full"><option value="">-- Chọn --</option>${names.map(n => `<option value="${escapeHtml(nameToVal(n))}"${cur.target === n ? ' selected' : ''}>${escapeHtml(n)}</option>`).join('')}</select>${ACTOR_AUTO[cur.card] ? '' : '<p class="text-xs text-amber-300 mt-2">App ghi lại lựa chọn — quản trò tự áp dụng chức năng của lá này.</p>'}<div class="actor-res"></div>`;
-                            }
+                            if (cur && cur.card) html += `<div class="actor-now">🎭 Đêm nay Diễn Viên <b>là ${escapeHtml(roleName(cur.card))}</b> — bấm <b>Tiếp theo</b> để dùng chức năng của vai này (đầy đủ như vai thật). Lá này chỉ dùng được trong đêm nay.</div>`;
                         }
                         c.insertAdjacentHTML('beforeend', html + '</div>');
                         c.querySelectorAll('.actor-setup').forEach(s => s.onchange = () => { state.actorSetup = state.actorSetup || ['', '', '']; state.actorSetup[+s.dataset.k] = s.value; let p = state.actorSetup.filter(Boolean); if (p.length === 3 && new Set(p).size === 3) { state.actorPool = p.slice(); state.actorUsed = []; state.eventLog.push({ title: 'Diễn Viên', content: 'Đặt riêng 3 lá: ' + p.map(roleName).join(', ') + '.' }); c.querySelector('.r3-block').remove(); renderNightStep(); } try { saveGame(); } catch (e) {} });
-                        c.querySelectorAll('.actor-b').forEach(b => b.onclick = () => { state.actorPick = { day: state.dayCount, card: b.dataset.v, target: '' }; c.querySelector('.r3-block').remove(); renderNightStep(); });
+                        c.querySelectorAll('.actor-b').forEach(b => b.onclick = () => { state.actorPick = { day: state.dayCount, card: b.dataset.v, target: '' }; actorApply(); c.querySelector('.r3-block').remove(); renderNightStep(); });
                         let as = c.querySelector('.act-actor-sel'); if (as) { as.onchange = () => { state.actorPick.target = nameOfVal(valToName(as.value) || as.value); actorRes(); try { saveGame(); } catch (e) {} }; actorRes(); }
                     }
                 } catch (e) { console.error(e); }
@@ -15093,7 +15091,7 @@ document.addEventListener('click', e => {
             resolveNight = function () {
                 let d = state.dayCount, act = state.currentNightActions || (state.currentNightActions = {}), ap = state.actorPick && state.actorPick.day === d ? state.actorPick : null;
                 // Diễn Viên dùng lá Bảo Vệ -> bảo vệ có hiệu lực thật
-                if (ap && ap.card === 'guard' && ap.target) { let pl = (state.players || []).find(p => p.name === ap.target); act.protectByKey = Object.assign({}, act.protectByKey || {}, { actor_guard: pl ? pl.id : ap.target }); }
+
                 let r = _rn.apply(this, arguments);
                 try {
                     if (ap && ap.card) { state.actorUsed = (state.actorUsed || []).concat(ap.card); state.eventLog.push({ title: `Đêm ${d} — Diễn Viên`, content: `Dùng lá ${roleName(ap.card)}${ap.target ? ' lên ' + ap.target : ''}.` }); }
@@ -15293,6 +15291,62 @@ document.addEventListener('click', e => {
             else el.insertAdjacentHTML('beforeend', `<div class="censor-box mt-3 pt-3 border-t border-gray-700 text-xs text-red-300 text-left" onclick="this.classList.toggle('revealed')"><div class="censor-head"><span class="font-bold text-gray-400 uppercase tracking-wider text-[11px]">Nguyên nhân tử vong:</span></div><div class="censor-body space-y-1.5">${lines}</div></div>`);
             state.nightResultHtml = el.innerHTML; try { saveGame(); } catch (e) {}
         }
+
+    
+        // =====================================================================
+        //  Diễn Viên: chọn lá nào thì ĐÊM ĐÓ là vai đó — chèn bước thật của vai ngay sau bước Diễn Viên
+        //  (giao diện + luật đầy đủ của vai; lá chỉ dùng 1 đêm; dùng được cả Đêm 1)
+        // =====================================================================
+        function actorHolder() {
+            let p = (state.players || []).find(x => x.roleId === 'actor' && x.isAlive); if (p) return p.name;
+            if (!(state.players || []).length) return Object.keys(state.dealAssignment || {}).find(n => state.dealAssignment[n] === 'actor') || ((state.n1TempData || {}).actor || [])[0] || '';
+            return '';
+        }
+        function actorApply() {
+            let seq = state.nightSequence || [];
+            for (let i = seq.length - 1; i >= 0; i--) if (seq[i]._actor) { seq.splice(i, 1); if (state.currentStepIndex > i) state.currentStepIndex--; }
+            let ap = state.actorPick; if (!ap || ap.day !== state.dayCount || !ap.card) return;
+            let r = ROLES_DB.find(x => x.id === ap.card); if (!r) return;
+            // Đêm 1 các bước vai có kiểu 'single', từ Đêm 2 là 'single_action' -> lấy đúng kiểu của đêm hiện tại
+            let tpl = seq.find(s => s.role && s.type !== 'group_action' && !s._actor) || { type: state.dayCount === 1 ? 'single' : 'single_action' };
+            let ai = seq.findIndex(s => s.role && s.role.id === 'actor');
+            seq.splice((ai >= 0 ? ai : state.currentStepIndex) + 1, 0, Object.assign({}, tpl, { role: r, _actor: true }));
+        }
+        const actorTonight = () => { let ap = state.actorPick; return ap && ap.day === state.dayCount && ap.card ? ap.card : ''; };
+        function withActorAs(fn) {   // Diễn Viên tạm thời LÀ vai đã chọn (chỉ trong lúc vẽ bước / chốt đêm)
+            let card = actorTonight(), name = actorHolder(); if (!card || !name) return fn();
+            let p = (state.players || []).find(x => x.name === name && x.roleId === 'actor');
+            if (p) { p.roleId = card; try { return fn(); } finally { if (p.roleId === card) p.roleId = 'actor'; } }
+            let L = (state.n1TempData = state.n1TempData || {})[card] = (state.n1TempData[card] || []), added = !L.includes(name);   // Đêm 1: chưa có danh sách người chơi
+            if (added) L.push(name);
+            let d0 = state.deck[card] || 0; if (!d0) state.deck[card] = 1;   // Đêm 1 dựng ô theo số lá trong bộ bài -> tạm coi có 1 lá
+            try { return fn(); } finally { if (added) { let k = L.indexOf(name); if (k >= 0) L.splice(k, 1); } if (!d0) state.deck[card] = 0; }
+        }
+        (function () {
+            const _nc = namesCalledInStep;
+            namesCalledInStep = function (st) {
+                if (st && st._actor) { let n = actorHolder(); return n ? [n] : []; }
+                return _nc.apply(this, arguments);
+            };
+            const _r = renderNightStep;
+            renderNightStep = function () {
+                let st = state.nightSequence && state.nightSequence[state.currentStepIndex];
+                if (st && st._actor) return withActorAs(() => _r.apply(this, arguments));
+                return _r.apply(this, arguments);
+            };
+            const _rn = resolveNight;
+            resolveNight = function () {
+                let card = actorTonight(), n1 = state.dayCount === 1, name = actorHolder();
+                let r = card ? withActorAs(() => _rn.apply(this, arguments)) : _rn.apply(this, arguments);
+                if (card && n1 && name) {   // Đêm 1: bỏ bản ghi trùng (Diễn Viên giữ vai Diễn Viên)
+                    let seen = {}; state.players = (state.players || []).filter(p => { if (p.name !== name) return true; if (seen[p.name]) return false; seen[p.name] = 1; return true; });
+                    let p = state.players.find(x => x.name === name); if (p) { p.roleId = 'actor'; p.initialRoleId = 'actor'; }
+                }
+                return r;
+            };
+            const _sn = startNightPhase;
+            startNightPhase = function () { let r = _sn.apply(this, arguments); try { actorApply(); } catch (e) {} return r; };
+        })();
 
     </script>
 </body>
