@@ -596,6 +596,10 @@
     .pf-choice { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:6px 0 10px; } .pf-choice .pfc:last-child:nth-child(odd) { grid-column:1 / -1; }
     .pfc { min-height:52px; padding:0 12px; border-radius:14px; border:1px solid rgba(255,255,255,.12); background:#1C2541; color:#e6e9f5; font:inherit; font-size:15px; font-weight:800; cursor:pointer; }
     .pfc.on { background:#5E5CE6; color:#fff; border-color:#7D7AFF; }
+
+    .pfc-w { position:relative; } .pfc-w .pfc { width:100%; padding-right:44px; }
+    .pfc-i { position:absolute; top:50%; right:6px; transform:translateY(-50%); width:32px; height:32px; border-radius:50%; border:none; background:rgba(255,255,255,.16); color:#fff; font:italic 800 15px Georgia, serif; cursor:pointer; }
+    .pfc-desc { margin:-2px 0 10px; padding:10px 12px; border-radius:12px; background:#0f1626; border:1px solid var(--line); font-size:13.5px; line-height:1.45; color:#cbd5e1; } .pfc-desc b { display:block; color:#fff; margin-bottom:2px; }
 </style>
 </head>
 <body>
@@ -1419,7 +1423,7 @@ function renderPickBar() {
     const sentNow = pickSent && pickSent === curFieldsJson();
     el.innerHTML = (turnUntil ? `<div id="pf-timer" class="pf-timer" role="timer" aria-live="off"></div>` : '') + (fieldsMsg.notes || []).map(t => `<div class="pf-note">${esc(t)}</div>`).join('') + fieldsMsg.fields.map(f => {
         if (f.kind === 'choice') { if (!choiceV && f.values && f.values[0]) choiceV = f.values[0];
-            return `<div class="pf on" style="--fc:${f.color}"><span class="pf-l">🃏 ${esc(f.label)}</span></div><div class="pf-choice" role="group" aria-label="${esc(f.label)}">${(f.options || []).map(o => `<button type="button" class="pfc${choiceV === o.v ? ' on' : ''}" aria-pressed="${choiceV === o.v}" data-v="${esc(o.v)}">${esc(o.t)}</button>`).join('')}</div>`; }
+            return `<div class="pf on" style="--fc:${f.color}"><span class="pf-l">🃏 ${esc(f.label)}</span></div><div class="pf-choice" role="group" aria-label="${esc(f.label)}">${(f.options || []).map((o, k) => `<div class="pfc-w"><button type="button" class="pfc${choiceV === o.v ? ' on' : ''}" aria-pressed="${choiceV === o.v}" data-v="${esc(o.v)}">${esc(o.t)}</button>${o.d ? `<button type="button" class="pfc-i" data-k="${k}" aria-label="Mô tả ${esc(o.n || o.t)}">i</button>` : ''}</div>`).join('')}</div><div class="pfc-desc" id="pfc-desc" hidden></div>`; }
         if (f.kind === 'letter') return `<div class="pf on" style="--fc:${f.color}"><span class="pf-l">👻 ${esc(f.label)}</span><input id="pf-letter" class="pf-letter" maxlength="2" value="${esc(letter)}" placeholder="?" autocomplete="off" autocapitalize="characters"></div>`;
         if (f.kind === 'vamp') return `<div class="pf on" style="--fc:${f.color}"><span class="pf-l">🦇 Hỏi ${f.n} người bắt đầu từ ${esc(f.anchor)} (ngồi đối diện bạn)</span></div>
             <div class="pf-dir"><button class="pfd${vampDir === 1 ? ' on' : ''}" data-d="1">⬅️ Sang TRÁI</button><button class="pfd${vampDir === -1 ? ' on' : ''}" data-d="-1">Sang PHẢI ➡️</button></div>`;
@@ -1431,6 +1435,8 @@ function renderPickBar() {
     el.querySelectorAll('.pf-x').forEach(b => b.onclick = () => { picks[+b.dataset.fi] = []; renderPickBar(); renderRing(); });
     $('pf-ok').onclick = pickConfirm;
     el.querySelectorAll('.pfc').forEach(b => b.onclick = () => { choiceV = b.dataset.v; renderPickBar(); });
+    el.querySelectorAll('.pfc-i').forEach(b => b.onclick = () => { const f = fieldsMsg.fields.find(x => x.kind === 'choice'), o = f && f.options[+b.dataset.k], d = $('pfc-desc'); if (!o || !d) return;
+        const same = !d.hidden && d.dataset.k === b.dataset.k; d.hidden = same; d.dataset.k = b.dataset.k; d.innerHTML = `<b>${esc(o.n || o.t)}</b>${esc(o.d)}`; });
     const li = $('pf-letter'); if (li) li.oninput = () => { letter = li.value.toUpperCase().replace(/\s/g, '').slice(-1); li.value = letter; const b = $('pf-ok'); const sent = pickSent && pickSent === curFieldsJson(); b.disabled = !fieldsReady() || sent; b.textContent = sent ? '✅ Đã gửi — chạm để đổi lựa chọn' : '✅ Xác nhận'; };
     el.querySelectorAll('.pfd').forEach(b => b.onclick = () => { vampDir = +b.dataset.d; renderPickBar(); renderRing(); });
 }
